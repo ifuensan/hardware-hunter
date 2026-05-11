@@ -113,9 +113,7 @@ def test_progress_and_status_not_imported() -> None:
 
 
 @pytest.mark.parametrize("width", [60, 80, 100, 120])
-def test_render_table_renders_5x3_at_locked_widths(
-    width: int, snapshot: SnapshotAssertion
-) -> None:
+def test_render_table_renders_5x3_at_locked_widths(width: int, snapshot: SnapshotAssertion) -> None:
     """UX-DR31 golden-file regression: rendered text is stable per width."""
     output = _render_table_to_text(SAMPLE_ROWS, SAMPLE_COLUMNS, width=width)
     # syrupy compares against tracked snapshot files in __snapshots__/.
