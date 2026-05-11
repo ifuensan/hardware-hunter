@@ -1,0 +1,49 @@
+# serializer version: 1
+# name: test_render_table_renders_5x3_at_locked_widths[100]
+  '''
+  event                                │ marketplace                      │                 latency_ms
+  ─────────────────────────────────────┼──────────────────────────────────┼───────────────────────────
+  poll_started                         │ wallapop                         │                        842
+  listing_seen                         │ wallapop                         │                       1207
+  listing_seen                         │ ebay                             │                        391
+  alert_sent                           │ wallapop                         │                          —
+  poll_finished                        │ ebay                             │                         28
+  
+  '''
+# ---
+# name: test_render_table_renders_5x3_at_locked_widths[120]
+  '''
+  event                                       │ marketplace                             │                       latency_ms
+  ────────────────────────────────────────────┼─────────────────────────────────────────┼─────────────────────────────────
+  poll_started                                │ wallapop                                │                              842
+  listing_seen                                │ wallapop                                │                             1207
+  listing_seen                                │ ebay                                    │                              391
+  alert_sent                                  │ wallapop                                │                                —
+  poll_finished                               │ ebay                                    │                               28
+  
+  '''
+# ---
+# name: test_render_table_renders_5x3_at_locked_widths[60]
+  '''
+  event                 │ marketplace        │      latency_ms
+  ──────────────────────┼────────────────────┼────────────────
+  poll_started          │ wallapop           │             842
+  listing_seen          │ wallapop           │            1207
+  listing_seen          │ ebay               │             391
+  alert_sent            │ wallapop           │               —
+  poll_finished         │ ebay               │              28
+  
+  '''
+# ---
+# name: test_render_table_renders_5x3_at_locked_widths[80]
+  '''
+  event                        │ marketplace               │            latency_ms
+  ─────────────────────────────┼───────────────────────────┼──────────────────────
+  poll_started                 │ wallapop                  │                   842
+  listing_seen                 │ wallapop                  │                  1207
+  listing_seen                 │ ebay                      │                   391
+  alert_sent                   │ wallapop                  │                     —
+  poll_finished                │ ebay                      │                    28
+  
+  '''
+# ---
