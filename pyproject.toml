@@ -38,6 +38,71 @@ dev = [
 [tool.ruff]
 src = ["src", "tests", "scripts"]
 extend-exclude = [".claude", ".agents", "_bmad", "_bmad-output"]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+    "C4",   # flake8-comprehensions
+    "ARG",  # flake8-unused-arguments
+    "SIM",  # flake8-simplify
+    "TID",  # flake8-tidy-imports
+    "PTH",  # flake8-use-pathlib
+    "RUF",  # ruff-specific rules
+]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["ARG"]      # test fixtures often have unused args
+"scripts/**/*.py" = ["PTH123"]  # `open()` is fine in standalone scripts
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src", "tests", "scripts"]
+exclude = [
+    "_bmad",
+    "_bmad-output",
+    "\\.claude",
+    "\\.agents",
+]
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_decorators = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+]
+markers = [
+    "slow: long-running tests (opt-in via --runslow)",
+]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["src/hardware_hunter"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+# Phase 2 critical-path 90% threshold lands in Story 5.15.
+# Phase 1 stories use coverage as informational only.
