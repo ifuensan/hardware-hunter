@@ -1,0 +1,1398 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>hardware-hunter PRD</title><style>
+@page {
+  size: A4;
+  margin: 18mm 16mm 20mm 16mm;
+  @bottom-center {
+    content: "hardware-hunter PRD · " counter(page) " / " counter(pages);
+    font: 9pt 'Inter', 'Helvetica Neue', sans-serif;
+    color: #888;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body {
+  font: 10.5pt/1.5 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  color: #1a1a1a;
+  margin: 0;
+  padding: 0;
+  hyphens: auto;
+}
+h1 {
+  font-size: 24pt;
+  font-weight: 700;
+  margin: 0 0 4mm 0;
+  letter-spacing: -0.02em;
+  color: #0a0a0a;
+}
+h2 {
+  font-size: 16pt;
+  font-weight: 700;
+  margin: 12mm 0 4mm 0;
+  padding-bottom: 2mm;
+  border-bottom: 1.5pt solid #1a1a1a;
+  color: #0a0a0a;
+  page-break-after: avoid;
+  page-break-before: auto;
+}
+h3 {
+  font-size: 12.5pt;
+  font-weight: 600;
+  margin: 7mm 0 2.5mm 0;
+  color: #1a1a1a;
+  page-break-after: avoid;
+}
+h4 {
+  font-size: 10.5pt;
+  font-weight: 600;
+  margin: 5mm 0 1.5mm 0;
+  color: #333;
+  page-break-after: avoid;
+}
+p { margin: 0 0 3mm 0; }
+ul, ol { margin: 0 0 3mm 0; padding-left: 6mm; }
+li { margin-bottom: 1mm; }
+li > p { margin-bottom: 1mm; }
+strong { color: #0a0a0a; font-weight: 600; }
+em { color: #2a2a2a; }
+a { color: #0044aa; text-decoration: none; }
+code {
+  font: 9pt/1.4 'JetBrains Mono', 'Fira Code', 'Menlo', 'Consolas', monospace;
+  background: #f4f4f6;
+  padding: 0.5pt 2pt;
+  border-radius: 2pt;
+  color: #5a2a8a;
+  word-break: break-word;
+}
+pre {
+  background: #f7f7f9;
+  border: 0.5pt solid #e3e3e6;
+  border-radius: 3pt;
+  padding: 3mm;
+  overflow-x: auto;
+  page-break-inside: avoid;
+  margin: 0 0 4mm 0;
+}
+pre code {
+  background: transparent;
+  padding: 0;
+  color: #1a1a1a;
+  font-size: 8.8pt;
+  line-height: 1.45;
+  white-space: pre;
+}
+blockquote {
+  margin: 2mm 0 4mm 0;
+  padding: 2mm 4mm;
+  background: #fafaf6;
+  border-left: 2pt solid #b88a00;
+  color: #4a3a00;
+  font-style: italic;
+  page-break-inside: avoid;
+}
+blockquote p { margin: 0; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 4mm 0;
+  font-size: 9.5pt;
+  page-break-inside: auto;
+}
+thead { display: table-header-group; }
+tr { page-break-inside: avoid; }
+th, td {
+  border: 0.5pt solid #d4d4d8;
+  padding: 1.5mm 2mm;
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  background: #f0f0f3;
+  font-weight: 600;
+  color: #0a0a0a;
+}
+td code, th code {
+  font-size: 8.8pt;
+}
+hr {
+  border: none;
+  border-top: 0.5pt solid #c4c4c8;
+  margin: 6mm 0;
+}
+
+/* Title block */
+.cover {
+  page-break-after: always;
+  padding-top: 25mm;
+}
+.cover h1 {
+  font-size: 36pt;
+  margin-bottom: 5mm;
+}
+.cover .subtitle {
+  font-size: 14pt;
+  color: #555;
+  margin-bottom: 30mm;
+}
+.cover .meta {
+  font-size: 10.5pt;
+  color: #555;
+  line-height: 1.7;
+  border-top: 0.5pt solid #c4c4c8;
+  padding-top: 5mm;
+}
+.cover .meta strong { color: #1a1a1a; }
+.cover .scope-banner {
+  margin-top: 10mm;
+  padding: 4mm 5mm;
+  background: #fff8e6;
+  border-left: 3pt solid #b88a00;
+  font-size: 10.5pt;
+  color: #4a3a00;
+}
+.cover .scope-banner strong { color: #4a3a00; }
+
+/* Subtle FR/NFR markers */
+li strong:first-child { color: #0a0a0a; }
+</style></head><body>
+<section class="cover">
+  <h1>hardware-hunter</h1>
+  <div class="subtitle">Product Requirements Document — v1</div>
+  <div class="meta">
+    <p><strong>Author:</strong> ifuensan<br>
+    <strong>Date:</strong> 2026-05-10<br>
+    <strong>Project type:</strong> cli_tool · self-hosted agent<br>
+    <strong>Domain:</strong> general (marketplace agent / homelab tooling)<br>
+    <strong>Complexity:</strong> high<br>
+    <strong>Release mode:</strong> phased<br>
+    <strong>License:</strong> MIT<br>
+    <strong>Repository:</strong> github.com/ifuensan/hardware-hunter</p>
+  </div>
+  <div class="scope-banner">
+    <strong>(c3) scope contract — do not relitigate.</strong>
+    Personal homelab tool. Wallapop + eBay.es only for v1; multi-marketplace deferred.
+    Arbitrage explicitly out of scope and structurally prevented.
+  </div>
+</section>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>hardware-hunter is a self-hosted, MIT-licensed agent that watches Wallapop and eBay.es continuously against a YAML wishlist of specific homelab parts (HDDs, RAM) and surfaces matches in Telegram — including parts hidden inside larger listings (a WD Red inside a &ldquo;NAS DS220 con discos&rdquo;) that saved searches structurally cannot see. With opt-in Phase 2 enabled per wishlist entry, an explicit Telegram tap completes the purchase via the marketplace&rsquo;s protected payment rail.</p>
+<p><strong>Primary user.</strong> ifuensan (Spanish homelabber) personally; the OSS release is a side benefit for other Spanish homelabbers, not a go-to-market. No team, no funding, no resale.</p>
+<p><strong>Problem.</strong> Manual scanning of Wallapop and eBay.es costs a homelabber roughly 20 minutes a day of refreshing the same searches; good listings vanish in about four hours; saved searches cannot reason per-SKU about price ceilings, cannot verify a listing matches its claim, and never see hidden-component listings at all. The DRAM/NAND price spike (DDR4 32GB doubled Oct 2025 → Q1 2026; shortages projected through Q4 2027 per Tom&rsquo;s Hardware and IDC) makes the Spanish second-hand market the rational sourcing channel — and the time tax peaks alongside it.</p>
+<p><strong>Future state.</strong> ifuensan no longer refreshes Wallapop. The wishlist YAML and Telegram replace the manual hunt entirely; Phase 2 closes the &ldquo;I was in a meeting&rdquo; gap.</p>
+<p><strong>Scope contract — (c3), do not relitigate.</strong> Personal homelab tool. Wallapop + eBay.es only for v1; multi-marketplace deferred. Arbitrage is explicitly out of scope and structurally prevented (no <code>expected_resale_value</code> field; LLM prompt is wishlist-anchored, not arbitrage-anchored). Arbitrage forks belong in a separate repo under a different name.</p>
+<h3 id="what-makes-this-special">What Makes This Special</h3>
+<p>Four differentiators, none of which the existing OSS Wallapop bots (wallabot, Walla-Bot, davertor, nadiamoe, Tatuck) or Wallapop&rsquo;s own saved searches combine:</p>
+<ol>
+<li><strong>Specific-model wishlist with per-SKU price ceilings.</strong> YAML names exact references (<code>manufacturer</code>, <code>model</code>, <code>ref</code>) and two ceilings — <code>max_price_solo</code> (standalone) and <code>max_price_in_device</code> (hidden inside a wrapper). Alerts fire on the part the user actually wants at the price they&rsquo;d actually pay, not on keyword matches.</li>
+<li><strong>Container detection.</strong> A listing&rsquo;s title/description/photos are evaluated for whether the wanted SKU is inside a NAS, mini-PC, or workstation. No competitor does this; saved searches catch 0% of hidden-component listings by definition.</li>
+<li><strong>Phase 2: opt-in autonomous purchase via the marketplace&rsquo;s protected payment rail</strong> (Wallapop Pay, eBay checkout — never Bizum or transferencia), gated by a non-bypassable Telegram tap. Per-entry toggle, per-entry max price, per-entry confidence threshold. No fully autonomous mode by design.</li>
+<li><strong>eBay.es coverage alongside Wallapop.</strong> eBay.es regularly surfaces server-class hardware that never appears on Wallapop; eBay&rsquo;s adapter is structurally independent, so a Wallapop break leaves the system half-degraded, not dead.</li>
+</ol>
+<p><strong>Core insight.</strong> The wishlist YAML makes &ldquo;what to buy&rdquo; deterministic — the LLM only verifies whether a listing matches a wishlist entry, never picks. This single design choice does triple duty:</p>
+<ul>
+<li>Sidesteps the ACES-style biases (position, sponsored, open-ended pricing) that affect VLM shopping agents.</li>
+<li>Structurally prevents arbitrage drift — schema has no <code>expected_resale_value</code>, prompt is wishlist-anchored, no off-wishlist alerts. Drift requires a deliberate change visible in code review.</li>
+<li>Reduces the LLM failure surface to one verifiable question per listing, orthogonal to the structural buy-flow guardrails (cross-source price reconciliation, receipt-vs-alert diff, daily synthetic smoke test) that defend against silent Phase 2 misbehavior.</li>
+</ul>
+<h2 id="project-classification">Project Classification</h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Project Type</strong></td>
+<td><code>cli_tool</code> — self-hosted agent, docker-compose install, YAML/env config, Telegram as the user surface (no built-in GUI)</td>
+</tr>
+<tr>
+<td><strong>Domain</strong></td>
+<td><code>general</code> (sub-domain: marketplace agent / homelab tooling)</td>
+</tr>
+<tr>
+<td><strong>Complexity</strong></td>
+<td><strong>High</strong> — driven by Phase 2 autonomous purchase, two-path Wallapop adapter under anti-bot pressure, silent-failure-mode design, LLM evaluation with confidence, unproven container-detection accuracy</td>
+</tr>
+<tr>
+<td><strong>Project Context</strong></td>
+<td><strong>Greenfield</strong> — fresh repository at <code>github.com/ifuensan/hardware-hunter</code>; no prior code or docs</td>
+</tr>
+<tr>
+<td><strong>License / repo</strong></td>
+<td>MIT, personal GitHub (<code>ifuensan/hardware-hunter</code>)</td>
+</tr>
+<tr>
+<td><strong>Stack (locked, not for PRD debate)</strong></td>
+<td>Hermes Agent v0.13.0 (Nous Research, MIT) + TinyFish via MCP; runs on owned HPE DL160 Gen10 in Valencia colo; Telegram for alerts and approvals; LLM (Gemini Flash assumed) for listing evaluation</td>
+</tr>
+</tbody>
+</table>
+<h2 id="success-criteria">Success Criteria</h2>
+<h3 id="user-success">User Success</h3>
+<p>The user (ifuensan) achieves success when:</p>
+<ul>
+<li><strong>Time-tax elimination.</strong> ~20 min/day of manual Wallapop/eBay.es scanning replaced by passive Telegram alerts. By month 1 of Phase 1, manual scanning is ≤2 min/day (spot-check only).</li>
+<li><strong>Deal capture against the 4-hour half-life.</strong> Within the first 30 days of Phase 1, at least one alert fires on a listing the user would have missed manually (off-hours, container, or four-hour-window).</li>
+<li><strong>Container detection is not vapor.</strong> Within the first 90 days, ≥1 container-detection alert (HDD-in-NAS or RAM-in-mini-PC) the user confirms as a true positive on tap. Zero across 90 days = headline differentiator is broken; rethink before promoting publicly.</li>
+<li><strong>Phase 2 trust acquired.</strong> After 4–8 weeks of Phase 1 reading, the user enables Phase 2 for at least one wishlist entry; first Phase 2 purchase completes successfully (item arrives, matches the alert, no buyer-protection dispute).</li>
+<li><strong>Aha! moment.</strong> First Telegram alert that surfaces a match the user would have bought manually anyway — while doing something else.</li>
+</ul>
+<h3 id="project-sustainability-in-lieu-of-business-success">Project Sustainability (in lieu of &ldquo;Business Success&rdquo;)</h3>
+<p>This is OSS scratch-own-itch; success ≠ commercial metrics. Sustainability is the right frame:</p>
+<ul>
+<li><strong>Personal-utility holds.</strong> ifuensan keeps using hardware-hunter for own homelab parts for 3+ consecutive months (inverse of the personal-use walk-away trigger).</li>
+<li><strong>Maintenance cost contained.</strong> Steady-state ≤8 h/month after the first 6 months. Any rolling 3-month average &gt;20 h/month invokes the sustained-burden walk-away.</li>
+<li><strong>Marketplace breaks absorbable.</strong> Expected 2–4 breaks/year, each absorbed in ≤30 h. Three consecutive failed patch attempts on a single break = technical-debt walk-away trigger.</li>
+<li><strong>Cost ceiling held.</strong> Running cost stays at €0 on existing homelab hardware (or ≤€10/month worst-case if TinyFish free tier disappears).</li>
+<li><strong>Graceful off-ramp documented.</strong> If any walk-away trigger fires: final commit pinning deps, README addendum dating the unmaintained state, repo archived with pointer to forks. Not silent abandonment.</li>
+<li><strong>OSS adoption is explicitly NOT a success criterion</strong> (per (c3)). External users are a side effect; community PRs welcome but unbudgeted.</li>
+</ul>
+<h3 id="technical-success-v1-launch-blocker-bar">Technical Success — v1 launch-blocker bar</h3>
+<ul>
+<li><strong>Adapter discipline enforced.</strong> <code>PageFetcher</code> / <code>BrowserSession</code> (or equivalent) interfaces wrap Hermes and TinyFish. Direct imports from business logic = launch blocker. Verified via CI lint or code-review checklist.</li>
+<li><strong>Two-path Wallapop adapter operational.</strong> Unofficial API primary + TinyFish Search/Fetch fallback. Either path alone carries Phase 1.</li>
+<li><strong>eBay.es adapter operational.</strong> Official eBay API; structurally independent from Wallapop&rsquo;s adapter.</li>
+<li><strong>Phase 1 stabilization gate.</strong> 4–8 weeks of Phase 1 running before Phase 2 enables for any wishlist entry.</li>
+<li><strong>Phase 2 fail-closed.</strong> Purchase refused unless 100% of expected UI elements present.</li>
+<li><strong>Per-purchase circuit breaker.</strong> N consecutive Phase 2 failures auto-disables autonomous mode globally and Telegrams the user.</li>
+<li><strong>Cross-source price reconciliation at buy time.</strong> Re-fetch via the alternate path before checkout; tolerance breach fails closed.</li>
+<li><strong>Receipt-vs-alert reconciliation.</strong> Mismatch raises high-priority Telegram alert and auto-disables Phase 2 (scope of auto-disable — global vs per-entry — captured as an Open Question for the PRD body).</li>
+<li><strong>Daily Phase 2 synthetic smoke test.</strong> Drift auto-disables Phase 2.</li>
+<li><strong>Append-only SQLite audit log per Phase 2 purchase.</strong> Alert snapshot + tap event + marketplace transaction (with photo perceptual hashes).</li>
+<li><strong>No remote logging, no telemetry.</strong> All data local; user = data controller.</li>
+</ul>
+<h3 id="measurable-outcomes">Measurable Outcomes</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Target</th>
+<th>Triggered remediation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Manual scanning post Phase 1 month 1</td>
+<td>≤ 2 min/day</td>
+<td>Phase 1 UX is broken; investigate alert reliability</td>
+</tr>
+<tr>
+<td>Container-detection true positives, first 90 days</td>
+<td>≥ 1 user-confirmed</td>
+<td>Differentiator is vapor; rethink before public framing</td>
+</tr>
+<tr>
+<td>Phase 2 enabled on ≥1 entry by week 12</td>
+<td>Yes</td>
+<td>Trust never acquired; reassess Phase 2 worth shipping</td>
+</tr>
+<tr>
+<td>Phase 2 silent mispurchases, first 90 days</td>
+<td>0</td>
+<td>Reconciliation stack insufficient; pause Phase 2</td>
+</tr>
+<tr>
+<td>Maintenance hours, rolling 3-month avg</td>
+<td>≤ 20 h/month</td>
+<td>Sustained-burden walk-away</td>
+</tr>
+<tr>
+<td>Marketplace-break recovery</td>
+<td>≤ 30 h, ≤ 3 attempts per break</td>
+<td>Technical-debt walk-away</td>
+</tr>
+<tr>
+<td>Running cost</td>
+<td>≤ €10/month worst-case</td>
+<td>Cost-creep audit</td>
+</tr>
+</tbody>
+</table>
+<h2 id="product-scope">Product Scope</h2>
+<h3 id="mvp-phase-1-alerts-only">MVP — Phase 1 (alerts only)</h3>
+<p>The minimum that proves the concept: continuous Wallapop + eBay.es watch against the wishlist YAML, Telegram alerts with confidence levels and one-line LLM takes, no purchase action.</p>
+<p>In MVP:</p>
+<ul>
+<li>Wishlist YAML schema: <code>manufacturer</code>, <code>model</code>, <code>ref</code>, <code>max_price_solo</code>, <code>max_price_in_device</code>, <code>type</code> (hdd|ram), <code>keywords[]</code>, <code>container_keywords[]</code>. Up to ~100 entries.</li>
+<li>Wallapop two-path adapter (unofficial API + TinyFish Search/Fetch fallback) behind <code>PageFetcher</code>/<code>BrowserSession</code> interfaces.</li>
+<li>eBay.es official-API adapter.</li>
+<li>Wishlist-anchored LLM evaluation with confidence level; container detection logic.</li>
+<li>Telegram alerts with photo, price, seller location, one-line LLM take, link; skip/snooze buttons.</li>
+<li>SQLite seen-listings dedup; cron-driven polling.</li>
+<li>Wallapop long-lived sessions with manual re-auth (no silent automated re-login).</li>
+<li>Single <code>docker-compose</code> install; <code>.env.example</code>; README with example wishlist entries for common HDD/RAM models.</li>
+<li><strong>ROADMAP.md and CONTRIBUTING.md as launch artifacts</strong> (not nice-to-haves) — <code>CONTRIBUTING.md</code> carries the explicit &ldquo;no arbitrage PRs&rdquo; rule; <code>ROADMAP.md</code> names future-multi-marketplace, future-arbitrage-as-separate-repo, and &ldquo;C&amp;D-induced sunset&rdquo; as documented end-state.</li>
+<li>Repository hygiene: no Wallapop trademarks, logos, or proprietary terms in titles, package names, or domain.</li>
+</ul>
+<p>Out of MVP (deferred): Phase 2 buy flow, accuracy dashboard, multi-marketplace, web UI/dashboard, polish.</p>
+<h3 id="growth-features-post-mvp-phase-2-supporting">Growth Features (Post-MVP) — Phase 2 + supporting</h3>
+<p>Ships ~4–8 weeks after Phase 1 stabilizes for the user:</p>
+<ul>
+<li>Phase 2 autonomous purchase with the full guardrail stack (per-entry toggle, per-entry max price, per-entry confidence threshold, fail-closed UI checks, per-purchase circuit breaker).</li>
+<li>Telegram Buy/Skip buttons per alert (only when Phase 2 is enabled for that entry).</li>
+<li>Wallapop chat → Wallapop Pay flow via TinyFish Browser; eBay.es Cómpralo-ya checkout.</li>
+<li>Cross-source price reconciliation at buy time; receipt-vs-alert reconciliation with auto-disable on mismatch; daily Phase 2 synthetic smoke test.</li>
+<li>Append-only SQLite audit log per Phase 2 purchase.</li>
+<li><strong>Accuracy dashboard for hidden-component detection.</strong> Per PRFAQ verdict, treated as launch-week priority not fast-follow; placed in Growth only because the data to build it accumulates during Phase 1 use.</li>
+<li><strong>Empirical LLM bias audit</strong> (esp. Castilian vs Catalan/regional Spanish/Basque language register) before Phase 2 is enabled for any user beyond ifuensan.</li>
+</ul>
+<h3 id="vision-future-separate-research-not-v1">Vision (Future, separate research / not v1)</h3>
+<ul>
+<li>Multi-marketplace expansion beyond Wallapop + eBay.es (&ldquo;much later, after validating Wallapop+eBay.es first&rdquo;); documented in ROADMAP as a future research direction.</li>
+<li>Arbitrage / flipping framing — <strong>explicitly out of scope for hardware-hunter forever</strong>; ROADMAP points to a separate-repo path under a different name.</li>
+<li>Possible publication on agentskills.io for Hermes ecosystem visibility.</li>
+<li>&ldquo;C&amp;D-induced sunset&rdquo; as a documented possible end state — not a goal, a planned graceful exit per the legal posture.</li>
+</ul>
+<h2 id="user-journeys">User Journeys</h2>
+<p>The user surface is narrow by design ((c3) personal-use): one human (ifuensan) wearing two hats — homelabber and operator — plus an opt-in fork runner from the OSS side-effect audience. There is no API consumer, no admin separate from the operator, no support staff.</p>
+<h3 id="journey-1-phase-1-happy-path-the-aha">Journey 1 — Phase 1 happy path: the aha!</h3>
+<p><strong>Persona.</strong> ifuensan, Spanish homelabber, runs a Synology RS818+ NAS in a closet in Valencia. Has been watching the second-hand market for a WD Red 4TB to round out his array. DDR4/HDD prices are climbing weekly.</p>
+<p><strong>Opening scene.</strong> Tuesday, 16:42. He&rsquo;s at his day job. His wishlist YAML has 18 entries; hardware-hunter has been running on the homelab DL160 for 11 days; he has not opened Wallapop today.</p>
+<p><strong>Rising action.</strong> His phone buzzes. Telegram:</p>
+<blockquote>
+<p>&ldquo;📦 <strong>WD Red 4TB · 48€</strong> · Valencia · seller online · LLM take: <em>photos show a real WD Red, not a green; serial visible</em>. Confidence: high. [Ver listing]&rdquo;</p>
+</blockquote>
+<p>The listing is 9 minutes old. Saved searches haven&rsquo;t pinged yet because his Wallapop saved-search ranges weren&rsquo;t tight enough.</p>
+<p><strong>Climax.</strong> He taps the link, opens Wallapop, messages the seller, agrees within minutes. Total elapsed: 90 s alert-to-message.</p>
+<p><strong>Resolution.</strong> Pays via Wallapop Pay. Drive arrives Friday. He never opened Wallapop manually. He has not lost his lunch break to refreshing.</p>
+<p><strong>Capabilities revealed.</strong> Marketplace polling at human-volume cadence; wishlist-anchored evaluation; per-SKU <code>max_price_solo</code>; one-line LLM take with confidence; Telegram alert with photo + price + seller location + deep link; cron scheduling; SQLite seen-listings dedup so this listing won&rsquo;t fire twice.</p>
+<h3 id="journey-2-phase-2-happy-path-trust-acquired">Journey 2 — Phase 2 happy path: trust acquired</h3>
+<p><strong>Persona.</strong> Same ifuensan, six weeks into Phase 1. He has watched ~40 alerts fire, audited the LLM evaluations, manually purchased four times. This morning he flipped Phase 2 to <code>true</code> for two specific entries — WD Red 4TB and HGST He10 14TB — leaving the other 16 entries alert-only.</p>
+<p><strong>Opening scene.</strong> Wednesday, 11:17. He&rsquo;s in a 1:1 with his manager.</p>
+<p><strong>Rising action.</strong> Phone buzzes:</p>
+<blockquote>
+<p>&ldquo;🟢 <strong>HGST He10 14TB · 60€</strong> (max_solo: 75€) · Valencia · confidence: high · <em>real He10, SMART screenshot included</em> · [✅ Buy] [❌ Skip] [👁 Ver]&rdquo;</p>
+</blockquote>
+<p>He glances at the photo, taps <strong>Buy</strong> without leaving the meeting.</p>
+<p><strong>Climax.</strong> Behind the tap: the agent re-fetches the same listing through the <em>other</em> path (TinyFish Browser, since the API surfaced this one) — cross-source price reconciliation: 60€ ↔ 60€, within tolerance. Fail-closed UI element check passes. Wallapop Pay checkout proceeds. ~22 seconds end-to-end.</p>
+<p><strong>Resolution.</strong></p>
+<blockquote>
+<p>&ldquo;✅ Comprado. <strong>60.00€</strong> via Wallapop Pay · Receipt: WAL-7Q4-XYZ · [screenshot]&rdquo;</p>
+</blockquote>
+<p>Local SQLite audit log records: alert snapshot (with photo perceptual hash), tap event (Telegram message ID + button + timestamp), marketplace transaction (receipt ID + price paid + screenshot). Drive arrives Friday.</p>
+<p><strong>Capabilities revealed.</strong> Per-entry Phase 2 toggle; per-entry <code>max_price_solo</code> ceiling; confidence threshold gating; fail-closed UI element checks; cross-source price reconciliation at buy time; Wallapop Pay flow via TinyFish Browser; append-only audit log per Phase 2 purchase; receipt screenshot capture.</p>
+<h3 id="journey-3-edge-case-silent-failure-caught-the-q9-scenario">Journey 3 — Edge case: silent-failure caught (the Q9 scenario)</h3>
+<p><strong>Persona.</strong> Same ifuensan, three months in, Phase 2 enabled on three entries. He&rsquo;s stopped reading every alert because they&rsquo;re routine.</p>
+<p><strong>Opening scene.</strong> Thursday morning. Wallapop has quietly shipped a UI change — the listing detail page now formats the price <code>1.234,56 €</code> as <code>1234.56 €</code>. The unofficial-API response format is unchanged; only the HTML detail-page parser is affected.</p>
+<p><strong>Rising action.</strong> The agent&rsquo;s HTML parser silently misreads. A WD Red 4TB priced at 53€ is parsed as 0.53€. The <strong>daily Phase 2 synthetic smoke test</strong> runs at 06:00 against a synthetic listing whose raw text uses dot — it passes. Drift goes undetected by smoke test alone.</p>
+<p>A real listing fires. The agent surfaces alert &ldquo;0.53€&rdquo;. Before any Phase 2 purchase can complete, the <strong>cross-source price reconciliation at buy time</strong> independently re-fetches via the alternate path: API path returns 53€, HTML parser returns 0.53€. Disagreement exceeds tolerance.</p>
+<p><strong>Climax.</strong> Phase 2 fails closed. High-priority Telegram:</p>
+<blockquote>
+<p>&ldquo;⚠️ <strong>Phase 2 auto-disabled (global).</strong> Cross-source price reconciliation tripped: API 53.00 vs HTML parser 0.53. Listing: [link]. Investigate parser.&rdquo;</p>
+</blockquote>
+<p><strong>Resolution.</strong> ifuensan reads the audit log on the homelab box, traces drift to the format change, patches the parser, adds comma-formatted fixtures to the smoke-test regression set, re-runs smoke tests green, manually re-enables Phase 2. Total: ~45 minutes. <strong>No money lost.</strong> The reconciliation stack did exactly what the PRFAQ Q9 mitigation promised.</p>
+<p><strong>Capabilities revealed.</strong> Daily synthetic Phase 2 smoke test; cross-source price reconciliation at buy time as an <em>independent</em> second defense (the smoke test missed the bug because its synthetic data didn&rsquo;t cover commas; reconciliation caught it on real data); global Phase 2 auto-disable on reconciliation failure (TBD whether per-entry instead — see Open Questions); audit log inspection workflow; manual Phase 2 re-enable after green smoke test.</p>
+<h3 id="journey-4-operator-hat-wallapop-re-auth-wishlist-update">Journey 4 — Operator hat: Wallapop re-auth + wishlist update</h3>
+<p><strong>Persona.</strong> ifuensan-as-operator, Saturday-morning maintenance window. Same person, different mode: he&rsquo;s not chasing deals, he&rsquo;s keeping the agent healthy.</p>
+<p><strong>Opening scene.</strong> 09:30. Logs show 6 hours of <code>Wallapop unofficial API: 401 Unauthorized</code> — session cookie expired. Phase 1 was degraded on Wallapop overnight (the TinyFish Search/Fetch fallback path carried partial coverage), but eBay.es ran clean (independent adapter). Earlier Telegram:</p>
+<blockquote>
+<p>&ldquo;ℹ️ <strong>Wallapop session expired.</strong> Manual re-auth required (no silent re-login). Run <code>hardware-hunter login wallapop</code>.&rdquo;</p>
+</blockquote>
+<p><strong>Rising action.</strong> He SSHes to the DL160, runs <code>hardware-hunter login wallapop</code>. The agent spins up a TinyFish Browser session, opens Wallapop&rsquo;s login page in a stealth Chromium, walks him through entering credentials + 2FA, persists the cookie file with restrictive perms. While he&rsquo;s there, he edits <code>wishlist.yaml</code> to add a Kingston KVR32N22D8/32 DDR4-3200 32GB kit he&rsquo;s been eyeing.</p>
+<p><strong>Climax.</strong> He runs <code>hardware-hunter validate-wishlist</code> — schema lints clean. He runs <code>hardware-hunter test-search "Kingston 32GB DDR4 3200"</code> — the agent surfaces three current listings as a read-only dry run, applying the wishlist-anchored prompt against each so he can sanity-check whether the LLM evaluation matches his judgment.</p>
+<p><strong>Resolution.</strong> He restarts the stack: <code>docker-compose down &amp;&amp; docker-compose up -d</code>. Phase 1 backfills overnight; the new Kingston entry enters rotation. Total time: 12 minutes.</p>
+<p><strong>Capabilities revealed.</strong> Wallapop manual re-auth UX (long-lived session with no silent automated re-login); wishlist YAML schema validator (CLI); dry-run search command; cookie file with restrictive permissions; docker-compose lifecycle as the supported install model; eBay.es independence as a &ldquo;half-degraded &gt; dead&rdquo; property.</p>
+<h3 id="journey-5-oss-contributor-fork-runner">Journey 5 — OSS contributor: fork runner</h3>
+<p><strong>Persona.</strong> Marc, another Spanish homelabber. Runs a small Mini PC at home with Proxmox and a couple of containers. Spotted hardware-hunter on a Spanish dev forum. Wants a Kingston 16GB DDR4-2666 SO-DIMM under €25.</p>
+<p><strong>Opening scene.</strong> Sunday afternoon. He&rsquo;s read the README and the legal disclaimer. He spins up a fresh Telegram bot via BotFather, generates a Wallapop secondary account he&rsquo;s &ldquo;willing to lose&rdquo; (per the customer-FAQ recommendation), clones the repo.</p>
+<p><strong>Rising action.</strong> Copies <code>.env.example</code> → <code>.env</code>, fills in Telegram bot token + Wallapop credentials + eBay.es app credentials. Edits the example <code>wishlist.yaml</code> down to one entry (his Kingston module), tunes <code>max_price_solo</code> to 25€. Runs <code>docker-compose up -d</code>. Phase 2 is <strong>disabled by default</strong> — the README is explicit.</p>
+<p><strong>Climax.</strong> Two days later: &ldquo;Kingston KVR26N19S8/16 · 22€ · Madrid · confidence: medium · <em>photos show package, label visible</em> · [link]&rdquo;. He taps the link, buys manually via Wallapop Pay.</p>
+<p><strong>Resolution.</strong> He stars the repo. Considers opening a PR with three additional Castilian-friendly wishlist examples for the README — the <code>CONTRIBUTING.md</code> lists wishlist contributions as one of the three explicit invitation categories. He never enables Phase 2; alerts are enough for him. (This is the (c3)-aligned fork-user posture: hardware-hunter saved him time, he didn&rsquo;t need the autonomous-purchase tier.)</p>
+<p><strong>Capabilities revealed.</strong> README with realistic example wishlists; <code>.env.example</code> covering all needed credentials; single <code>docker-compose up</code> install; Phase 2 disabled-by-default for safety; <code>CONTRIBUTING.md</code> with three invitation categories (wishlist examples, prompt improvements, Wallapop selector patches); legal disclaimer + secondary-account recommendation in README.</p>
+<h3 id="journey-requirements-summary">Journey Requirements Summary</h3>
+<table>
+<thead>
+<tr>
+<th>Capability area</th>
+<th>Driven by journeys</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Marketplace polling (Wallapop two-path + eBay.es)</td>
+<td>1, 2, 4, 5</td>
+<td>Cron-driven, human-volume rates, eBay.es independent</td>
+</tr>
+<tr>
+<td>Wishlist-anchored LLM evaluation w/ confidence</td>
+<td>1, 2, 5</td>
+<td>One-line take returned per match</td>
+</tr>
+<tr>
+<td>Container detection</td>
+<td>(adjacent — implied baseline; full demo in a future story)</td>
+<td>First true-positive alert is a launch-week metric</td>
+</tr>
+<tr>
+<td>Telegram alerts (rich format + skip/snooze)</td>
+<td>1, 2, 3, 4</td>
+<td>Phase 1 buttons: skip / snooze; Phase 2 adds Buy / Skip</td>
+</tr>
+<tr>
+<td>Per-entry Phase 2 toggle / max price / confidence threshold</td>
+<td>2, 3</td>
+<td>Phase 2 default <code>false</code> (Journey 5)</td>
+</tr>
+<tr>
+<td>Fail-closed UI element checks + per-purchase circuit breaker</td>
+<td>2, 3</td>
+<td>Auto-disables on N consecutive failures</td>
+</tr>
+<tr>
+<td>Cross-source price reconciliation at buy time</td>
+<td>2, 3</td>
+<td>Q9 silent-failure-mode primary defense</td>
+</tr>
+<tr>
+<td>Receipt-vs-alert reconciliation (auto-disable on mismatch)</td>
+<td>2, 3</td>
+<td>Global auto-disable on first incident — scope TBD</td>
+</tr>
+<tr>
+<td>Daily Phase 2 synthetic smoke test</td>
+<td>3</td>
+<td>Independent of cross-source reconciliation</td>
+</tr>
+<tr>
+<td>Append-only SQLite audit log per Phase 2 purchase</td>
+<td>2, 3, 4</td>
+<td>Photo perceptual hashes + Telegram tap event + receipt</td>
+</tr>
+<tr>
+<td>Wallapop manual re-auth UX (no silent automated re-login)</td>
+<td>4</td>
+<td><code>hardware-hunter login wallapop</code> CLI + cookie persistence</td>
+</tr>
+<tr>
+<td>Wishlist YAML validator + dry-run search</td>
+<td>4</td>
+<td>CLI commands for the operator hat</td>
+</tr>
+<tr>
+<td>docker-compose install + <code>.env.example</code> + README example wishlists</td>
+<td>4, 5</td>
+<td>Single launch artifact for OSS forkers</td>
+</tr>
+<tr>
+<td><code>CONTRIBUTING.md</code> + <code>ROADMAP.md</code> as launch artifacts</td>
+<td>5</td>
+<td>Wishlist examples / prompt improvements / selector patches</td>
+</tr>
+<tr>
+<td>Legal disclaimer + secondary-account recommendation in README</td>
+<td>5</td>
+<td>Customer-FAQ position made operational</td>
+</tr>
+</tbody>
+</table>
+<p>Out of scope (explicitly): web UI, multi-tenant deployment, RBAC, cloud-hosted SaaS, third-party API consumers, billing.</p>
+<h2 id="domain-specific-requirements">Domain-Specific Requirements</h2>
+<p>The product domain (<code>general</code> consumer/homelab tooling) has no regulatory regime equivalent to HIPAA/PCI/etc. — but six cross-cutting constraints, locked through five PRFAQ stages, shape every requirement that follows. They get a home here so they cannot drift implicit.</p>
+<h3 id="compliance-legal-posture">Compliance &amp; Legal Posture</h3>
+<ul>
+<li><strong>Wallapop ToS (rev. Apr 2026):</strong> explicitly forbids scraping/bots. Realistic enforcement is account ban, not legal action (precedent: Tatuck/wallapop-scraper publicly hosted on GitHub; ZebraBot operating commercially in Spain for years without legal escalation).</li>
+<li><strong>Operating posture:</strong> comply-don&rsquo;t-fight on any C&amp;D. Solo maintainer cannot litigate; pretending otherwise is unsustainable. README/repo position hardware-hunter as a &ldquo;personal monitoring tool,&rdquo; not a &ldquo;Wallapop scraper&rdquo; — wording matters.</li>
+<li><strong>C&amp;D contingency (documented in <code>ROADMAP.md</code> as a possible end state, not a goal):</strong> read carefully, do not respond same-day, assess scope, comply with reasonable scope (rename, archive, code removal). MIT-licensed forks survive.</li>
+<li><strong>Spanish web-scraping precedent:</strong> Spanish courts have generally permitted scraping of public data (cited generically in customer FAQ, no specific case citation in shipped docs).</li>
+<li><strong>Hacienda / tax integration:</strong> <strong>out of scope.</strong> Personal use only by (c3); commercial-volume use would be a (c3) violation.</li>
+</ul>
+<h3 id="privacy-data-handling-rgpd-posture">Privacy &amp; Data Handling (RGPD posture)</h3>
+<ul>
+<li><strong>All data local.</strong> SQLite store on the user&rsquo;s homelab box; no remote logging, no telemetry, no cloud sync.</li>
+<li><strong>User = data controller; hardware-hunter = processor.</strong> Sellers&rsquo; publicly posted listing data is processed only for the duration of evaluation/transaction. No profiling, no third-party sharing.</li>
+<li><strong>Stored data classes:</strong> wishlist YAML (user content), seen-listings dedup index (URL + perceptual photo hash), Phase 2 audit log (alert + tap + transaction), Wallapop session cookie file. All readable by the user via the filesystem.</li>
+<li><strong>Retention:</strong> indefinite local retention by default; user owns deletion. No automatic purge requirements (no remote sync to comply with).</li>
+<li><strong>Cookie/credential hygiene:</strong> restrictive filesystem permissions on cookie file and <code>.env</code>; never logged.</li>
+</ul>
+<h3 id="phase-2-dispute-evidence">Phase 2 Dispute Evidence</h3>
+<p>Three artifacts persisted <strong>locally, append-only</strong>, per Phase 2 purchase. Defends against three distinct claim classes:</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Contents</th>
+<th>Defends against</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Alert snapshot</strong></td>
+<td>Listing URL, title, description, photo perceptual hashes, price, wishlist entry matched, LLM evaluation + confidence, Phase 2 settings active at the time</td>
+<td>&ldquo;You bought the wrong thing&rdquo; (vs seller — preserved even if seller edits/deletes the listing)</td>
+</tr>
+<tr>
+<td><strong>User tap event</strong></td>
+<td>Telegram message ID, button pressed (Buy / Skip / Snooze), timestamp</td>
+<td>&ldquo;I never authorized this&rdquo; (Telegram&rsquo;s own audit trail is a corroborating second source)</td>
+</tr>
+<tr>
+<td><strong>Marketplace transaction</strong></td>
+<td>Receipt ID (Wallapop Pay reference, eBay order number), price actually paid, screenshot of confirmation page (TinyFish Browser captures)</td>
+<td>Platform dispute resolution (marketplace logs primary; local trail corroborates if contested)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="anti-bot-mitigation">Anti-Bot Mitigation</h3>
+<ul>
+<li><strong>Polling at human-volume rates.</strong> Cron-driven, not high-frequency streaming. Concrete rate limits captured in NFRs.</li>
+<li><strong>Wallapop long-lived sessions with manual re-auth.</strong> No silent automated re-login (anti-bot risk). Operator runs <code>hardware-hunter login wallapop</code> on cookie expiry.</li>
+<li><strong>Stealth Chromium for Phase 2 buy flow.</strong> Via TinyFish Browser. Login flows go through real browser sessions, not API token forgery.</li>
+<li><strong>Per-purchase circuit breaker.</strong> N consecutive Phase 2 buy failures auto-disables autonomous mode globally; protects against silent anti-bot detection escalation.</li>
+<li><strong>No mass-scraping pattern.</strong> Listing fetches are scoped to wishlist matches, not bulk extraction. Reduces both anti-bot signal and LPI database-rights exposure.</li>
+</ul>
+<h3 id="llm-bias-surfaces">LLM Bias Surfaces</h3>
+<p>Per the ACES (Columbia/Yale, WebConf 2026) findings on VLM shopping agents, structurally-eliminated biases vs unaudited residual surfaces:</p>
+<p><strong>Eliminated by wishlist-anchored design:</strong></p>
+<ul>
+<li>Position bias (each listing evaluated in isolation, no &ldquo;first result wins&rdquo;)</li>
+<li>Sponsored-content bias (Wallapop and eBay.es do not have sponsored-listing slots equivalent to ACES marketplaces)</li>
+<li>Open-ended price sensitivity (ceilings come from user YAML, not LLM judgment)</li>
+</ul>
+<p><strong>Unaudited residual surfaces (must surface in NFRs and the launch-blocker checklist):</strong></p>
+<ul>
+<li>Photo-quality bias (cleaner photos → higher confidence?)</li>
+<li>Description-length bias (verbose → &ldquo;trustworthy&rdquo;?)</li>
+<li>Language-register bias (Castilian vs Catalan/regional Spanish/Basque) — matters specifically for a Spain tool; could systematically affect non-Castilian sellers</li>
+<li>Confidence-level calibration (over/under-confidence in particular conditions)</li>
+</ul>
+<p><strong>Mitigation path.</strong> Empirical bias audit before Phase 2 enables for any user beyond ifuensan; community accuracy dashboard as the long-term audit instrument. Until the dashboard exists, residual bias is best-effort and disclosed in <code>README.md</code>.</p>
+<h3 id="repository-hygiene-legal-driven">Repository Hygiene (legal-driven)</h3>
+<ul>
+<li>No Wallapop trademarks, logos, or proprietary terms in repo name, package names, domain, or anywhere user-visible.</li>
+<li>README positions hardware-hunter as a personal monitoring tool, NOT a &ldquo;Wallapop scraper.&rdquo; Wording is operational, not aesthetic — reduces the trademark complaint surface and the cost of a forced rename.</li>
+<li>Adapter file names use marketplace names only where strictly necessary (e.g. <code>wallapop_adapter.py</code> is fine inside <code>adapters/</code>; the package itself is not named after Wallapop).</li>
+<li><code>CONTRIBUTING.md</code> carries an explicit &ldquo;no arbitrage PRs&rdquo; rule and a pointer to the future-research separate-repo path; closes the door on (c3)-violating contributions before they land.</li>
+<li><code>ROADMAP.md</code> names: future-multi-marketplace, future-arbitrage-as-separate-repo, &ldquo;C&amp;D-induced sunset&rdquo; as documented end state.</li>
+</ul>
+<blockquote>
+<p><strong>Risk register cross-reference.</strong> All domain-driven risks (legal, ToS, privacy, anti-bot, bias) are tracked alongside technical and resource risks in the consolidated tables under <code>Project Scoping &amp; Phased Development &gt; Risk Mitigation Strategy</code>.</p>
+</blockquote>
+<h2 id="innovation-novel-patterns">Innovation &amp; Novel Patterns</h2>
+<h3 id="detected-innovation-areas">Detected Innovation Areas</h3>
+<p>Four innovations, ordered by structural significance:</p>
+<h4 id="1-wishlist-anchored-llm-evaluation-the-framing-innovation">1. Wishlist-anchored LLM evaluation (the framing innovation)</h4>
+<p>Standard VLM shopping-agent pattern (ACES: Columbia/Yale, WebConf 2026): user gives an open-ended preference (&ldquo;find me a cheap NAS&rdquo;); agent picks. Documented to suffer from position bias, sponsored-content bias, and open-ended price sensitivity.</p>
+<p>hardware-hunter inverts it. The user&rsquo;s YAML names exact references and per-SKU price ceilings; the LLM is asked one question per listing — <em>&ldquo;does this listing match this wishlist entry?&rdquo;</em> — and returns a confidence level. The LLM never picks what to buy; it only verifies.</p>
+<p>This is a deliberate framing choice with three structural consequences:</p>
+<ul>
+<li>ACES position/sponsored/pricing biases are eliminated by construction, not by mitigation.</li>
+<li>Arbitrage drift is structurally prevented — the schema has no <code>expected_resale_value</code> field, the prompt has no resale framing, the codepath has no &ldquo;interesting&rdquo; off-wishlist surfacing. Drift requires a deliberate change visible in code review.</li>
+<li>The remaining LLM failure surface is one verifiable question per listing, orthogonal to the buy-flow guardrails that defend Phase 2.</li>
+</ul>
+<h4 id="2-container-detection-the-headline-differentiator">2. Container detection (the headline differentiator)</h4>
+<p>A second per-SKU price ceiling — <code>max_price_in_device</code> — paired with <code>container_keywords[]</code> lets the agent flag listings where the wanted SKU is hidden inside a wrapper (HDD inside a NAS, RAM inside a mini-PC, GPU inside a workstation). The LLM evaluates title/description/photos for whether the wanted part is present at the secondary ceiling.</p>
+<p>No surveyed OSS Wallapop bot (wallabot, Walla-Bot, davertor, nadiamoe, Tatuck) does this. Wallapop&rsquo;s saved searches catch 0% by definition.</p>
+<p>The novelty is the <em>schema commitment</em>, not the implementation: making &ldquo;this part hidden in something else&rdquo; a first-class wishlist concept rather than a heuristic on top of keyword search.</p>
+<h4 id="3-adapter-discipline-as-a-v1-launch-blocker">3. Adapter discipline as a v1 launch blocker</h4>
+<p><code>PageFetcher</code> and <code>BrowserSession</code> (or equivalent) interfaces wrap Hermes and TinyFish. Direct imports from business logic = launch blocker, verified via CI lint or code-review checklist. Stack swap (TinyFish → Playwright self-hosted, Hermes pin to a known-good version, etc.) becomes days of work, not weeks.</p>
+<p>Pattern is well-known in production engineering; the innovation is <strong>enforcing it as a launch blocker on a single-developer evening project</strong>. The PRFAQ verdict makes this binding: the project&rsquo;s stack-risk story collapses without it.</p>
+<h4 id="4-phase-2-self-disabling-guardrail-stack-the-silent-failure-defense">4. Phase 2 self-disabling guardrail stack (the silent-failure defense)</h4>
+<p>Three independent defenses against the Q9 scenario (wrong-but-internally-consistent values bypassing structural guardrails):</p>
+<ul>
+<li><strong>Cross-source price reconciliation at buy time.</strong> Re-fetch via the alternate path (TinyFish if API was used, API if TinyFish was used); disagreement beyond tolerance fails closed.</li>
+<li><strong>Receipt-vs-alert reconciliation.</strong> After every Phase 2 purchase, diff alert price vs marketplace receipt. Mismatch raises high-priority Telegram and auto-disables Phase 2.</li>
+<li><strong>Daily synthetic smoke test.</strong> Independent fetch against a known-price synthetic listing. Drift auto-disables Phase 2.</li>
+</ul>
+<p>Each catches a different failure shape; the smoke test alone misses bugs whose triggering data is absent from the synthetic fixtures (Journey 3 demonstrates this — comma-formatted prices), and reconciliation alone is silent if the agent never buys. The stack works because the defenses are independent.</p>
+<p>Pattern is borrowed from production SRE (independent observability, defense in depth). Innovation is the application: an OSS personal-use shopping agent applying production-grade silent-failure defenses because real money is on the line per purchase.</p>
+<h3 id="market-context-competitive-landscape">Market Context &amp; Competitive Landscape</h3>
+<p>Surveyed OSS Wallapop bots and adjacent tools (May 2026):</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>LLM</th>
+<th>Container detection</th>
+<th>Phase 2 / autonomous purchase</th>
+<th>eBay.es</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>wallabot</strong></td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>Selenium + Telegram alerts; seen-ads.txt dedup</td>
+</tr>
+<tr>
+<td><strong>Walla-Bot</strong> (miqueasmd)</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>Config-driven keyword search; email alerts</td>
+</tr>
+<tr>
+<td><strong>davertor/wallapop-scraper</strong></td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>Library returning DataFrames; no integration</td>
+</tr>
+<tr>
+<td><strong>nadiamoe/wallabot</strong></td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>Alert engine on keyword search</td>
+</tr>
+<tr>
+<td><strong>Tatuck/wallapop-scraper</strong></td>
+<td>Gemini 2.0 Flash for resale value</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>Closest in spirit; arbitrage-framed (different product)</td>
+</tr>
+<tr>
+<td><strong>Apify Wallapop Scraper</strong></td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>SaaS, $0.50/1000 results</td>
+</tr>
+<tr>
+<td><strong>ScrapingBee</strong></td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>N/A</td>
+<td>Generic scraping API</td>
+</tr>
+<tr>
+<td><strong>Wallapop saved searches</strong></td>
+<td>N/A</td>
+<td>No (0% by definition)</td>
+<td>No</td>
+<td>N/A</td>
+<td>Native, free, the minimum viable alternative</td>
+</tr>
+<tr>
+<td><strong>ZebraBot (zebrabot.es)</strong></td>
+<td>Unknown (commercial)</td>
+<td>Unknown</td>
+<td>Unknown</td>
+<td>Unknown</td>
+<td>Commercial Spanish service, decade+ live, not OSS — useful as ToS-enforcement precedent</td>
+</tr>
+<tr>
+<td><strong>hardware-hunter</strong></td>
+<td>Wishlist-anchored, confidence-leveled</td>
+<td><strong>Yes</strong></td>
+<td><strong>Yes (opt-in, HITL Telegram, per-entry)</strong></td>
+<td><strong>Yes (official API)</strong></td>
+<td>The combination is the moat</td>
+</tr>
+</tbody>
+</table>
+<p>The four-bullet differentiator — wishlist YAML with per-SKU ceilings + container detection + opt-in Phase 2 via protected payment rails + eBay.es alongside Wallapop — is the combination none of the surveyed tools offers. Tatuck is the closest single-axis competitor (LLM evaluation) but framed as arbitrage; the framing difference is the moat.</p>
+<h3 id="validation-approach">Validation Approach</h3>
+<p>Each innovation has a concrete validation path:</p>
+<table>
+<thead>
+<tr>
+<th>Innovation</th>
+<th>How we know it works</th>
+<th>How we know it failed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wishlist-anchored evaluation</td>
+<td>First 30 days: ifuensan accepts ≥ 80% of fired alerts as true positives on tap (rough sanity bar; tune with experience). LLM bias audit before Phase 2 enables for non-Castilian/non-self users.</td>
+<td>If precision drops below ~50%, the prompt or the model is wrong; reframe before Phase 2.</td>
+</tr>
+<tr>
+<td>Container detection</td>
+<td>First 90 days: ≥ 1 user-confirmed true-positive container alert. PRFAQ-bound success metric.</td>
+<td>Zero true positives across 90 days = headline differentiator is vapor; rethink before public framing.</td>
+</tr>
+<tr>
+<td>Adapter discipline</td>
+<td>CI lint enforces no direct Hermes/TinyFish imports from business-logic packages. Stack swap dry run (mock the alternate adapter) succeeds in a single evening.</td>
+<td>A direct import slips into main = process failure; tighten the lint and treat as launch blocker.</td>
+</tr>
+<tr>
+<td>Phase 2 guardrail stack</td>
+<td>First 90 days of Phase 2: zero silent mispurchases. Smoke-test regression set grows with each marketplace UI surprise.</td>
+<td>Any silent mispurchase in the first 90 days = stack insufficient; pause Phase 2, root-cause the gap, add a fourth defense if needed.</td>
+</tr>
+</tbody>
+</table>
+<p>Pre-launch: the accuracy dashboard (community-collected) is committed in PRFAQ as a launch-week priority, not a fast-follow. It is the long-term validation instrument for both wishlist-anchored evaluation and container detection.</p>
+<h3 id="risk-mitigation-innovation-specific-fallbacks">Risk Mitigation (innovation-specific fallbacks)</h3>
+<ul>
+<li><strong>Wishlist-anchored evaluation underperforms.</strong> Fallback: more verbose <code>keywords[]</code> per entry (looser surface) + raise the confidence-threshold gate so only high-confidence matches alert; sacrifices recall for precision.</li>
+<li><strong>Container detection produces too many false positives.</strong> Fallback: tighten <code>container_keywords[]</code>, raise the confidence threshold for container matches specifically (per-entry-class threshold, not just per-entry). Acceptable degradation: alerts on wrappers go quiet; direct-listing alerts continue to work.</li>
+<li><strong>Adapter discipline slips during a rushed patch.</strong> Fallback: CI lint hard-fails the build; a direct import never reaches main. Process is the safety net.</li>
+<li><strong>Phase 2 guardrail stack misses a silent failure.</strong> Fallback: per-purchase circuit breaker is the universal backstop — N consecutive Phase 2 anomalies (any kind) auto-disable autonomous mode globally. Adding a fourth independent defense is cheaper than waiting for the next failure class.</li>
+<li><strong>All four innovations underperform together.</strong> Fallback: hardware-hunter degrades to a more sophisticated wallabot — keyword alerts on Wallapop + eBay.es with deduplication. Still beats saved searches (eBay.es coverage, dedup, two-tier pricing) and hits the time-tax success criterion. The product survives even if the headline novelty doesn&rsquo;t.</li>
+</ul>
+<h2 id="cli-tool-specific-requirements">CLI Tool Specific Requirements</h2>
+<h3 id="project-type-overview">Project-Type Overview</h3>
+<p>hardware-hunter has two interaction surfaces:</p>
+<ul>
+<li><strong>Daemon-style operation</strong> (the steady state). Once installed and configured, hardware-hunter runs as a long-lived agent process inside docker-compose. <strong>Hermes Agent&rsquo;s built-in scheduler</strong> drives all polling jobs (no external cron). The daemon never blocks on user input; alerts go to Telegram; failures auto-disable rather than escalate.</li>
+<li><strong>Operator CLI</strong> (the maintenance surface). A single <code>hardware-hunter</code> binary with subcommands handles install-time setup, manual re-auth, wishlist editing, dry-runs, and audit-log inspection. ifuensan-as-operator (Journey 4) is the primary CLI consumer.</li>
+</ul>
+<p>The Telegram bot is the primary <em>user</em> surface (alerts, taps, decisions). The CLI is the primary <em>operator</em> surface (setup, troubleshooting, audit). The two surfaces never overlap — no operator command takes Telegram input, and no Telegram interaction triggers CLI work.</p>
+<h3 id="technical-architecture-considerations">Technical Architecture Considerations</h3>
+<ul>
+<li><strong>Scheduler:</strong> Hermes Agent&rsquo;s native scheduler (per kickoff: natural-language cron, no job limit, persists across restarts via Hermes&rsquo; SQLite memory). hardware-hunter expresses polling cadence as Hermes scheduled jobs, not OS cron. Stack-swap implication: if Hermes is ever replaced, a <code>Scheduler</code> interface must abstract this — captured under adapter discipline.</li>
+<li><strong>Two-path Wallapop adapter</strong> behind <code>PageFetcher</code> interface (unofficial API primary + TinyFish Search/Fetch fallback).</li>
+<li><strong>eBay.es adapter</strong> behind same <code>PageFetcher</code> interface (official eBay API primary; no fallback needed at v1 — eBay&rsquo;s API is structurally stable).</li>
+<li><strong>Phase 2 buy flow</strong> behind <code>BrowserSession</code> interface (TinyFish Browser via MCP).</li>
+<li><strong>LLM evaluation</strong> behind a <code>ListingEvaluator</code> interface (provider-agnostic; Gemini Flash assumed for cost; pluggable).</li>
+<li><strong>All persistence is local SQLite</strong> behind a <code>Store</code> interface (seen-listings dedup, audit log, optional cached LLM evaluations).</li>
+<li><strong>No remote logging, no telemetry.</strong></li>
+</ul>
+<p>Adapter discipline is a v1 launch blocker per the Innovation section; CI lint enforces no direct imports of Hermes / TinyFish / Gemini SDKs from anywhere outside the corresponding adapter package.</p>
+<h3 id="command-structure">Command Structure</h3>
+<p>A single <code>hardware-hunter</code> binary, subcommand-organized. Daemon mode is the implicit default when no subcommand is given (or when launched via docker-compose); subcommands are for the operator.</p>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>hardware-hunter                         # daemon mode (Phase 1 + opted-in Phase 2 entries)
+hardware-hunter --version
+hardware-hunter --help
+
+# Setup &amp; authentication
+hardware-hunter init                    # scaffold wishlist.yaml, config.yaml, .env from examples
+hardware-hunter login wallapop          # interactive: opens stealth Chromium, persists cookie
+hardware-hunter login ebay              # OAuth flow for eBay.es API
+
+# Wishlist &amp; config
+hardware-hunter validate-wishlist [path]            # schema + reachability + duplicate-ref lint
+hardware-hunter validate-config [path]              # config.yaml + .env presence
+hardware-hunter test-search &lt;query|--entry NAME&gt;    # dry-run search (no alert sent)
+hardware-hunter explain &lt;listing-url&gt;               # one-shot LLM evaluation against current wishlist
+
+# Phase 2 controls
+hardware-hunter phase2 status                       # show per-entry Phase 2 settings
+hardware-hunter phase2 enable &lt;entry&gt;               # turn on for a wishlist entry
+hardware-hunter phase2 disable &lt;entry|--all&gt;        # turn off (per-entry or globally)
+hardware-hunter phase2 smoke-test                   # run synthetic price-parse smoke test now
+hardware-hunter phase2 reconcile &lt;receipt-id&gt;       # re-run receipt-vs-alert reconciliation
+
+# Audit &amp; diagnostics
+hardware-hunter audit show [--last N | --entry E]   # paginated audit log
+hardware-hunter audit export [--since DATE] &lt;path&gt;  # export audit rows (JSONL)
+hardware-hunter health                              # adapter status, scheduler status, last poll, last alert
+hardware-hunter logs [--tail | --since DURATION]    # structured log access
+
+# Lifecycle
+hardware-hunter daemon                              # explicit daemon mode (default; rarely typed)
+hardware-hunter stop                                # graceful shutdown signal
+</code></pre></div>
+
+<p>Shell completion (bash + zsh) is a post-launch nice-to-have, not a v1 requirement. Subcommand grouping keeps completion straightforward to add later.</p>
+<h3 id="output-formats">Output Formats</h3>
+<table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Format</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Telegram alert (Phase 1)</strong></td>
+<td>Markdown message with photo attachment + inline buttons</td>
+<td>Bullets: photo, price, seller location, one-line LLM take, confidence level, deeplink. Inline buttons: <code>[👁 Ver] [🙅 Skip] [😴 Snooze 24h]</code>.</td>
+</tr>
+<tr>
+<td><strong>Telegram alert (Phase 2 enabled entry)</strong></td>
+<td>Same as Phase 1 + Buy button</td>
+<td>Inline buttons: <code>[✅ Buy] [❌ Skip] [👁 Ver]</code>. Buy executes the buy flow on tap.</td>
+</tr>
+<tr>
+<td><strong>Telegram operational alert</strong></td>
+<td>Plain text, no buttons</td>
+<td><code>⚠️</code> prefix for high-priority (Phase 2 auto-disable, smoke-test drift, reconciliation tripped). <code>ℹ️</code> prefix for informational (session expiry).</td>
+</tr>
+<tr>
+<td><strong>CLI default output</strong></td>
+<td>Plain text, human-readable, ANSI colors when stdout is a TTY</td>
+<td><code>--no-color</code> to force plain.</td>
+</tr>
+<tr>
+<td><strong>CLI structured output</strong></td>
+<td><code>--format json</code> on commands that have a list/object result</td>
+<td><code>test-search</code>, <code>audit show</code>, <code>health</code>, <code>phase2 status</code>, <code>explain</code>. JSON on stdout, errors on stderr.</td>
+</tr>
+<tr>
+<td><strong>Logs (daemon)</strong></td>
+<td>Structured JSON Lines on stdout</td>
+<td>Single line per event; <code>level</code>, <code>ts</code>, <code>event</code>, <code>entry</code>, <code>marketplace</code>, <code>listing_id</code>, <code>latency_ms</code> as standard fields. docker-compose captures stdout.</td>
+</tr>
+<tr>
+<td><strong>Audit log (Phase 2)</strong></td>
+<td>Append-only SQLite</td>
+<td>Tables: <code>alert_snapshots</code>, <code>tap_events</code>, <code>transactions</code>. Photo perceptual hashes stored inline. Exportable to JSONL via <code>audit export</code>.</td>
+</tr>
+<tr>
+<td><strong>Seen-listings dedup</strong></td>
+<td>SQLite</td>
+<td>URL + perceptual photo hash + first-seen timestamp + last-seen timestamp + match-fired flag.</td>
+</tr>
+</tbody>
+</table>
+<p>Telegram message format is <strong>fixed for v1</strong> (changes require schema migration in the audit log because alert snapshots reference it). Operator-facing CLI output is allowed to evolve more freely.</p>
+<h3 id="config-schema">Config Schema</h3>
+<p>Three files, three concerns:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Concern</th>
+<th>Sensitivity</th>
+<th>Tracked in repo?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>wishlist.yaml</code></td>
+<td>What to look for</td>
+<td>User content</td>
+<td>Example version (<code>wishlist.example.yaml</code>) tracked; user&rsquo;s actual file gitignored</td>
+</tr>
+<tr>
+<td><code>config.yaml</code></td>
+<td>Operational tunables</td>
+<td>Non-sensitive</td>
+<td>Example version (<code>config.example.yaml</code>) tracked; user&rsquo;s <code>config.yaml</code> gitignored</td>
+</tr>
+<tr>
+<td><code>.env</code></td>
+<td>Credentials only</td>
+<td>Sensitive</td>
+<td><code>.env.example</code> tracked; <code>.env</code> gitignored, never logged</td>
+</tr>
+</tbody>
+</table>
+<h4 id="wishlistyaml-schema-sketch-full-schema-pinned-in-architecture-step"><code>wishlist.yaml</code> (schema sketch — full schema pinned in Architecture step)</h4>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>-<span style="color: #bbbbbb"> </span><span style="color: #008000; font-weight: bold">manufacturer</span>:<span style="color: #bbbbbb"> </span>Western Digital
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">model</span>:<span style="color: #bbbbbb"> </span>WD Red Plus 4TB
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">ref</span>:<span style="color: #bbbbbb"> </span>WD40EFPX
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">type</span>:<span style="color: #bbbbbb"> </span>hdd
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">max_price_solo</span>:<span style="color: #bbbbbb"> </span>55<span style="color: #bbbbbb">          </span><span style="color: #3D7B7B; font-style: italic"># €</span>
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">max_price_in_device</span>:<span style="color: #bbbbbb"> </span>90<span style="color: #bbbbbb">     </span><span style="color: #3D7B7B; font-style: italic"># €; nil disables container detection for this entry</span>
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">keywords</span>:
+<span style="color: #bbbbbb">    </span>-<span style="color: #bbbbbb"> </span><span style="color: #BA2121">&quot;WD</span><span style="color: #19177C"> </span><span style="color: #BA2121">Red</span><span style="color: #19177C"> </span><span style="color: #BA2121">4TB&quot;</span>
+<span style="color: #bbbbbb">    </span>-<span style="color: #bbbbbb"> </span><span style="color: #BA2121">&quot;WD40EFPX&quot;</span>
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">container_keywords</span>:
+<span style="color: #bbbbbb">    </span>-<span style="color: #bbbbbb"> </span><span style="color: #BA2121">&quot;NAS</span><span style="color: #19177C"> </span><span style="color: #BA2121">Synology</span><span style="color: #19177C"> </span><span style="color: #BA2121">4TB&quot;</span>
+<span style="color: #bbbbbb">    </span>-<span style="color: #bbbbbb"> </span><span style="color: #BA2121">&quot;NAS</span><span style="color: #19177C"> </span><span style="color: #BA2121">QNAP</span><span style="color: #19177C"> </span><span style="color: #BA2121">4TB&quot;</span>
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">phase2</span>:
+<span style="color: #bbbbbb">    </span><span style="color: #008000; font-weight: bold">enabled</span>:<span style="color: #bbbbbb"> </span>false<span style="color: #bbbbbb">            </span><span style="color: #3D7B7B; font-style: italic"># default false; flipped by `phase2 enable &lt;entry&gt;`</span>
+<span style="color: #bbbbbb">    </span><span style="color: #008000; font-weight: bold">confidence_threshold</span>:<span style="color: #bbbbbb"> </span>high<span style="color: #bbbbbb"> </span><span style="color: #3D7B7B; font-style: italic"># one of: low, medium, high</span>
+</code></pre></div>
+
+<p>Constraints: <code>manufacturer</code>/<code>model</code>/<code>ref</code> define the unique key; <code>type</code> ∈ {<code>hdd</code>, <code>ram</code>}; lists kept under ~100 entries (validated by <code>validate-wishlist</code>); <strong>no <code>expected_resale_value</code> / <code>min_margin_percent</code> / <code>current_market_price</code> fields permitted</strong> — <code>validate-wishlist</code> rejects them with a pointer to the (c3) scope contract and the future-research repo path.</p>
+<h4 id="configyaml-operational-tunables"><code>config.yaml</code> (operational tunables)</h4>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code><span style="color: #008000; font-weight: bold">schedule</span>:
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">wallapop_poll</span>:<span style="color: #bbbbbb"> </span><span style="color: #BA2121">&quot;every</span><span style="color: #19177C"> </span><span style="color: #BA2121">15</span><span style="color: #19177C"> </span><span style="color: #BA2121">minutes&quot;</span><span style="color: #bbbbbb">      </span><span style="color: #3D7B7B; font-style: italic"># natural language for Hermes scheduler</span>
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">ebay_poll</span>:<span style="color: #bbbbbb">     </span><span style="color: #BA2121">&quot;every</span><span style="color: #19177C"> </span><span style="color: #BA2121">30</span><span style="color: #19177C"> </span><span style="color: #BA2121">minutes&quot;</span>
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">phase2_smoke</span>:<span style="color: #bbbbbb">  </span><span style="color: #BA2121">&quot;daily</span><span style="color: #19177C"> </span><span style="color: #BA2121">at</span><span style="color: #19177C"> </span><span style="color: #BA2121">06:00&quot;</span>
+
+<span style="color: #008000; font-weight: bold">rate_limits</span>:
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">tinyfish_search_rpm</span>:<span style="color: #bbbbbb"> </span>5
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">tinyfish_fetch_rpm</span>:<span style="color: #bbbbbb">  </span>25
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">ebay_api_rpd</span>:<span style="color: #bbbbbb">        </span>5000
+
+<span style="color: #008000; font-weight: bold">phase2</span>:
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">default_enabled</span>:<span style="color: #bbbbbb"> </span>false<span style="color: #bbbbbb">                  </span><span style="color: #3D7B7B; font-style: italic"># never set true here; per-entry only</span>
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">circuit_breaker_threshold</span>:<span style="color: #bbbbbb"> </span>3<span style="color: #bbbbbb">            </span><span style="color: #3D7B7B; font-style: italic"># N consecutive failures → global auto-disable</span>
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">reconcile_tolerance_eur</span>:<span style="color: #bbbbbb"> </span>0.50<span style="color: #bbbbbb">           </span><span style="color: #3D7B7B; font-style: italic"># cross-source price reconciliation tolerance</span>
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">reconcile_tolerance_pct</span>:<span style="color: #bbbbbb"> </span>0.5<span style="color: #bbbbbb">            </span><span style="color: #3D7B7B; font-style: italic"># whichever is greater of the two</span>
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">on_reconciliation_failure</span>:<span style="color: #bbbbbb"> </span>global<span style="color: #bbbbbb">        </span><span style="color: #3D7B7B; font-style: italic"># one of: global, per_entry  # see Open Question</span>
+
+<span style="color: #008000; font-weight: bold">llm</span>:
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">provider</span>:<span style="color: #bbbbbb"> </span>gemini-flash<span style="color: #bbbbbb">                  </span><span style="color: #3D7B7B; font-style: italic"># one of: gemini-flash, gpt-4o, claude-haiku</span>
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">confidence_default</span>:<span style="color: #bbbbbb"> </span>high<span style="color: #bbbbbb">                </span><span style="color: #3D7B7B; font-style: italic"># default per-entry confidence threshold</span>
+
+<span style="color: #008000; font-weight: bold">paths</span>:
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">data_dir</span>:<span style="color: #bbbbbb"> </span>/var/lib/hardware-hunter<span style="color: #bbbbbb">      </span><span style="color: #3D7B7B; font-style: italic"># SQLite, audit log, cookies</span>
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">log_dir</span>:<span style="color: #bbbbbb">  </span>/var/log/hardware-hunter<span style="color: #bbbbbb">      </span><span style="color: #3D7B7B; font-style: italic"># rotated by Hermes/docker</span>
+
+<span style="color: #008000; font-weight: bold">logging</span>:
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">level</span>:<span style="color: #bbbbbb"> </span>info<span style="color: #bbbbbb">                             </span><span style="color: #3D7B7B; font-style: italic"># debug, info, warn, error</span>
+<span style="color: #bbbbbb">  </span><span style="color: #008000; font-weight: bold">format</span>:<span style="color: #bbbbbb"> </span>json<span style="color: #bbbbbb">                            </span><span style="color: #3D7B7B; font-style: italic"># json, text</span>
+</code></pre></div>
+
+<h4 id="env-credentials-only"><code>.env</code> (credentials only)</h4>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code># Telegram
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=
+
+# Wallapop (cookie file persisted separately by `hardware-hunter login wallapop`)
+WALLAPOP_USERNAME=
+WALLAPOP_PASSWORD=
+
+# eBay.es (OAuth tokens persisted separately after `hardware-hunter login ebay`)
+EBAY_CLIENT_ID=
+EBAY_CLIENT_SECRET=
+
+# TinyFish (MCP)
+TINYFISH_API_KEY=
+
+# LLM
+LLM_API_KEY=
+</code></pre></div>
+
+<p><code>.env</code> is loaded once at process start; rotation requires daemon restart. No secret hot-reload at v1.</p>
+<h3 id="scripting-support">Scripting Support</h3>
+<ul>
+<li><strong>Idempotency.</strong> All <code>validate-*</code>, <code>test-search</code>, <code>explain</code>, <code>audit show</code>, <code>phase2 status</code>, <code>health</code> commands are read-only and safe to invoke repeatedly. <code>init</code> refuses to overwrite existing files (use <code>--force</code> with confirmation prompt).</li>
+<li><strong>Exit codes.</strong></li>
+<li><code>0</code> — success</li>
+<li><code>1</code> — usage error / unknown subcommand</li>
+<li><code>2</code> — config or wishlist validation failure</li>
+<li><code>3</code> — adapter / network failure (Wallapop down, eBay API 5xx, TinyFish unreachable)</li>
+<li><code>4</code> — auth failure (cookie expired, OAuth token invalid)</li>
+<li><code>5</code> — Phase 2 guardrail tripped (smoke-test drift, reconciliation mismatch, circuit breaker open)</li>
+<li>These codes are stable across releases and documented in README.</li>
+<li><strong>Pipeable JSON.</strong> Every list/object-returning subcommand supports <code>--format json</code>. JSON goes to stdout; errors and progress to stderr. Suitable for <code>jq</code> chains in operator scripts.</li>
+<li><strong>No interactive prompts in non-TTY contexts.</strong> When stdout is not a TTY, commands fail fast on missing args rather than prompting (<code>hardware-hunter login wallapop</code> is the explicit exception — it&rsquo;s interactive by design).</li>
+<li><strong>Daemon lifecycle.</strong> <code>hardware-hunter daemon</code> (or implicit default) handles SIGTERM gracefully (drains in-flight LLM evaluations, flushes audit log, lets Telegram alerts complete, exits ≤30s). docker-compose <code>stop_grace_period: 30s</code> matches.</li>
+<li><strong>Dry-run philosophy.</strong> <code>test-search</code> and <code>explain</code> never mutate state, never send Telegram messages, never count against rate limits beyond the actual fetch. Result printed as if the alert <em>would</em> fire — operator sees confidence, message body, button set.</li>
+</ul>
+<h3 id="sections-skipped">Sections Skipped</h3>
+<p>Per CSV <code>skip_sections</code> for <code>cli_tool</code>: <code>visual_design</code>, <code>ux_principles</code>, <code>touch_interactions</code>. Confirmed correct: hardware-hunter has no visual UI; UX is structured around Telegram conversational patterns covered in the Output Formats subsection above.</p>
+<h3 id="implementation-considerations">Implementation Considerations</h3>
+<ul>
+<li><strong>Hermes Agent integration.</strong> Polling jobs registered with Hermes&rsquo; scheduler at startup; subagents (up to 8 concurrent per kickoff doc) parallelize per-marketplace and per-listing LLM evaluation. Hermes&rsquo; <code>clarify</code> primitive is <em>not</em> used in the daemon path (the daemon never asks the operator at runtime — it Telegrams or fails closed); <code>clarify</code> is permissible in the operator CLI for safety prompts (e.g. <code>phase2 disable --all</code> confirmation).</li>
+<li><strong>TinyFish MCP.</strong> Configured in Hermes&rsquo; MCP server list; <code>tinyfish_search</code>, <code>tinyfish_fetch</code>, <code>tinyfish_browser</code> tools attach automatically. Adapter wrappers normalize their interfaces.</li>
+<li><strong>Memory / LLM evaluation cache.</strong> Hermes&rsquo; SQLite memory + FTS5 hosts a per-listing-URL cache of LLM evaluation results — avoids re-querying when the same listing is re-fetched within a TTL. TTL defaults to 24 h; shorter for low-confidence evaluations.</li>
+<li><strong>Container packaging.</strong> Single <code>Dockerfile</code> produces an image that bundles the Python (or chosen runtime) project + Hermes&rsquo; agent runtime. <code>docker-compose.yml</code> mounts <code>./data</code> for the SQLite store and <code>./config</code> for the three config files. Phase 2 needs no extra container — TinyFish Browser is invoked over MCP, not embedded.</li>
+<li><strong>Versioning.</strong> Semver. <code>0.x</code> until first Phase 2 purchase by ifuensan; <code>1.0.0</code> after Phase 1 stabilizes for 4–8 weeks AND a successful Phase 2 purchase has been completed.</li>
+</ul>
+<h2 id="project-scoping-phased-development">Project Scoping &amp; Phased Development</h2>
+<p>This section provides the strategic context behind the Phase 1 / Phase 2 / Vision split already established in <code>Product Scope</code>. No requirements are being deferred or de-scoped here — the phasing is the one the PRFAQ and kickoff documents pre-committed to.</p>
+<h3 id="mvp-strategy-philosophy">MVP Strategy &amp; Philosophy</h3>
+<p><strong>MVP approach:</strong> <em>problem-solving MVP</em> — the Phase 1 release exists to prove that a wishlist-anchored, container-aware, two-marketplace alert agent meaningfully replaces manual scanning for the user (ifuensan personally). Adoption, revenue, and community-formation are explicit non-goals of MVP per (c3).</p>
+<p><strong>Phase 1 ships first because:</strong></p>
+<ul>
+<li>It validates the wishlist-anchored design against real listings before any money is on the line.</li>
+<li>It generates the data the Phase 2 reconciliation stack and the accuracy dashboard will need (smoke-test fixtures, perceptual photo hashes, real-world false-positive rates).</li>
+<li>It establishes the &ldquo;trust window&rdquo; the user needs before flipping any Phase 2 toggle (4–8 weeks of clean Phase 1 reading, per success criteria).</li>
+</ul>
+<p><strong>Phase 2 ships next because:</strong></p>
+<ul>
+<li>The customer-FAQ commits to it and removing it would weaken the product against saved searches (which already cover the alert-only minimum).</li>
+<li>The silent-failure-mode defenses (cross-source price reconciliation, receipt-vs-alert diff, daily smoke test) cannot be fully validated without Phase 1 data; shipping them earlier would be premature.</li>
+<li>The <code>4–8 weeks of Phase 1 stable</code> gate is a <em>behavioral</em> requirement on the user, not a code-completion gate — Phase 2 code can ship dark behind the per-entry toggle.</li>
+</ul>
+<p><strong>Vision items defer because:</strong></p>
+<ul>
+<li>Multi-marketplace expansion was explicitly captured-and-reverted during PRFAQ Stage 2; relitigating it without Wallapop+eBay.es validation would invalidate the (c3) scope contract.</li>
+<li>Arbitrage is a different product entirely, structurally barred from this repo by schema, prompt, and CONTRIBUTING.md guard-rails.</li>
+<li>agentskills.io publication is a community-distribution decision that depends on whether v1 delivers on its commitments.</li>
+</ul>
+<h3 id="resource-requirements">Resource Requirements</h3>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Effort (single experienced developer, evenings + weekends)</th>
+<th>Calendar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Phase 1</strong></td>
+<td>~3–5 weeks of focused engineering, +1 week of contingency for Wallapop unofficial-API quirks</td>
+<td>~1.5 months elapsed (with day-job hours)</td>
+</tr>
+<tr>
+<td><strong>Phase 2</strong></td>
+<td>~4–8 additional weeks (PRFAQ Q5: lower bound slips ~50% in practice if Phase 2 buy-flow stability matches Q1&rsquo;s &ldquo;hardest problem&rdquo; ranking)</td>
+<td>~2 additional months elapsed</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>~3 months of solid evening work</strong> to ship everything the customer FAQ promised</td>
+<td>~3.5 months elapsed total</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Team:</strong> ifuensan, solo. No co-developers, no funding, no contractor budget.</p>
+<p><strong>Skills required (already held):</strong> Python (or chosen runtime), agent-runtime familiarity (Hermes), MCP integration, basic SRE practices, Spanish second-hand-marketplace context.</p>
+<p><strong>What the project explicitly says no to in v1</strong> (per PRFAQ verdict):</p>
+<ul>
+<li>Any side project consuming the same evening hours.</li>
+<li>Multi-marketplace expansion (deferred per (c3)).</li>
+<li>Polish, dashboards, web UI, accuracy reporting beyond the launch-week dashboard.</li>
+<li>Feature work outside customer-FAQ commitments before Phase 2 ships.</li>
+</ul>
+<h3 id="risk-mitigation-strategy">Risk Mitigation Strategy</h3>
+<h4 id="technical-risks">Technical risks</h4>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+<th>Triggered fallback</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phase 2 buy flow stability (PRFAQ-named hardest problem)</td>
+<td>Phase 1 stabilization gate (4–8 weeks); fail-closed UI element checks; per-purchase circuit breaker; integration tests against recorded fixtures</td>
+<td>Phase 1 stays the steady state if selector breakage outpaces patch cycles. Honest trade-off, not failure.</td>
+</tr>
+<tr>
+<td>Silent Phase 2 misbehavior (Q9 scenario)</td>
+<td>Three independent defenses: cross-source price reconciliation at buy time, receipt-vs-alert reconciliation, daily synthetic smoke test (covered in Innovation section + Phase 2 Failure Defense FRs)</td>
+<td>Per-purchase circuit breaker auto-disables Phase 2 globally on any anomaly; user investigates audit log; manual re-enable after green smoke test.</td>
+</tr>
+<tr>
+<td>Wallapop unofficial API breaks</td>
+<td>Two-path adapter: API primary + TinyFish Search/Fetch fallback; either path carries Phase 1 alone</td>
+<td>TinyFish covers Phase 1 if API path dies entirely; eBay.es independent path also continues.</td>
+</tr>
+<tr>
+<td>Wallapop session persistence</td>
+<td>Long-lived sessions with manual re-auth (no silent automated re-login); operator runs <code>hardware-hunter login wallapop</code> on expiry</td>
+<td>Manual re-auth is acceptable friction (Journey 4); automation here is anti-bot-risky.</td>
+</tr>
+<tr>
+<td>Both Wallapop adapter paths fail simultaneously</td>
+<td>Two independent paths reduce probability; eBay.es independent adapter path keeps running regardless</td>
+<td>Phase 1 degraded on Wallapop only; user notified via operational Telegram; operator patches at next opportunity.</td>
+</tr>
+<tr>
+<td>Wallapop ToS account ban</td>
+<td>Customer-FAQ recommends secondary account (&ldquo;willing to lose&rdquo;); polling at human-volume rates; no mass-scraping; no silent re-login</td>
+<td>Re-auth with replacement account; not a project-ending risk for any individual user.</td>
+</tr>
+<tr>
+<td>TinyFish service change or pricing</td>
+<td><code>PageFetcher</code> / <code>BrowserSession</code> interfaces; Playwright self-hosted as bare-metal fallback</td>
+<td>Adapter swap is days of work, not weeks. Worst-case Phase 1 cost ~€10/month.</td>
+</tr>
+<tr>
+<td>Hermes Agent breaking change</td>
+<td>Pin to known-good version (<code>v0.13.x</code> floor at v1); MIT license = fork option; primitives used (cron, memory, clarify) are core</td>
+<td>Migrate if a single-dev evening absorbs it; otherwise stay pinned, security-only fork-with-patch if needed.</td>
+</tr>
+<tr>
+<td>LLM bias on language register</td>
+<td>Empirical bias audit before Phase 2 enables for non-Castilian users; community accuracy dashboard as long-term audit instrument</td>
+<td>Continue Phase 1 alerts (low-stakes) while audit is pending.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="market-adoption-risks">Market / adoption risks</h4>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+<th>Triggered fallback</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Container-detection accuracy poor</td>
+<td>Accuracy dashboard treated as launch-week priority, not fast-follow; container detection framed as &ldquo;best-effort&rdquo; pre-launch</td>
+<td>Tighten <code>container_keywords[]</code> and confidence thresholds; if precision &lt;50%, container alerts go quiet while direct-listing alerts continue. Product survives.</td>
+</tr>
+<tr>
+<td>Wallapop ToS exposure (C&amp;D arrives)</td>
+<td>Comply-don&rsquo;t-fight posture; repo hygiene (no Wallapop trademarks); secondary-account recommendation in customer FAQ</td>
+<td>C&amp;D-induced sunset documented as ROADMAP end state; rebrand-and-comply procedure. MIT forks survive.</td>
+</tr>
+<tr>
+<td>User-perceived &ldquo;yet another bot&rdquo;</td>
+<td>PRFAQ four-bullet differentiator + customer FAQ explicitly distinguishes from competitors; honest framing tells some readers to use saved searches instead</td>
+<td>Acceptable; (c3) means adoption is a side effect anyway.</td>
+</tr>
+<tr>
+<td>Low real-world differentiator validation at launch</td>
+<td>Accuracy dashboard committed as launch-week priority; pre-launch comms frame container detection as best-effort</td>
+<td>If first 90 days show zero true-positive container alerts: rethink headline framing before promoting publicly.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="resource-sustainability-risks">Resource / sustainability risks</h4>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+<th>Triggered fallback</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Solo-maintainer burnout</td>
+<td>Five concrete walk-away triggers documented (personal-use, technical-debt, sustained-burden, legal, stack); graceful off-ramp procedure</td>
+<td>Pinning commit + README addendum + repo archived with fork pointer. Not silent abandonment.</td>
+</tr>
+<tr>
+<td>Maintenance burden exceeds budget</td>
+<td>Steady-state target ≤8 h/month; rolling 3-month average &gt;20 h/month invokes sustained-burden walk-away</td>
+<td>If walk-away fires: graceful off-ramp; forks pick up if the codebase has value to others.</td>
+</tr>
+<tr>
+<td>OSS contributor pool small</td>
+<td>CONTRIBUTING.md names three explicit invitation categories (wishlist examples, prompt improvements, Wallapop selector patches)</td>
+<td>(c3): OSS adoption isn&rsquo;t a success criterion. If no contributors, that&rsquo;s fine — same posture as solo from day one.</td>
+</tr>
+<tr>
+<td>Stack-component costs increase</td>
+<td>TinyFish free tier disappearing → ~€10/month worst case; Browser pricing → cents-per-purchase. All trivial vs deal value.</td>
+<td>Cost-creep audit; switch to self-hosted Playwright if economics flip.</td>
+</tr>
+<tr>
+<td>Day-job time competing for evenings</td>
+<td>Walk-away triggers explicitly include 3-month personal-disuse and 20+ h/month-for-3-months patterns</td>
+<td>Same off-ramp procedure; ifuensan&rsquo;s homelab can also fall back to saved searches without losing parts already bought.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="functional-requirements">Functional Requirements</h2>
+<blockquote>
+<p>This section is the <strong>capability contract</strong> for hardware-hunter v1. UX, architecture, and epic decomposition must trace every feature back to one or more FRs below. A capability not listed here will not exist in the final product unless explicitly added via PRD revision.</p>
+</blockquote>
+<h3 id="wishlist-management">Wishlist Management</h3>
+<ul>
+<li><strong>FR1.</strong> The user can declare wishlist entries in a YAML file with fields for manufacturer, model, reference, type (<code>hdd</code>/<code>ram</code>), maximum standalone price (<code>max_price_solo</code>), maximum in-device price (<code>max_price_in_device</code>), keywords list, and container keywords list.</li>
+<li><strong>FR2.</strong> The user can specify a per-entry Phase 2 enable/disable flag and a per-entry confidence threshold (<code>low</code>/<code>medium</code>/<code>high</code>).</li>
+<li><strong>FR3.</strong> The operator can run a wishlist validator that verifies schema conformance, uniqueness of <code>(manufacturer, model, ref)</code> keys, soft-cap of ~100 entries, and structural absence of arbitrage-related fields (<code>expected_resale_value</code>, <code>min_margin_percent</code>, <code>current_market_price</code>); the agent refuses to load any wishlist containing such fields and points the operator to the (c3) scope contract and the future-research repo path.</li>
+<li><strong>FR4.</strong> The agent uses <code>(manufacturer, model, ref)</code> as the entry key for alerts, audit log, dedup, and Phase 2 controls.</li>
+<li><strong>FR5.</strong> Setting <code>max_price_in_device</code> to nil disables container detection for that entry; the entry continues to alert on direct matches against <code>max_price_solo</code>.</li>
+</ul>
+<h3 id="marketplace-monitoring">Marketplace Monitoring</h3>
+<ul>
+<li><strong>FR6.</strong> The agent monitors Wallapop continuously via two independent paths — a primary unofficial-API path and a fallback search/fetch path — such that either path alone can carry Phase 1 alerts.</li>
+<li><strong>FR7.</strong> The agent monitors eBay.es continuously via the official eBay API, structurally independent from any Wallapop adapter, so a Wallapop break leaves eBay.es coverage intact.</li>
+<li><strong>FR8.</strong> The agent polls each marketplace at human-volume rates configurable per marketplace (e.g. Wallapop every 15 minutes, eBay every 30 minutes), driven by Hermes Agent&rsquo;s built-in scheduler.</li>
+<li><strong>FR9.</strong> The agent generates marketplace-specific search queries from each wishlist entry&rsquo;s <code>keywords</code> and <code>container_keywords</code>.</li>
+<li><strong>FR10.</strong> The agent persists a seen-listings dedup index (URL + perceptual photo hash + first-seen and last-seen timestamps + match-fired flag) so a single listing fires at most one alert per wishlist entry.</li>
+<li><strong>FR11.</strong> The agent never surfaces listings that do not match any wishlist entry, regardless of how interesting they appear; there is no &ldquo;good deals&rdquo; surfacing path.</li>
+<li><strong>FR12.</strong> The agent stops polling Wallapop and emits an operational Telegram alert when the Wallapop session expires; it never attempts silent automated re-login.</li>
+</ul>
+<h3 id="listing-evaluation">Listing Evaluation</h3>
+<ul>
+<li><strong>FR13.</strong> For each candidate listing, the agent invokes a wishlist-anchored LLM evaluation that answers one question — <em>&ldquo;does this listing match this wishlist entry?&rdquo;</em> — and returns a confidence level (<code>low</code>/<code>medium</code>/<code>high</code>).</li>
+<li><strong>FR14.</strong> The agent evaluates standalone listings against the entry&rsquo;s <code>max_price_solo</code> ceiling and container/wrapper listings against <code>max_price_in_device</code>, using <code>container_keywords</code> to identify wrapper candidates (NAS, mini-PC, workstation, etc.).</li>
+<li><strong>FR15.</strong> The agent surfaces the LLM&rsquo;s one-line take on listing authenticity (e.g. <em>&ldquo;photos show a real WD Red, serial visible&rdquo;</em>) in every alert.</li>
+<li><strong>FR16.</strong> The agent caches LLM evaluation results per listing URL with a configurable TTL (default 24h, shorter for low-confidence results) to avoid redundant queries on re-fetch.</li>
+<li><strong>FR17.</strong> The agent never scores listings for resale value, margin, expected market value, or any arbitrage-related metric; the LLM has no codepath that produces such outputs.</li>
+</ul>
+<h3 id="alert-notifications-phase-1">Alert Notifications (Phase 1)</h3>
+<ul>
+<li><strong>FR18.</strong> The user receives a Telegram alert per matched listing containing photo, price, seller location, one-line LLM take, confidence level, matched wishlist entry, and a deep link to the listing.</li>
+<li><strong>FR19.</strong> Phase 1 alerts include inline action buttons: <em>View</em>, <em>Skip</em>, <em>Snooze</em>.</li>
+<li><strong>FR20.</strong> The user can tap <em>Snooze</em> on any alert to suppress further alerts for the same wishlist entry for a configurable window (default 24h).</li>
+<li><strong>FR21.</strong> The agent emits operational Telegram alerts — distinct from listing alerts — for: marketplace authentication expiry, Phase 2 auto-disable events, smoke-test drift, circuit-breaker openings, and reconciliation tripping. Operational alerts are prefixed (<code>⚠️</code> for high-priority, <code>ℹ️</code> for informational) and contain no inline action buttons.</li>
+<li><strong>FR22.</strong> The Telegram alert format for Phase 1 and Phase 2 listing alerts is fixed for v1; changes require a coordinated audit-log schema migration because alert snapshots reference the format.</li>
+</ul>
+<h3 id="autonomous-purchase-phase-2">Autonomous Purchase (Phase 2)</h3>
+<ul>
+<li><strong>FR23.</strong> The user can enable Phase 2 per wishlist entry (default disabled). Phase 2 is never enabled by default for any entry; there is no setting that flips it on globally.</li>
+<li><strong>FR24.</strong> Phase 2-enabled entry alerts include <em>Buy</em>, <em>Skip</em>, <em>View</em> buttons; tapping <em>Buy</em> initiates the autonomous purchase flow.</li>
+<li><strong>FR25.</strong> The agent completes Phase 2 purchases exclusively via platform-protected payment rails (Wallapop Pay, eBay.es checkout); the agent has no codepath that uses Bizum, transferencia, or any unprotected rail.</li>
+<li><strong>FR26.</strong> The agent enforces per-entry maximum prices as a hard ceiling; any listing exceeding the ceiling fails closed without offering a <em>Buy</em> button, regardless of confidence.</li>
+<li><strong>FR27.</strong> The agent enforces per-entry confidence thresholds; listings below the threshold present a manual-review-only path even when Phase 2 is enabled for the entry.</li>
+<li><strong>FR28.</strong> The agent verifies all expected UI elements are present in the marketplace buy flow before proceeding (fail-closed UI check); any missing element aborts the purchase and emits an operational Telegram alert.</li>
+<li><strong>FR29.</strong> The agent has no fully-autonomous mode. There is no setting, flag, environment variable, or CLI command that bypasses the per-purchase Telegram tap.</li>
+<li><strong>FR30.</strong> Phase 2 buy flows execute via a stealth browser session (real browser, not API token forgery), using the marketplace&rsquo;s own login state.</li>
+</ul>
+<h3 id="phase-2-failure-defense">Phase 2 Failure Defense</h3>
+<ul>
+<li><strong>FR31.</strong> Before completing a Phase 2 purchase, the agent re-fetches the listing via the alternate marketplace path (cross-source price reconciliation) and aborts the purchase if prices disagree beyond a configurable tolerance (€ floor + percentage, whichever is greater).</li>
+<li><strong>FR32.</strong> After every Phase 2 purchase, the agent compares the alert price to the marketplace receipt price (receipt-vs-alert reconciliation); a mismatch raises a high-priority Telegram alert and auto-disables Phase 2 (scope of auto-disable — global vs per-entry — captured as Open Question).</li>
+<li><strong>FR33.</strong> The agent runs a daily synthetic Phase 2 smoke test against a known-price fixture; drift between parsed and independent values auto-disables Phase 2 globally.</li>
+<li><strong>FR34.</strong> The agent maintains a per-purchase circuit breaker that auto-disables Phase 2 globally after N consecutive Phase 2 failures (default 3, configurable).</li>
+<li><strong>FR35.</strong> After any Phase 2 auto-disable, the operator must explicitly re-enable Phase 2 via the CLI; the agent never re-enables itself, regardless of subsequent successful smoke tests.</li>
+</ul>
+<h3 id="audit-dispute-evidence">Audit &amp; Dispute Evidence</h3>
+<ul>
+<li><strong>FR36.</strong> The agent persists an append-only SQLite audit log per Phase 2 purchase with three artifacts:</li>
+<li><strong>Alert snapshot</strong> — listing URL, title, description, photo perceptual hashes, price, wishlist entry matched, LLM evaluation + confidence level, Phase 2 settings active at the time.</li>
+<li><strong>User tap event</strong> — Telegram message ID, button pressed (<em>Buy</em> / <em>Skip</em> / <em>Snooze</em>), timestamp.</li>
+<li><strong>Marketplace transaction</strong> — receipt ID (Wallapop Pay reference, eBay order number), price actually paid, screenshot of the confirmation page.</li>
+<li><strong>FR37.</strong> The operator can view audit log entries (<code>audit show</code>, optionally scoped by entry or time window) and export them to JSONL (<code>audit export</code>).</li>
+<li><strong>FR38.</strong> All audit log data is stored locally; the agent never transmits audit data to remote servers and emits no telemetry of any kind.</li>
+</ul>
+<h3 id="operator-tools-configuration">Operator Tools &amp; Configuration</h3>
+<ul>
+<li><strong>FR39.</strong> The operator interacts with hardware-hunter through a single <code>hardware-hunter</code> binary with subcommands. Daemon mode is the implicit default when no subcommand is given.</li>
+<li><strong>FR40.</strong> The operator can scaffold initial config files (<code>wishlist.yaml</code>, <code>config.yaml</code>, <code>.env</code>) from tracked examples via <code>init</code>; the command refuses to overwrite existing files unless <code>--force</code> is given alongside an interactive confirmation prompt.</li>
+<li><strong>FR41.</strong> The operator can authenticate Wallapop interactively via <code>login wallapop</code>, which opens a real browser session, walks the operator through credentials and 2FA, and persists the resulting cookie with restrictive filesystem permissions.</li>
+<li><strong>FR42.</strong> The operator can authenticate eBay.es via <code>login ebay</code>, completing OAuth and persisting tokens locally with restrictive permissions.</li>
+<li><strong>FR43.</strong> The operator can perform a dry-run search (<code>test-search</code>) against a wishlist entry or arbitrary query without sending alerts, mutating state, or counting beyond actual rate-limit usage.</li>
+<li><strong>FR44.</strong> The operator can perform a one-shot LLM evaluation of any listing URL (<code>explain</code>) to inspect how the agent would treat it, including confidence and the alert message body the agent would have sent.</li>
+<li><strong>FR45.</strong> The operator can view, enable, and disable per-entry Phase 2 settings via <code>phase2 status</code>, <code>phase2 enable &lt;entry&gt;</code>, and <code>phase2 disable &lt;entry|--all&gt;</code>.</li>
+<li><strong>FR46.</strong> The operator can manually trigger the synthetic smoke test (<code>phase2 smoke-test</code>) and re-run a receipt-vs-alert reconciliation on a past receipt (<code>phase2 reconcile &lt;receipt-id&gt;</code>).</li>
+<li><strong>FR47.</strong> The operator can inspect agent health (<code>health</code>) — adapter status, scheduler status, last poll, last alert, last Phase 2 event — to diagnose problems without reading raw logs.</li>
+<li><strong>FR48.</strong> All read-only operator commands support a <code>--format json</code> flag for scripting; daemon logs emit structured JSON Lines on stdout. Operator commands return stable, documented exit codes (0 success / 1 usage / 2 validation / 3 adapter / 4 auth / 5 Phase 2 guardrail).</li>
+<li><strong>FR49.</strong> Configuration is split across <code>wishlist.yaml</code> (user content), <code>config.yaml</code> (operational tunables: rates, thresholds, paths, log level), and <code>.env</code> (credentials only, never logged); the agent loads <code>.env</code> once at process start with no hot-reload.</li>
+<li><strong>FR50.</strong> The agent handles SIGTERM gracefully — drains in-flight LLM evaluations, flushes the audit log, completes pending Telegram alerts, exits within 30 seconds.</li>
+</ul>
+<h3 id="project-distribution-artifacts">Project Distribution &amp; Artifacts</h3>
+<ul>
+<li><strong>FR51.</strong> The repository ships a single <code>docker-compose.yml</code> install path with example wishlist entries for common HDD and RAM models, an <code>.env.example</code>, and a <code>config.example.yaml</code>; user-specific files (<code>wishlist.yaml</code>, <code>config.yaml</code>, <code>.env</code>) are gitignored.</li>
+<li><strong>FR52.</strong> The repository includes a <code>CONTRIBUTING.md</code> with an explicit &ldquo;no arbitrage PRs&rdquo; rule and three named invitation categories (wishlist examples, prompt improvements, Wallapop selector patches), pointing to a separate-repo path for arbitrage forks.</li>
+<li><strong>FR53.</strong> The repository includes a <code>ROADMAP.md</code> naming future-multi-marketplace expansion, future-arbitrage-as-separate-repo, and &ldquo;C&amp;D-induced sunset&rdquo; as a documented possible end state.</li>
+<li><strong>FR54.</strong> The README positions hardware-hunter as a personal monitoring tool (not a &ldquo;Wallapop scraper&rdquo;), includes a legal disclaimer covering Spanish ToS posture and the secondary-account recommendation, and contains no Wallapop trademarks, logos, or proprietary terms in titles, package names, or domain references.</li>
+</ul>
+<h2 id="non-functional-requirements">Non-Functional Requirements</h2>
+<p>This section specifies HOW WELL hardware-hunter must perform, not WHAT it does. Categories not listed are explicitly out of scope: <strong>Scalability</strong> (single-user product; forks are independent installs; wishlist bounded at ~100 entries), <strong>Accessibility</strong> (Telegram is the user surface, accessibility delegated to Telegram clients; the CLI is operator-only).</p>
+<h3 id="performance">Performance</h3>
+<p>The performance envelope is shaped by the 4-hour listing half-life and the customer-FAQ commitment that &ldquo;the manual refresh disappears.&rdquo;</p>
+<ul>
+<li><strong>NFR-P1. Alert delivery latency.</strong> Time from listing publication to Telegram alert delivery: ≤ 20 minutes p95 in steady state (bounded by polling cadence + LLM evaluation + Telegram delivery). Wallapop poll cadence (default 15 min) is the dominant component; tunable per <code>config.yaml</code>.</li>
+<li><strong>NFR-P2. Phase 2 buy completion.</strong> End-to-end Phase 2 buy completion (Telegram tap → marketplace receipt screenshot): ≤ 60 seconds p95 under normal marketplace load. Cross-source reconciliation pre-check accounts for ≤ 10 seconds of that budget.</li>
+<li><strong>NFR-P3. LLM evaluation latency.</strong> Per-listing evaluation: ≤ 5 seconds p95 with Gemini Flash (assumed default). The agent processes evaluations concurrently (Hermes subagents, up to 8 workers) so total per-poll evaluation time scales with batch size, not serial latency.</li>
+<li><strong>NFR-P4. CLI responsiveness.</strong> Read-only operator commands (<code>audit show</code>, <code>health</code>, <code>phase2 status</code>, <code>validate-wishlist</code>, <code>validate-config</code>) complete in ≤ 2 seconds for typical wishlist sizes (≤ 100 entries).</li>
+<li><strong>NFR-P5. Daemon startup.</strong> Cold boot from <code>docker-compose up</code> to first scheduled poll registered with Hermes scheduler: ≤ 30 seconds.</li>
+</ul>
+<h3 id="security">Security</h3>
+<ul>
+<li><strong>NFR-S1. Credential handling.</strong> All marketplace credentials, Telegram bot tokens, TinyFish API keys, and LLM API keys are loaded exclusively from <code>.env</code> at process start; the agent never logs credentials, never persists them outside the cookie/token files, and never transmits them to remote services beyond their target API.</li>
+<li><strong>NFR-S2. Cookie file permissions.</strong> Wallapop session cookie file and eBay OAuth token file are created with mode <code>0600</code> (owner read/write only). The agent verifies permissions at startup and refuses to load if mode is permissive.</li>
+<li><strong>NFR-S3. Transport security.</strong> All external API calls (Wallapop, eBay, Telegram, TinyFish, LLM provider) use TLS 1.2 or higher. The agent rejects connections that fall back to weaker protocols or accept invalid certificates (no <code>--insecure</code> equivalent).</li>
+<li><strong>NFR-S4. Audit log integrity.</strong> The Phase 2 audit log is append-only at the application layer (no <code>UPDATE</code> or <code>DELETE</code> statements ever issued by hardware-hunter against <code>alert_snapshots</code>, <code>tap_events</code>, or <code>transactions</code>). Existing rows are never mutated; corrections, if needed, are appended as new annotation rows referencing the original.</li>
+<li><strong>NFR-S5. Payment-rail enforcement.</strong> The agent has no codepath that initiates a transfer outside Wallapop Pay or eBay.es checkout. Any code change that adds an alternate rail requires an explicit PRD revision; CI lint flags introductions of relevant API calls outside the protected-rail wrapper.</li>
+<li><strong>NFR-S6. Operator confirmation for destructive ops.</strong> Operator commands that affect Phase 2 globally (<code>phase2 disable --all</code>) or destroy state (<code>init --force</code>) require an interactive confirmation prompt; in non-TTY contexts these commands fail rather than auto-proceed.</li>
+<li><strong>NFR-S7. Local-only data plane.</strong> The agent emits no telemetry, no usage analytics, no crash reports to any external service. Logs go to stdout (captured by docker-compose); audit log stays local; SQLite stores stay local.</li>
+</ul>
+<h3 id="reliability-recovery">Reliability &amp; Recovery</h3>
+<ul>
+<li><strong>NFR-R1. eBay.es independence.</strong> A complete Wallapop outage (both adapter paths down) does not affect eBay.es polling, alerts, or Phase 2 (for eBay.es-source listings). The two marketplace adapters share no runtime state at the polling/evaluation/alerting layer.</li>
+<li><strong>NFR-R2. Two-path Wallapop fallback.</strong> When the unofficial-API path fails (timeout, 4xx/5xx, schema mismatch), the agent automatically falls back to the TinyFish search/fetch path within the same poll cycle. The agent logs the path used per request for diagnosis.</li>
+<li><strong>NFR-R3. Graceful degradation, not silent failure.</strong> When a capability is degraded (one Wallapop path down, LLM provider rate-limited, smoke test failing), the agent emits an operational Telegram alert. No degradation is silent.</li>
+<li><strong>NFR-R4. Manual-recovery boundaries.</strong> The agent <strong>never</strong> attempts the following automatically: silent re-login on Wallapop session expiry (FR12); Phase 2 re-enable after auto-disable (FR35); overwrite of an existing config file (FR40). All require explicit operator action.</li>
+<li><strong>NFR-R5. Daemon crash behavior.</strong> On unhandled exception, the agent exits non-zero with a structured log line containing the exception class and stack trace; docker-compose <code>restart: on-failure</code> (with backoff) is the supported recovery model. The audit log and seen-listings dedup must remain consistent across crash/restart (no duplicate alerts, no missing audit rows).</li>
+<li><strong>NFR-R6. Marketplace-break recovery target.</strong> After a marketplace UI/API change breaks one adapter, the operator is expected to restore service within ≤ 30 hours of patch effort per break, ≤ 3 attempts. Beyond either threshold, the technical-debt walk-away trigger fires (Project Sustainability success criterion).</li>
+</ul>
+<h3 id="integration">Integration</h3>
+<ul>
+<li><strong>NFR-I1. Hermes Agent.</strong> Pinned to a known-good version range (default v0.13.x at v1; floor / ceiling specified in dependency manifest). Migration to a new minor version is treated as a code change requiring CI green and operator-side smoke test before merge.</li>
+<li><strong>NFR-I2. TinyFish MCP.</strong> Configured as a Hermes MCP server endpoint; the agent does not embed TinyFish SDKs directly. Free-tier rate limits respected by config (5 req/min Search, 25 URLs/min Fetch); the agent enforces these client-side regardless of remote enforcement.</li>
+<li><strong>NFR-I3. LLM provider abstraction.</strong> A <code>ListingEvaluator</code> interface wraps the LLM call; provider switch (Gemini Flash → GPT-4o → Claude Haiku) requires only an adapter swap and a config change, not business-logic edits. CI lint enforces no direct LLM-SDK imports outside the adapter package.</li>
+<li><strong>NFR-I4. Wallapop unofficial-API contract drift.</strong> The adapter validates the response schema at parse time; schema drift surfaces as an <code>adapter</code> failure (exit code 3 / operational alert), not silent acceptance.</li>
+<li><strong>NFR-I5. eBay.es official API.</strong> Standard API key + OAuth flow; renewals and rate-limit headers respected. Daily request budget tracked against the configured ceiling (<code>ebay_api_rpd</code>); breach raises an operational alert and degrades to reduced poll cadence rather than failing.</li>
+<li><strong>NFR-I6. Telegram bot delivery.</strong> Failed sends (network error, Telegram 5xx) are retried with exponential backoff up to a configurable ceiling (default 3 attempts over ~1 minute). Persistent failure surfaces as a structured-log error; the agent does not block polling on Telegram outages.</li>
+</ul>
+<h3 id="cost">Cost</h3>
+<ul>
+<li><strong>NFR-C1. Phase 1 monthly cost target.</strong> ≤ €0/month on existing homelab hardware; ≤ €10/month worst case (small VPS + TinyFish free tier disappearance + LLM at ~50 entries × ~10 candidates/day × ~500 tokens/eval). The first fair deal caught typically covers a year of running costs at this envelope.</li>
+<li><strong>NFR-C2. Phase 2 incremental cost.</strong> Per-purchase cost remains in cents range with TinyFish Browser default pricing; ≤ €1.00 per Phase 2 purchase even under worst-case TinyFish pricing changes. Cost-creep audit is a documented operator workflow; threshold breach triggers a config or provider review.</li>
+<li><strong>NFR-C3. LLM cache hit rate.</strong> The per-listing evaluation cache (FR16) targets a hit rate ≥ 60% on listings re-fetched within TTL during steady state, reducing token spend during dedup re-checks and operator dry-runs.</li>
+</ul>
+<h3 id="maintainability">Maintainability</h3>
+<ul>
+<li><strong>NFR-M1. Adapter discipline (launch blocker).</strong> No business-logic package directly imports Hermes, TinyFish, Wallapop SDK, eBay SDK, LLM SDK, or marketplace-specific HTML/CSS selectors. Direct imports are caught by CI lint (custom import-graph rule) and block merge. This is a v1 launch-blocker NFR per the Innovation section.</li>
+<li><strong>NFR-M2. Test coverage on Phase 2 critical path.</strong> Phase 2 buy-flow logic (cross-source reconciliation, fail-closed UI checks, circuit breaker, audit-log writes, receipt-vs-alert reconciliation) has integration tests against recorded marketplace fixtures. Coverage on these modules ≥ 90% line coverage at v1.0.</li>
+<li><strong>NFR-M3. Smoke-test regression set.</strong> The synthetic Phase 2 smoke test (FR33) maintains a regression set that grows with every marketplace UI surprise (parser drift, format change, button rename); fixtures are tracked in the repo, not generated.</li>
+<li><strong>NFR-M4. Semver discipline.</strong> Public CLI surface (subcommand names, flag names, exit codes, JSON output schema), config schema (<code>wishlist.yaml</code>, <code>config.yaml</code>, <code>.env</code> keys), and audit-log SQLite schema are governed by semver. Breaking changes bump major.</li>
+<li><strong>NFR-M5. Dependency footprint.</strong> Total Python (or chosen runtime) third-party dependency count kept under 30 direct dependencies at v1; each new direct dependency requires a &ldquo;why not standard library or existing dep&rdquo; note in the PR. Hermes, TinyFish, and LLM SDK adapters concentrate the heavyweight deps inside their own packages.</li>
+<li><strong>NFR-M6. Solo-maintainer sustainability.</strong> Steady-state maintenance budget ≤ 8 h/month after the first 6 months; rolling 3-month average &gt; 20 h/month invokes the sustained-burden walk-away trigger. README addendum + dependency-pinning final commit + repo archival is the documented graceful off-ramp procedure (covered in Project Sustainability success criterion).</li>
+</ul>
+<h3 id="privacy">Privacy</h3>
+<ul>
+<li><strong>NFR-PR1. Data classes.</strong> The agent stores only: wishlist YAML (user content), config files (operational tunables), credentials (<code>.env</code>, cookie file, OAuth token file), seen-listings dedup index (URL + perceptual photo hash + timestamps + match flag), Phase 2 audit log (alert + tap + transaction). No other personal data, no other listing metadata beyond what the listing exposes publicly.</li>
+<li><strong>NFR-PR2. Retention.</strong> Indefinite local retention by default. The user, as data controller, owns deletion. The agent provides no automated purge of seen-listings or audit data; this is intentional (forensic value of audit log; dedup correctness).</li>
+<li><strong>NFR-PR3. No remote persistence.</strong> Configuration may not be set in any way that causes seen-listings, audit-log, or wishlist data to be transmitted to remote storage. The architecture forbids it; the schema has no field for it.</li>
+<li><strong>NFR-PR4. Deletion path.</strong> The operator can delete agent state by removing <code>data_dir/*</code> (SQLite stores) and credential files; no cloud-side &ldquo;right to be forgotten&rdquo; workflow exists or is needed.</li>
+<li><strong>NFR-PR5. Listing data scope.</strong> The agent processes seller-published listing data (title, description, photos, price, location) only for the duration of evaluation and audit-snapshot capture. No profiling of sellers, no cross-listing analytics, no aggregation beyond per-listing dedup.</li>
+</ul>
+<h3 id="observability">Observability</h3>
+<ul>
+<li><strong>NFR-O1. Structured logs.</strong> Daemon emits structured JSON Lines on stdout with the standard fields <code>level</code>, <code>ts</code>, <code>event</code>, <code>entry</code>, <code>marketplace</code>, <code>listing_id</code>, <code>latency_ms</code>, <code>error_class</code>. Logs are docker-compose-captured; no syslog/remote-logging integration at v1.</li>
+<li><strong>NFR-O2. Health surface.</strong> <code>health</code> command returns adapter status (Wallapop primary / Wallapop fallback / eBay.es / Telegram / TinyFish / LLM provider), Hermes scheduler status, last-poll timestamp per marketplace, last-alert timestamp, last Phase 2 event, and current Phase 2 enable/disable scope. Suitable for cron-driven external health checks.</li>
+<li><strong>NFR-O3. Operator-readable audit log.</strong> <code>audit show</code> paginates the Phase 2 audit log with human-readable formatting; <code>audit export</code> produces JSONL suitable for <code>jq</code> or external analysis.</li>
+<li><strong>NFR-O4. Diagnostic completeness.</strong> For any operational alert (Phase 2 disable, smoke-test drift, reconciliation tripped, circuit-breaker open, session expiry), the agent emits a structured log entry that contains the data necessary to root-cause the event without re-running the failing path. Operator must not need to enable debug logging to diagnose a production incident.</li>
+<li><strong>NFR-O5. No mandatory log retention by hardware-hunter.</strong> docker-compose / systemd / docker log driver owns log rotation; the agent makes no assumptions about how long logs are kept.</li>
+</ul>
+<h2 id="open-questions">Open Questions</h2>
+<p>Genuine unknowns and undecided choices that survive PRD lock-in. Each one names the resolution path so it doesn&rsquo;t drift indefinitely. <em>Already-resolved</em> kickoff/PRFAQ questions (project name, license, scheduler, config layout, CLI shape, web backend, Wallapop session persistence strategy, two-path adapter design) are deliberately not listed here.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Question</th>
+<th>Default for v1</th>
+<th>Path to resolution</th>
+<th>Owner</th>
+<th>Blocking?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OQ1</td>
+<td>Receipt-vs-alert reconciliation auto-disable scope: <strong>global</strong> vs <strong>per-entry</strong>. Currently <code>on_reconciliation_failure: global</code> in <code>config.yaml</code>; FR32 codifies global default. User flagged option to make per-entry.</td>
+<td>Global</td>
+<td>Re-evaluate after first 30 days of Phase 2 with real-world reconciliation outcomes; switch to per-entry only if global causes excessive correlated false-disables.</td>
+<td>ifuensan</td>
+<td>No — global is safe-default</td>
+</tr>
+<tr>
+<td>OQ2</td>
+<td>Container detection prompt criterion: strict ceiling against <code>max_price_in_device</code> (current design) vs LLM-judged &ldquo;vale la pena&rdquo; qualitative criterion (kickoff doc Q7).</td>
+<td>Strict ceiling against <code>max_price_in_device</code>, with LLM confidence as secondary gate</td>
+<td>Validate via Phase 1 container alerts in first 90 days; compare false-positive/negative rates of strict vs qualitative on real-world fixtures from the regression set.</td>
+<td>ifuensan</td>
+<td>No — strict is the safer default</td>
+</tr>
+<tr>
+<td>OQ3</td>
+<td>Realistic per-purchase TinyFish Browser cost (NFR-C2 says ≤ €1.00/purchase; PRFAQ estimates &ldquo;cents&rdquo;).</td>
+<td>≤ €1.00 worst-case per NFR-C2</td>
+<td>Measure on first 5 Phase 2 purchases; update NFR-C2 and customer-FAQ cost numbers before Phase 2 docs go public.</td>
+<td>ifuensan</td>
+<td><strong>Yes</strong> — Phase 2 customer-FAQ docs need this measured before public release</td>
+</tr>
+<tr>
+<td>OQ4</td>
+<td>Wishlist scale assumptions (~50 entries × ~10 candidates/day × ~3M tokens/month).</td>
+<td>Assumed correct; cost envelope holds even at 2×</td>
+<td>Validate during first month of personal Phase 1 use; update config-yaml example comments and NFR-C1 if reality diverges materially.</td>
+<td>ifuensan</td>
+<td>No</td>
+</tr>
+<tr>
+<td>OQ5</td>
+<td>Per-marketplace adapter break frequency (estimated 2–4/year per PRFAQ; could be higher if Wallapop anti-bot tightens).</td>
+<td>2–4/year</td>
+<td>Track empirically; if frequency exceeds 6/year sustained, consider whether the technical-debt walk-away trigger threshold (3 failed attempts × 30h) is still calibrated correctly.</td>
+<td>ifuensan</td>
+<td>No</td>
+</tr>
+<tr>
+<td>OQ6</td>
+<td>Language-register bias on LLM evaluation (Castilian vs Catalan/regional Spanish/Basque). Bias audit committed before Phase 2 enables for non-Castilian users — outcome empirically unknown.</td>
+<td>Best-effort, disclosed in README</td>
+<td>Empirical audit on a fixed corpus of Spanish-region listings before Phase 2 enables for any user beyond ifuensan; results feed the accuracy dashboard.</td>
+<td>ifuensan + community</td>
+<td><strong>Yes</strong> — gates Phase 2 enablement for non-Castilian users</td>
+</tr>
+<tr>
+<td>OQ7</td>
+<td>Phase 2 fallback when TinyFish Browser is unavailable mid-buy (kickoff doc Q5).</td>
+<td>Fail closed; emit operational Telegram alert with the listing link so the user can buy manually within their existing session.</td>
+<td>Document the manual-fallback path in README&rsquo;s troubleshooting section before Phase 2 ships.</td>
+<td>ifuensan</td>
+<td>No — graceful default is fine for v1</td>
+</tr>
+<tr>
+<td>OQ8</td>
+<td>agentskills.io publication for Hermes ecosystem visibility (kickoff doc Q10).</td>
+<td>Deferred to Vision</td>
+<td>Decide post-launch based on whether v1 hits its success criteria and whether the Hermes community shows interest in the wishlist-anchored evaluation pattern.</td>
+<td>ifuensan</td>
+<td>No</td>
+</tr>
+</tbody>
+</table></body></html>
