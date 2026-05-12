@@ -169,10 +169,30 @@ def cmd_init() -> None:
     _placeholder()
 
 
+_DEFAULT_WISHLIST_PATH = Path("config") / "wishlist.yaml"
+
+
 @app.command("validate-wishlist")
-def cmd_validate_wishlist() -> None:
-    """Validate ``wishlist.yaml`` against the schema + scope contract (Epic 2)."""
-    _placeholder()
+def cmd_validate_wishlist(
+    path: Annotated[
+        Path,
+        typer.Option(
+            "--path",
+            "-p",
+            help="Path to wishlist.yaml (default: ./config/wishlist.yaml).",
+        ),
+    ] = _DEFAULT_WISHLIST_PATH,
+    output_format: Annotated[
+        str,
+        typer.Option("--format", help="Output format: 'human' (default) or 'json'."),
+    ] = "human",
+) -> None:
+    """Validate ``wishlist.yaml`` against the schema + (c3) scope contract."""
+    from hardware_hunter.cli.commands.validate_wishlist import run
+
+    exit_code = run(path, output_format)
+    if exit_code != 0:
+        raise typer.Exit(code=exit_code)
 
 
 @app.command("validate-config")

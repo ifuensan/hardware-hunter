@@ -166,6 +166,9 @@ def _cell(value: object) -> str:
     return str(value)
 
 
+_PROSE_WIDTH = 4096
+
+
 def render_prose(
     message: str,
     style: ThemeToken,
@@ -177,9 +180,14 @@ def render_prose(
     color disabled (``NO_COLOR`` / piped stdout), output is plain text and
     the prefix glyph (``✓``, ``error:``, ``warn:``) is preserved so the
     semantics survive screen readers and grep-style consumers (UX-DR22).
+
+    The console is built at a deliberately wide width so paths and other
+    long error tokens (e.g. ``/tmp/.../wishlist.yaml:9: …``) never get
+    soft-wrapped mid-line — that breaks grep, ``jq``-friendly parsing,
+    and any test that asserts a substring on the rendered output.
     """
     stream: IO[str] = sys.stderr if style in _STDERR_TOKENS else sys.stdout
-    console = _build_console(stream)
+    console = _build_console(stream, width=_PROSE_WIDTH)
 
     prefix = _PROSE_PREFIX[style]
     body_style = THEME[style]

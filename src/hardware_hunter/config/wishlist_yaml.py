@@ -66,11 +66,21 @@ class WishlistParseError(WishlistError):
 
 
 class WishlistScopeError(WishlistError):
-    """The wishlist contains forbidden-arbitrage fields (FR3 / (c3))."""
+    """The wishlist contains forbidden-arbitrage fields (FR3 / (c3)).
 
-    def __init__(self, path: Path, violations: list[ScopeViolation]) -> None:
+    Carries the parsed ruamel doc so the CLI's error renderer can
+    resolve the nearest entry name for the locked error template.
+    """
+
+    def __init__(
+        self,
+        path: Path,
+        violations: list[ScopeViolation],
+        doc: CommentedMap | None = None,
+    ) -> None:
         self.path = path
         self.violations = violations
+        self.doc = doc
         first = violations[0]
         loc = f"line {first.line_number}" if first.line_number else first.path
         super().__init__(
@@ -82,17 +92,23 @@ class WishlistScopeError(WishlistError):
 
 class WishlistValidationError(WishlistError):
     """pydantic rejected a field. Wraps the underlying ValidationError
-    with the source path and (when resolvable) a line number per error."""
+    with the source path and (when resolvable) a line number per error.
+
+    Carries the parsed doc so cross-entry validators (e.g. duplicate-key
+    detection) can be re-resolved to line numbers for the CLI's renderer.
+    """
 
     def __init__(
         self,
         path: Path,
         errors: list[dict[str, Any]],
         underlying: ValidationError,
+        doc: CommentedMap | None = None,
     ) -> None:
         self.path = path
         self.errors = errors
         self.underlying = underlying
+        self.doc = doc
         first = errors[0]
         loc = first.get("loc_str", first.get("loc"))
         line = first.get("line_number")
@@ -163,13 +179,13 @@ def load_wishlist(path: str | Path) -> Wishlist:
 
     violations = check_scope_violations(doc)
     if violations:
-        raise WishlistScopeError(path, violations)
+        raise WishlistScopeError(path, violations, doc=doc)
 
     try:
         wishlist = Wishlist.model_validate(_to_python(doc))
     except ValidationError as exc:
         errors = _enrich_validation_errors(exc, doc)
-        raise WishlistValidationError(path, errors, exc) from exc
+        raise WishlistValidationError(path, errors, exc, doc=doc) from exc
 
     _attach_doc(wishlist, doc)
     return wishlist
