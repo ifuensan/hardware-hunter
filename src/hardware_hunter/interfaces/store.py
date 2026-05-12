@@ -27,7 +27,6 @@ from datetime import datetime
 
 from hardware_hunter.domain.alert import AlertSnapshot
 from hardware_hunter.domain.audit import (
-    AlertSnapshotAudit,
     CallbackAudit,
     TapEventAudit,
     TransactionAudit,
@@ -72,15 +71,17 @@ class Store(ABC):
 
     @abstractmethod
     async def record_alert_snapshot(self, snapshot: AlertSnapshot) -> int:
-        """Persist an alert snapshot and return its monotonic audit_id."""
+        """Persist an alert snapshot and return its monotonic ``audit_id``.
+
+        ``alert_snapshots`` IS the audit table for dispatched alerts —
+        there is no separate "audit" write for alerts. Replay queries
+        and callback lookups read from this table; the slim audit view
+        is :class:`AlertSnapshotAudit` (read-side projection).
+        """
 
     @abstractmethod
     async def get_alert_snapshot(self, audit_id: int) -> AlertSnapshot | None:
         """Look up an alert snapshot by audit_id (used by callback handler)."""
-
-    @abstractmethod
-    async def record_alert_audit(self, audit: AlertSnapshotAudit) -> None:
-        """Append an alert-dispatch row to the audit log (NFR-S4)."""
 
     @abstractmethod
     async def record_callback(self, callback: CallbackAudit) -> None:

@@ -121,7 +121,6 @@ def test_store_phase1_methods_declared() -> None:
         "set_snooze",
         "record_alert_snapshot",
         "get_alert_snapshot",
-        "record_alert_audit",
         "record_callback",
     ):
         assert method in abstract, f"Store should declare {method!r}"
