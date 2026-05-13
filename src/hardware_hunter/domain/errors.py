@@ -136,3 +136,28 @@ class LlmRateLimited(LlmError):
     cycle (graceful degradation) and emitting an operational event
     ``llm_provider_rate_limited``.
     """
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Telegram bot adapter
+# ─────────────────────────────────────────────────────────────────────────
+
+
+class TelegramError(RuntimeError):
+    """Base class for any Telegram adapter failure."""
+
+
+class TelegramDeliveryFailed(TelegramError):
+    """The bot exhausted its retry budget on a transient failure.
+
+    The poll loop catches and continues (NFR-I6 — delivery failure
+    must not block polling). The operator sees the
+    ``telegram_send_failed`` structured-log line and decides whether
+    the issue warrants intervention.
+    """
+
+
+class TelegramConfigError(TelegramError):
+    """Telegram returned a non-retryable 4xx — token invalid, chat ID
+    wrong, bot kicked from chat, etc. The daemon stops attempting
+    deliveries until the operator fixes the configuration."""
