@@ -1,0 +1,387 @@
+"""Tests for the eBay official-API adapter — Story 3.7."""
+
+from __future__ import annotations
+
+import json
+import sys
+from collections.abc import Callable
+from datetime import UTC, datetime, timedelta
+from decimal import Decimal
+from pathlib import Path
+from typing import Any
+
+import httpx
+import pytest
+from pydantic import SecretStr
+
+from hardware_hunter.adapters.ebay_api import (
+    DailyQuotaTracker,
+    EbayApiFetcher,
+    OAuthTokens,
+    OAuthTokenStore,
+)
+from hardware_hunter.adapters.ebay_api.tokens import (
+    OAUTH_TOKEN_FILE_MODE,
+    parse_expires_in,
+)
+from hardware_hunter.domain.errors import (
+    EbayApiError,
+    EbayAuthFailed,
+    EbayQuotaExceeded,
+    EbaySchemaDrift,
+)
+from hardware_hunter.domain.listing import SearchQuery
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+FIXTURE_PATH = REPO_ROOT / "tests" / "fixtures" / "ebay_api" / "browse_search_4tb_hdd.json"
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Token store — atomic write + mode 0600
+# ─────────────────────────────────────────────────────────────────────────
+
+
+def _fresh_tokens(*, expires_in_seconds: int = 3600) -> OAuthTokens:
+    return OAuthTokens(
+        access_token="access-abc",
+        refresh_token="refresh-xyz",
+        expires_at=parse_expires_in(expires_in_seconds),
+        token_type="Bearer",
+        scope="https://api.ebay.com/oauth/api_scope/buy.browse",
+    )
+
+
+def test_token_save_and_reload_round_trip(tmp_path: Path) -> None:
+    store = OAuthTokenStore(tmp_path / "auth" / "oauth_tokens.json")
+    original = _fresh_tokens()
+    store.save(original)
+
+    loaded = store.load()
+    assert loaded.access_token == original.access_token
+    assert loaded.refresh_token == original.refresh_token
+    # ISO round-trip should be loss-less to the microsecond.
+    assert abs((loaded.expires_at - original.expires_at).total_seconds()) < 1
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX mode check")
+def test_token_save_sets_mode_0600(tmp_path: Path) -> None:
+    store = OAuthTokenStore(tmp_path / "auth" / "oauth_tokens.json")
+    store.save(_fresh_tokens())
+    mode = store.path.stat().st_mode & 0o777
+    assert mode == OAUTH_TOKEN_FILE_MODE
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX mode check")
+def test_token_save_preserves_0600_after_overwriting_644_target(tmp_path: Path) -> None:
+    """If a previous (sloppily-created) token file existed at 0644, the
+    atomic save MUST end with 0600 — not inherit the prior mode."""
+    target = tmp_path / "auth" / "oauth_tokens.json"
+    target.parent.mkdir(parents=True)
+    target.write_text("{}", encoding="utf-8")
+    target.chmod(0o644)
+
+    store = OAuthTokenStore(target)
+    store.save(_fresh_tokens())
+    mode = target.stat().st_mode & 0o777
+    assert mode == OAUTH_TOKEN_FILE_MODE
+
+
+def test_token_save_leaves_no_temp_files_on_success(tmp_path: Path) -> None:
+    auth_dir = tmp_path / "auth"
+    store = OAuthTokenStore(auth_dir / "oauth_tokens.json")
+    store.save(_fresh_tokens())
+    leftovers = [p.name for p in auth_dir.iterdir() if p.name.startswith(".oauth_tokens.")]
+    assert leftovers == []
+
+
+def test_needs_refresh_within_lead_time() -> None:
+    expiring_soon = OAuthTokens(
+        access_token="a",
+        refresh_token="r",
+        expires_at=datetime.now(UTC) + timedelta(minutes=3),
+    )
+    assert expiring_soon.needs_refresh() is True
+
+    expiring_later = OAuthTokens(
+        access_token="a",
+        refresh_token="r",
+        expires_at=datetime.now(UTC) + timedelta(minutes=15),
+    )
+    assert expiring_later.needs_refresh() is False
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Daily-quota tracker
+# ─────────────────────────────────────────────────────────────────────────
+
+
+def test_quota_decrements_on_consume() -> None:
+    tracker = DailyQuotaTracker(budget=3)
+    assert tracker.remaining() == 3
+    tracker.consume()
+    tracker.consume()
+    assert tracker.remaining() == 1
+    assert tracker.can_consume() is True
+    tracker.consume()
+    assert tracker.can_consume() is False
+
+
+def test_quota_resets_at_utc_midnight() -> None:
+    tracker = DailyQuotaTracker(budget=2)
+    day_one = datetime(2026, 5, 12, 23, 0, 0, tzinfo=UTC)
+    tracker.consume(now=day_one)
+    tracker.consume(now=day_one)
+    assert tracker.can_consume(now=day_one) is False
+
+    day_two = datetime(2026, 5, 13, 0, 1, 0, tzinfo=UTC)
+    assert tracker.can_consume(now=day_two) is True
+    assert tracker.remaining(now=day_two) == 2
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Fetcher harness
+# ─────────────────────────────────────────────────────────────────────────
+
+
+def _seed_tokens(tmp_path: Path, *, expires_in_seconds: int = 3600) -> OAuthTokenStore:
+    store = OAuthTokenStore(tmp_path / "auth" / "oauth_tokens.json")
+    store.save(_fresh_tokens(expires_in_seconds=expires_in_seconds))
+    return store
+
+
+def _build_fetcher(
+    tmp_path: Path,
+    handler: Callable[[httpx.Request], httpx.Response],
+    *,
+    expires_in_seconds: int = 3600,
+    quota_budget: int = 100,
+) -> EbayApiFetcher:
+    token_store = _seed_tokens(tmp_path, expires_in_seconds=expires_in_seconds)
+    transport = httpx.MockTransport(handler)
+    client = httpx.AsyncClient(transport=transport, base_url="https://api.ebay.com")
+    return EbayApiFetcher(
+        token_store,
+        SecretStr("APP-ID"),
+        SecretStr("CERT-ID"),
+        quota=DailyQuotaTracker(budget=quota_budget),
+        client=client,
+    )
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Happy path + fixture replay (AC: golden snapshot match)
+# ─────────────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_search_replays_fixture_into_two_listings(tmp_path: Path) -> None:
+    payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/buy/browse/v1/item_summary/search"
+        assert request.headers.get("X-EBAY-C-MARKETPLACE-ID") == "EBAY_ES"
+        return httpx.Response(200, json=payload)
+
+    fetcher = _build_fetcher(tmp_path, handler)
+    try:
+        listings = await fetcher.search(
+            SearchQuery(keywords=["WD Red Plus 4TB"], marketplace="ebay")
+        )
+    finally:
+        await fetcher.aclose()
+
+    assert len(listings) == 2
+    first = listings[0]
+    assert first.marketplace == "ebay"
+    assert first.listing_id == "v1|254000000001|0"
+    assert first.url == "https://www.ebay.es/itm/254000000001"
+    assert first.title == "WD Red Plus 4TB WD40EFPX"
+    assert first.price_eur == Decimal("65.00")
+    assert first.location == "Barcelona"
+    assert first.seller_id == "topdrives_es"
+    assert first.seller_history_count == 4321
+    assert first.published_at is not None
+
+    second = listings[1]
+    assert second.published_at is None  # itemCreationDate missing in fixture
+
+
+@pytest.mark.asyncio
+async def test_search_succeeded_log_carries_quota_remaining(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json=payload)
+
+    fetcher = _build_fetcher(tmp_path, handler, quota_budget=5)
+    try:
+        await fetcher.search(SearchQuery(keywords=["x"], marketplace="ebay"))
+    finally:
+        await fetcher.aclose()
+
+    records = [json.loads(line) for line in capsys.readouterr().out.splitlines() if line.strip()]
+    success = [r for r in records if r.get("event") == "ebay_search_succeeded"]
+    assert len(success) == 1
+    assert success[0]["marketplace"] == "ebay"
+    assert success[0]["result_count"] == 2
+    assert success[0]["daily_quota_remaining"] == 4  # 5 budget - 1 consumed
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Quota breach → EbayQuotaExceeded (NFR-I5)
+# ─────────────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_quota_breach_raises_before_any_http_call(tmp_path: Path) -> None:
+    calls: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        return httpx.Response(200, json={"itemSummaries": []})
+
+    fetcher = _build_fetcher(tmp_path, handler, quota_budget=1)
+    try:
+        # Burn the only allowed request.
+        await fetcher.search(SearchQuery(keywords=["x"], marketplace="ebay"))
+        # The next call should raise BEFORE hitting the transport.
+        before = len(calls)
+        with pytest.raises(EbayQuotaExceeded) as excinfo:
+            await fetcher.search(SearchQuery(keywords=["x"], marketplace="ebay"))
+        assert len(calls) == before  # no new HTTP request issued
+        assert excinfo.value.used == 1
+        assert excinfo.value.budget == 1
+    finally:
+        await fetcher.aclose()
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Token refresh — happy path + revoked refresh token
+# ─────────────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_token_near_expiry_triggers_refresh(tmp_path: Path) -> None:
+    """When the access token has < 5 min left, the fetcher refreshes
+    BEFORE issuing the search."""
+    refresh_calls: list[dict[str, Any]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/identity/v1/oauth2/token":
+            refresh_calls.append(
+                {
+                    "auth": request.headers.get("authorization"),
+                    "body": request.content.decode("utf-8"),
+                }
+            )
+            return httpx.Response(
+                200,
+                json={
+                    "access_token": "new-access",
+                    "refresh_token": "refresh-xyz",
+                    "expires_in": 7200,
+                    "token_type": "Bearer",
+                },
+            )
+        if request.url.path == "/buy/browse/v1/item_summary/search":
+            assert request.headers.get("Authorization") == "Bearer new-access"
+            return httpx.Response(200, json={"itemSummaries": []})
+        return httpx.Response(404)
+
+    # Token expires in 60 seconds — triggers refresh.
+    fetcher = _build_fetcher(tmp_path, handler, expires_in_seconds=60)
+    try:
+        await fetcher.search(SearchQuery(keywords=["x"], marketplace="ebay"))
+    finally:
+        await fetcher.aclose()
+
+    assert len(refresh_calls) == 1
+    assert "refresh_token=refresh-xyz" in refresh_calls[0]["body"]
+    # The new token is persisted to disk.
+    reloaded = OAuthTokenStore(tmp_path / "auth" / "oauth_tokens.json").load()
+    assert reloaded.access_token == "new-access"
+
+
+@pytest.mark.asyncio
+async def test_refresh_401_raises_ebay_auth_failed(tmp_path: Path) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/identity/v1/oauth2/token":
+            return httpx.Response(401, json={"error": "invalid_grant"})
+        return httpx.Response(404)
+
+    fetcher = _build_fetcher(tmp_path, handler, expires_in_seconds=60)
+    try:
+        with pytest.raises(EbayAuthFailed):
+            await fetcher.search(SearchQuery(keywords=["x"], marketplace="ebay"))
+    finally:
+        await fetcher.aclose()
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# API + schema errors
+# ─────────────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_http_500_raises_api_error(tmp_path: Path) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(500, text="upstream broken")
+
+    fetcher = _build_fetcher(tmp_path, handler)
+    try:
+        with pytest.raises(EbayApiError) as excinfo:
+            await fetcher.search(SearchQuery(keywords=["x"], marketplace="ebay"))
+    finally:
+        await fetcher.aclose()
+    assert excinfo.value.status_code == 500
+
+
+@pytest.mark.asyncio
+async def test_missing_required_field_raises_schema_drift(tmp_path: Path) -> None:
+    bad_payload = {
+        "total": 1,
+        "itemSummaries": [
+            {
+                # itemId missing
+                "title": "WD Red Plus 4TB",
+                "price": {"value": "55.00", "currency": "EUR"},
+            }
+        ],
+    }
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json=bad_payload)
+
+    fetcher = _build_fetcher(tmp_path, handler)
+    try:
+        with pytest.raises(EbaySchemaDrift) as excinfo:
+            await fetcher.search(SearchQuery(keywords=["x"], marketplace="ebay"))
+    finally:
+        await fetcher.aclose()
+    assert "itemId" in excinfo.value.field_path
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# NFR-S3 — no verify=False anywhere in the adapter
+# ─────────────────────────────────────────────────────────────────────────
+
+
+def test_fetcher_module_never_disables_tls_verification() -> None:
+    import ast
+
+    src = (
+        REPO_ROOT / "src" / "hardware_hunter" / "adapters" / "ebay_api" / "fetcher.py"
+    ).read_text(encoding="utf-8")
+    tree = ast.parse(src)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call):
+            for kw in node.keywords:
+                is_verify_false = (
+                    kw.arg == "verify"
+                    and isinstance(kw.value, ast.Constant)
+                    and kw.value.value is False
+                )
+                if is_verify_false:
+                    pytest.fail(f"fetcher.py passes verify=False at line {node.lineno} — NFR-S3")

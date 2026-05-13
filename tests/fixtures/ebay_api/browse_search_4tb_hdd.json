@@ -1,0 +1,26 @@
+{
+  "total": 2,
+  "itemSummaries": [
+    {
+      "itemId": "v1|254000000001|0",
+      "title": "WD Red Plus 4TB WD40EFPX",
+      "shortDescription": "Used drive, smart OK, light hours.",
+      "price": {"value": "65.00", "currency": "EUR"},
+      "itemLocation": {"city": "Barcelona", "country": "ES"},
+      "image": {"imageUrl": "https://i.ebayimg.com/images/g/abc/s-l500.jpg"},
+      "itemWebUrl": "https://www.ebay.es/itm/254000000001",
+      "seller": {"username": "topdrives_es", "feedbackScore": 4321},
+      "itemCreationDate": "2026-05-09T18:42:00.000Z"
+    },
+    {
+      "itemId": "v1|254000000002|0",
+      "title": "WD Red 4TB (older 256MB)",
+      "shortDescription": "Pulled from working NAS.",
+      "price": {"value": "45.00", "currency": "EUR"},
+      "itemLocation": {"city": "Madrid", "country": "ES"},
+      "image": {"imageUrl": "https://i.ebayimg.com/images/g/xyz/s-l500.jpg"},
+      "itemWebUrl": "https://www.ebay.es/itm/254000000002",
+      "seller": {"username": "retro_homelab", "feedbackScore": 88}
+    }
+  ]
+}

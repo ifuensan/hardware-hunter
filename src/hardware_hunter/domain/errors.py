@@ -59,3 +59,53 @@ class WallapopSchemaDrift(WallapopError):
         self.field_path = field_path
         self.detail = detail
         super().__init__(f"Wallapop schema drift at {field_path}{f': {detail}' if detail else ''}")
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# eBay
+# ─────────────────────────────────────────────────────────────────────────
+
+
+class EbayError(MarketplaceError):
+    """Base class for any eBay adapter failure."""
+
+
+class EbayAuthFailed(EbayError):
+    """OAuth refresh-token endpoint rejected the refresh token (HTTP 401).
+
+    The operator must re-run ``hardware-hunter login ebay`` to capture
+    fresh tokens; the daemon stops polling eBay until then.
+    """
+
+
+class EbayQuotaExceeded(EbayError):
+    """Daily request budget would be exceeded by the next call.
+
+    The poll loop reacts by halving the eBay cadence (2x backoff) until
+    the next UTC-midnight quota reset. Operators see the
+    ``ebay_quota_breach`` operational alert.
+    """
+
+    def __init__(self, used: int, budget: int) -> None:
+        self.used = used
+        self.budget = budget
+        super().__init__(f"eBay daily quota exceeded: {used}/{budget} requests used")
+
+
+class EbayApiError(EbayError):
+    """A non-401 4xx or 5xx response from the eBay API."""
+
+    def __init__(self, status_code: int, body_excerpt: str | None = None) -> None:
+        self.status_code = status_code
+        self.body_excerpt = body_excerpt
+        suffix = f": {body_excerpt}" if body_excerpt else ""
+        super().__init__(f"eBay API returned HTTP {status_code}{suffix}")
+
+
+class EbaySchemaDrift(EbayError):
+    """A 200 response was missing a field the adapter schema declares."""
+
+    def __init__(self, field_path: str, detail: str | None = None) -> None:
+        self.field_path = field_path
+        self.detail = detail
+        super().__init__(f"eBay schema drift at {field_path}{f': {detail}' if detail else ''}")
