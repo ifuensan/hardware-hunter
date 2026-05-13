@@ -64,17 +64,11 @@ class EnvSettings(BaseSettings):
     EBAY_CERT_ID: SecretStr
     EBAY_DEV_ID: SecretStr
 
-    # TinyFish — proxied through Hermes MCP, but the daemon still loads
-    # the raw key to support local-direct testing in `hardware-hunter
-    # test-search` (Epic 4) when Hermes is unreachable.
+    # TinyFish — Wallapop fallback path (browser-as-a-service). Adapter
+    # is adapters/wallapop_tinyfish/ (Story 3.5). Key from
+    # https://app.tinyfish.ai/api-keys; SecretStr so it is masked in
+    # repr() / logs and never appears in structured-log output.
     TINYFISH_API_KEY: SecretStr
-
-    # Hermes is a remote service (Proxmox VM) — not embedded as a Python
-    # library. These two are optional because some test environments
-    # stub the adapter; the Hermes-backed scheduler in Story 3.8 requires
-    # at least HERMES_URL.
-    HERMES_URL: str | None = None
-    HERMES_API_KEY: SecretStr | None = None
 
 
 @cache
@@ -123,8 +117,6 @@ def log_env_loaded(settings: EnvSettings) -> None:
                     "EBAY_CERT_ID": settings.EBAY_CERT_ID,
                     "EBAY_DEV_ID": settings.EBAY_DEV_ID,
                     "TINYFISH_API_KEY": settings.TINYFISH_API_KEY,
-                    "HERMES_URL": settings.HERMES_URL,
-                    "HERMES_API_KEY": settings.HERMES_API_KEY,
                 }.items()
                 if value is not None
             ),

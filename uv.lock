@@ -443,6 +443,7 @@ dependencies = [
     { name = "pyyaml" },
     { name = "rich" },
     { name = "ruamel-yaml" },
+    { name = "tinyfish" },
     { name = "typer" },
 ]
 
@@ -468,6 +469,7 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "rich", specifier = ">=14.3.0" },
     { name = "ruamel-yaml", specifier = ">=0.19.1" },
+    { name = "tinyfish", specifier = ">=0.2.5" },
     { name = "typer", specifier = ">=0.25.1" },
 ]
 
@@ -1064,6 +1066,20 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/47/c6/ee486fd809e357697ee8a44d3d69222b344920433d3b6666ccd9b374630c/tenacity-9.1.4.tar.gz", hash = "sha256:adb31d4c263f2bd041081ab33b498309a57c77f9acf2db65aadf0898179cf93a", size = 49413, upload-time = "2026-02-07T10:45:33.841Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d7/c1/eb8f9debc45d3b7918a32ab756658a0904732f75e555402972246b0b8e71/tenacity-9.1.4-py3-none-any.whl", hash = "sha256:6095a360c919085f28c6527de529e76a06ad89b23659fa881ae0649b867a9d55", size = 28926, upload-time = "2026-02-07T10:45:32.24Z" },
+]
+
+[[package]]
+name = "tinyfish"
+version = "0.2.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "tenacity" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/78/bf/ff5676fde1a9ad9183a127a5135a57736d114266bded4ae38f1d01cf9663/tinyfish-0.2.5.tar.gz", hash = "sha256:841095d97620e90afb49f97fae1ec8dc88dec78a8ee352c93252635f901a2fba", size = 58998, upload-time = "2026-04-03T01:02:16.533Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6c/a6/6ab83742e0074bdcbad5527bc451c7497dca1836a5153dfb0e6f28eb6227/tinyfish-0.2.5-py3-none-any.whl", hash = "sha256:05a763f10bdb7be958df4203010d321aecaf767cf64472ea3f48fe28c00cf921", size = 28056, upload-time = "2026-04-03T01:02:15.525Z" },
 ]
 
 [[package]]

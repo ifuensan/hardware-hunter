@@ -21,7 +21,7 @@ ADAPTERS_ROOT = SRC_ROOT / "adapters"
 # Suffix ``*`` means "any module starting with this prefix".
 DENY_LIST: tuple[str, ...] = (
     "hermes_agent",  # NFR-I1: Hermes via adapter only
-    "tinyfish",  # NFR-I2: TinyFish via Hermes MCP, never direct SDK
+    "tinyfish",  # NFR-I2: TinyFish SDK only inside adapters/wallapop_tinyfish/
     "google.genai",  # NFR-I3: LLM via ListingEvaluator interface
     "openai",  # alternate LLM via adapter only
     "anthropic",  # alternate LLM via adapter only

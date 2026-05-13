@@ -15,6 +15,7 @@ dependencies = [
     "pyyaml>=6.0.3",
     "rich>=14.3.0",
     "ruamel-yaml>=0.19.1",
+    "tinyfish>=0.2.5",
     "typer>=0.25.1",
 ]
 

@@ -40,8 +40,6 @@ def _isolate_env(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
         "EBAY_CERT_ID",
         "EBAY_DEV_ID",
         "TINYFISH_API_KEY",
-        "HERMES_URL",
-        "HERMES_API_KEY",
     ):
         monkeypatch.delenv(name, raising=False)
     reset_env_cache()
@@ -85,8 +83,6 @@ def _invoke(
             "EBAY_CERT_ID",
             "EBAY_DEV_ID",
             "TINYFISH_API_KEY",
-            "HERMES_URL",
-            "HERMES_API_KEY",
         }
     }
     return runner.invoke(

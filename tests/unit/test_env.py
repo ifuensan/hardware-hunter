@@ -47,8 +47,6 @@ def _isolate_env_cache_and_environ(
         "EBAY_CERT_ID",
         "EBAY_DEV_ID",
         "TINYFISH_API_KEY",
-        "HERMES_URL",
-        "HERMES_API_KEY",
     ):
         monkeypatch.delenv(name, raising=False)
     reset_env_cache()
@@ -227,29 +225,6 @@ def test_log_env_loaded_emits_names_only_via_subprocess(
     assert "secret-bot-token" not in serialized
     assert "secret-gemini" not in serialized
     assert "secret-tinyfish" not in serialized
-
-
-# ─────────────────────────────────────────────────────────────────────────
-# Optional Hermes fields — deviation from PRD AC list
-# ─────────────────────────────────────────────────────────────────────────
-
-
-def test_hermes_fields_optional_default_none(env_file: Path) -> None:
-    settings = get_env_settings(env_file)
-    assert settings.HERMES_URL is None
-    assert settings.HERMES_API_KEY is None
-
-
-def test_hermes_fields_populated_when_set(tmp_path: Path) -> None:
-    env_path = tmp_path / ".env"
-    env_path.write_text(
-        VALID_ENV + "HERMES_URL=https://hermes.local:8080\n" + "HERMES_API_KEY=hermes-secret\n",
-        encoding="utf-8",
-    )
-    settings = get_env_settings(env_path)
-    assert settings.HERMES_URL == "https://hermes.local:8080"
-    assert isinstance(settings.HERMES_API_KEY, SecretStr)
-    assert settings.HERMES_API_KEY.get_secret_value() == "hermes-secret"
 
 
 def test_unknown_env_var_is_ignored(tmp_path: Path) -> None:

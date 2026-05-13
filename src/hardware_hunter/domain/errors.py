@@ -62,6 +62,56 @@ class WallapopSchemaDrift(WallapopError):
 
 
 # ─────────────────────────────────────────────────────────────────────────
+# TinyFish (browser-as-a-service used as Wallapop fallback path)
+# ─────────────────────────────────────────────────────────────────────────
+
+
+class TinyFishError(MarketplaceError):
+    """Base class for any TinyFish-adapter failure.
+
+    TinyFish errors live in their own hierarchy (not under
+    :class:`WallapopError`) because their *causes* and *operator
+    actions* differ. A TinyFish-side outage doesn't mean Wallapop is
+    down — it means our fallback path is degraded; the operator should
+    check the TinyFish dashboard rather than re-logging into Wallapop.
+    """
+
+
+class TinyFishAuthFailed(TinyFishError):
+    """The TinyFish API key is invalid or revoked (HTTP 401).
+
+    The operator must replace ``TINYFISH_API_KEY`` in ``.env``; the
+    daemon stops attempting the TinyFish path until that's done.
+    """
+
+
+class TinyFishRateLimited(TinyFishError):
+    """TinyFish rate limit hit, or our own client-side window guard
+    refused the call to stay under the published 5 req/min Search limit.
+
+    The poll loop reacts by deferring the fallback to the next cycle
+    (graceful degradation) and emitting ``tinyfish_rate_limited`` on
+    the operational log.
+    """
+
+    def __init__(self, retry_after_s: float | None = None) -> None:
+        self.retry_after_s = retry_after_s
+        suffix = f" (retry after {retry_after_s}s)" if retry_after_s else ""
+        super().__init__(f"TinyFish rate limit exceeded{suffix}")
+
+
+class TinyFishUnavailable(TinyFishError):
+    """TinyFish returned a non-auth, non-rate-limit failure — network
+    timeout, 5xx, or a run that finished with ``status != COMPLETED``.
+
+    The poll loop's two-path orchestrator (Story 3.6) catches this and
+    falls back to the unofficial-API path if it succeeded, OR fires the
+    ``wallapop_both_paths_down`` operational alert if both paths failed
+    in the same cycle.
+    """
+
+
+# ─────────────────────────────────────────────────────────────────────────
 # eBay
 # ─────────────────────────────────────────────────────────────────────────
 
