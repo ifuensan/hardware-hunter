@@ -29,6 +29,16 @@ from hardware_hunter.domain.wishlist import WishlistEntry
 # produce arbitrage-flavored output. The unit test asserts none of them
 # appear in any rendered prompt; if a future prompt-improvement PR
 # accidentally introduces one, CI fails loud.
+#: Cache invalidation sentinel — bump this every time the prompt body
+#: changes meaningfully. The LLM evaluation cache (Story 3.10) keys
+#: stored evaluations by ``(listing_url, prompt_version)`` so a bump
+#: causes cache misses on every entry the next time we evaluate,
+#: forcing a fresh LLM call with the new prompt. The constant lives
+#: here (next to the prompt body) so a PR that changes the prompt and
+#: forgets to bump this is caught in code review.
+PROMPT_VERSION: Final[str] = "v1"
+
+
 FORBIDDEN_PROMPT_TERMS: Final[frozenset[str]] = frozenset(
     {
         "resale",

@@ -29,8 +29,9 @@ class ListingEvaluation(BaseModel):
     that justifies that classification, and the Direction-E renderer
     uses it to split the alert body.
 
-    ``cache_hit`` is set by the cache layer (Hermes SQLite + FTS5,
-    Story 3.10) so the alert renderer can decorate cached evaluations.
+    ``cache_hit`` is set by the cache layer (Story 3.10) so the alert
+    renderer can decorate cached evaluations. The cache is backed by a
+    local SQLite file separate from ``hardware_hunter.db``.
     """
 
     model_config = ConfigDict(extra="forbid")
