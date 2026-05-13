@@ -24,6 +24,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from datetime import datetime
+from uuid import UUID
 
 from hardware_hunter.domain.alert import AlertSnapshot
 from hardware_hunter.domain.audit import (
@@ -82,6 +83,19 @@ class Store(ABC):
     @abstractmethod
     async def get_alert_snapshot(self, audit_id: int) -> AlertSnapshot | None:
         """Look up an alert snapshot by audit_id (used by callback handler)."""
+
+    @abstractmethod
+    async def get_alert_snapshot_by_alert_id(self, alert_id: UUID) -> AlertSnapshot | None:
+        """Look up an alert snapshot by its UUID ``alert_id``.
+
+        The callback handler (Story 3.13) uses this to resolve the
+        originating ``entry_key`` when an operator taps a Phase 1
+        button — ``callback_data`` carries the UUID, not the internal
+        autoincrement ``audit_id``, because eBay listing IDs contain
+        characters that aren't valid callback_data and we deliberately
+        chose ``alert_id`` as the stable handle in the locked
+        ``<surface>:<verb>:<id>`` format.
+        """
 
     @abstractmethod
     async def record_callback(self, callback: CallbackAudit) -> None:

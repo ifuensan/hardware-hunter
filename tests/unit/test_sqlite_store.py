@@ -306,6 +306,31 @@ async def test_get_alert_snapshot_missing_returns_none(migrated_db: Path) -> Non
 
 
 @pytest.mark.asyncio
+async def test_get_alert_snapshot_by_alert_id_round_trip(migrated_db: Path) -> None:
+    store = SqliteStore(migrated_db)
+    try:
+        snapshot = _make_snapshot()
+        await store.record_alert_snapshot(snapshot)
+        loaded = await store.get_alert_snapshot_by_alert_id(snapshot.alert_id)
+        assert loaded is not None
+        assert loaded.alert_id == snapshot.alert_id
+        assert loaded.entry_key == snapshot.entry_key
+    finally:
+        await store.close()
+
+
+@pytest.mark.asyncio
+async def test_get_alert_snapshot_by_alert_id_missing_returns_none(
+    migrated_db: Path,
+) -> None:
+    store = SqliteStore(migrated_db)
+    try:
+        assert await store.get_alert_snapshot_by_alert_id(uuid4()) is None
+    finally:
+        await store.close()
+
+
+@pytest.mark.asyncio
 async def test_record_callback_writes_audit_row(migrated_db: Path) -> None:
     store = SqliteStore(migrated_db)
     try:

@@ -25,6 +25,7 @@ import json
 import sqlite3
 from datetime import UTC, datetime
 from pathlib import Path
+from uuid import UUID
 
 from hardware_hunter.adapters.sqlite_store.connection import open_connection
 from hardware_hunter.domain.alert import AlertSnapshot
@@ -185,6 +186,25 @@ class SqliteStore(Store):
                 WHERE audit_id = ?
                 """,
                 (audit_id,),
+            )
+            row = cursor.fetchone()
+            if row is None:
+                return None
+            return _row_to_alert_snapshot(row)
+
+        return await asyncio.to_thread(_read)
+
+    async def get_alert_snapshot_by_alert_id(self, alert_id: UUID) -> AlertSnapshot | None:
+        def _read() -> AlertSnapshot | None:
+            cursor = self._connection.execute(
+                """
+                SELECT alert_id, entry_manufacturer, entry_model, entry_ref,
+                       entry_display_name, listing_json, evaluation_json,
+                       phase, phase2_max_price_eur, rendered_at
+                FROM alert_snapshots
+                WHERE alert_id = ?
+                """,
+                (str(alert_id),),
             )
             row = cursor.fetchone()
             if row is None:

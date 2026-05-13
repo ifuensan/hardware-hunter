@@ -121,6 +121,7 @@ def test_store_phase1_methods_declared() -> None:
         "set_snooze",
         "record_alert_snapshot",
         "get_alert_snapshot",
+        "get_alert_snapshot_by_alert_id",
         "record_callback",
     ):
         assert method in abstract, f"Store should declare {method!r}"
@@ -178,6 +179,7 @@ _ALLOWED_INTERFACE_TOP_LEVELS = frozenset(
         "collections",
         "datetime",
         "typing",
+        "uuid",
         # blessed third-party
         "pydantic",
         # in-package
