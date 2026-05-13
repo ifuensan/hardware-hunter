@@ -18,7 +18,7 @@ from __future__ import annotations
 import re
 from datetime import datetime
 from decimal import Decimal
-from typing import Literal
+from typing import Final, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -33,6 +33,38 @@ ParseMode = Literal["MarkdownV2"]
 # is `<surface>:<verb>:<id>` per CALLBACK_DATA_FORMAT in the UX spec.
 _CALLBACK_DATA_MAX_BYTES = 64
 _CALLBACK_DATA_RE = re.compile(r"^[a-z0-9_]+:[a-z0-9_]+:[A-Za-z0-9_\-]+$")
+
+# ─────────────────────────────────────────────────────────────────────────
+# Locked UX tokens (UX-DR3 / UX-DR4 / UX-DR5)
+# ─────────────────────────────────────────────────────────────────────────
+
+#: Per-surface severity emoji. PRD amendment to grow.
+SEVERITY_TOKENS: Final[dict[str, str]] = {
+    "operational_warn": "⚠️ ",
+    "operational_info": "ℹ️ ",  # noqa: RUF001 — the info glyph is operator-facing
+    "phase1_listing": "📦",
+    "phase2_listing": "🟢",
+    "phase2_buy_success": "✅",
+    "phase2_buy_failure": "🚫",
+}
+
+#: Inline-keyboard button labels (Spanish per UX-DR27). PRD amendment to grow.
+BUTTON_LABELS: Final[dict[str, str]] = {
+    "view": "👁 Ver",
+    "skip_phase1": "🙅 Saltar",
+    "snooze": "😴 Posponer 24h",
+    "buy": "✅ Comprar",
+    "skip_phase2": "❌ Saltar",
+}
+
+#: Locked callback_data format. Max 64 bytes per Telegram.
+CALLBACK_DATA_FORMAT: Final[str] = "<surface>:<verb>:<id>"
+
+# Characters MarkdownV2 reserves and that user content must escape.
+# Order matters for the regex — backslash MUST be first or it would
+# double-escape itself.
+_MD_V2_RESERVED = r"\_*[]()~`>#+-=|{}.!"
+_MD_V2_RE = re.compile(r"([\\_*\[\]()~`>#+\-=|{}.!])")
 
 
 class InlineButton(BaseModel):
@@ -120,3 +152,114 @@ class AlertSnapshot(BaseModel):
     phase: Phase
     phase2_max_price_eur: Decimal | None = None
     rendered_at: datetime
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Rendering helpers — Story 3.11
+# ─────────────────────────────────────────────────────────────────────────
+
+
+def escape_markdown_v2(text: str) -> str:
+    """Escape every MarkdownV2-reserved character in ``text``.
+
+    Telegram's MarkdownV2 reserves ``_*[]()~`>#+-=|{}.!`` (plus
+    backslash). User-supplied content (titles, descriptions, LLM
+    takes, locations) MUST pass through this before being interpolated
+    into a template — otherwise a stray asterisk in a listing title
+    could break the markup or open an injection vector.
+    """
+    return _MD_V2_RE.sub(r"\\\1", text)
+
+
+def _format_price_es(amount: Decimal) -> str:
+    """Format a EUR Decimal in es-ES style — ``1.234,56 €``."""
+    quantized = amount.quantize(Decimal("0.01"))
+    # Python's built-in locale module is process-global and unreliable
+    # across environments; we hand-format to keep snapshot tests stable
+    # regardless of the host's locale.
+    integer_part, _, decimal_part = str(quantized).partition(".")
+    sign = ""
+    if integer_part.startswith("-"):
+        sign = "-"
+        integer_part = integer_part[1:]
+    # Insert dot every three digits from the right.
+    chunks: list[str] = []
+    while len(integer_part) > 3:
+        chunks.append(integer_part[-3:])
+        integer_part = integer_part[:-3]
+    chunks.append(integer_part)
+    int_grouped = ".".join(reversed(chunks))
+    return f"{sign}{int_grouped},{decimal_part} €"
+
+
+def _phase1_button_row(alert_id: str) -> list[InlineButton]:
+    """The Phase 1 button row: Ver · Saltar · Posponer 24h (UX-DR4).
+
+    ``callback_data`` carries the AlertSnapshot's UUID (``alert_id``)
+    rather than the raw ``listing_id`` because eBay listing IDs
+    contain ``|`` characters that aren't valid callback_data and
+    because the callbacks table indexes on ``alert_id`` regardless.
+    The callback handler resolves the originating listing by reading
+    the alert_snapshot row.
+    """
+    return [
+        InlineButton(text=BUTTON_LABELS["view"], callback_data=f"listing:view:{alert_id}"),
+        InlineButton(text=BUTTON_LABELS["skip_phase1"], callback_data=f"listing:skip:{alert_id}"),
+        InlineButton(text=BUTTON_LABELS["snooze"], callback_data=f"listing:snooze:{alert_id}"),
+    ]
+
+
+def render_phase1_listing_alert(snapshot: AlertSnapshot) -> RenderedAlert:
+    """Render a Phase 1 listing alert (Direction A + Direction E hybrid).
+
+    Anatomy (direct listing):
+      1. ``{📦} *<entry_display_name>* — *<price>*``
+      2. ``📍 <location> · <marketplace>``
+      3. ``_<one_line_take>_``
+      4. ``🔍 Confidence: <low|medium|high>``
+
+    When ``snapshot.evaluation.is_container == True``, two indented
+    rows are inserted between row 2 and row 3:
+      - ``  ↪︎ Wrapper: <wrapper_text>``
+      - ``  ↪︎ Extracted: <extracted_text>``
+
+    Every user-supplied substring passes through
+    :func:`escape_markdown_v2` so a listing title with an asterisk
+    can't break the markup or open an injection vector.
+
+    The output is locked at v1 per FR22; snapshot tests in
+    ``test_alert_renderer.py`` fail the build on any drift.
+    """
+    listing = snapshot.listing
+    evaluation = snapshot.evaluation
+
+    severity = SEVERITY_TOKENS["phase1_listing"]
+    name = escape_markdown_v2(snapshot.entry_display_name)
+    price = escape_markdown_v2(_format_price_es(listing.price_eur))
+    location = escape_markdown_v2(listing.location or "—")
+    marketplace = escape_markdown_v2(listing.marketplace.capitalize())
+    take = escape_markdown_v2(evaluation.one_line_take)
+    confidence = escape_markdown_v2(evaluation.confidence)
+
+    rows: list[str] = [
+        f"{severity} *{name}* — *{price}*",
+        f"📍 {location} · {marketplace}",
+    ]
+
+    if evaluation.is_container:
+        wrapper = escape_markdown_v2(evaluation.wrapper_text or "—")
+        extracted = escape_markdown_v2(evaluation.extracted_text or "—")
+        rows.append(f"  ↪︎ Wrapper: {wrapper}")
+        rows.append(f"  ↪︎ Extracted: {extracted}")
+
+    rows.append(f"_{take}_")
+    rows.append(f"🔍 Confidence: {confidence}")
+
+    photo_url = listing.photo_urls[0] if listing.photo_urls else None
+
+    return RenderedAlert(
+        text="\n".join(rows),
+        parse_mode="MarkdownV2",
+        photo_url=photo_url,
+        inline_keyboard=[_phase1_button_row(str(snapshot.alert_id))],
+    )

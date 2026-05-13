@@ -1,0 +1,35 @@
+# serializer version: 1
+# name: test_snapshot_container_listing
+  '''
+  📦 *WD Red Plus 4TB \(WD40EFPX\)* — *55,00 €*
+  📍 Madrid · Wallapop
+    ↪︎ Wrapper: Synology DS220\+ NAS
+    ↪︎ Extracted: WD Red Plus 4TB drives
+  _WD Red Plus 4TB at 55€ — strong match\._
+  🔍 Confidence: high
+  '''
+# ---
+# name: test_snapshot_direct_listing
+  '''
+  📦 *WD Red Plus 4TB \(WD40EFPX\)* — *55,00 €*
+  📍 Madrid · Wallapop
+  _WD Red Plus 4TB at 55€ — strong match\._
+  🔍 Confidence: high
+  '''
+# ---
+# name: test_snapshot_low_confidence_listing
+  '''
+  📦 *WD Red Plus 4TB \(WD40EFPX\)* — *55,00 €*
+  📍 Madrid · Wallapop
+  _Title hints at WD Red, ref not visible — uncertain\._
+  🔍 Confidence: low
+  '''
+# ---
+# name: test_snapshot_missing_photo_listing
+  '''
+  📦 *WD Red Plus 4TB \(WD40EFPX\)* — *55,00 €*
+  📍 Madrid · Wallapop
+  _WD Red Plus 4TB at 55€ — strong match\._
+  🔍 Confidence: high
+  '''
+# ---
