@@ -109,3 +109,30 @@ class EbaySchemaDrift(EbayError):
         self.field_path = field_path
         self.detail = detail
         super().__init__(f"eBay schema drift at {field_path}{f': {detail}' if detail else ''}")
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# LLM provider (Gemini Flash / GPT-4o-mini / Claude Haiku)
+# ─────────────────────────────────────────────────────────────────────────
+
+
+class LlmError(RuntimeError):
+    """Base class for any LLM-adapter failure."""
+
+
+class LlmEvaluationError(LlmError):
+    """The LLM returned a malformed or unparseable response.
+
+    The poll loop catches and skips the listing — crucially, the
+    listing is NOT marked as seen, so it will be retried on the next
+    poll cycle.
+    """
+
+
+class LlmRateLimited(LlmError):
+    """The LLM provider returned a rate-limit error (HTTP 429 or equivalent).
+
+    The poll loop reacts by deferring remaining listings to the next
+    cycle (graceful degradation) and emitting an operational event
+    ``llm_provider_rate_limited``.
+    """
