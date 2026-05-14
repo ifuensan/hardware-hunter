@@ -1,0 +1,116 @@
+# serializer version: 1
+# name: test_operational_alert_matches_snapshot[daemon_started]
+  '''
+  ℹ️ Daemon iniciado
+  
+  Versión: 0\.1\.0 · jobs: wallapop\_poll, ebay\_poll
+  '''
+# ---
+# name: test_operational_alert_matches_snapshot[daemon_stopped]
+  '''
+  ℹ️ Daemon detenido
+  
+  Motivo: SIGTERM
+  '''
+# ---
+# name: test_operational_alert_matches_snapshot[ebay_quota_breach]
+  '''
+  ℹ️ Cuota diaria de eBay alcanzada
+  
+  Cuota: 5000/5000 peticiones usadas hoy
+  Estado: cadencia de eBay reducida hasta el reset de medianoche UTC
+  '''
+# ---
+# name: test_operational_alert_matches_snapshot[ebay_token_refresh_failed]
+  '''
+  ⚠️ *eBay: token de refresco rechazado*
+  
+  Causa: el endpoint de refresco rechazó el refresh token \(HTTP 401\)
+  Estado actual: alertas de eBay en pausa \(Wallapop no afectado\)
+  
+  Próximo paso:
+  1\. `hardware-hunter login ebay --ru-name <tu-runame>`
+  2\. `docker-compose restart hardware-hunter`
+  '''
+# ---
+# name: test_operational_alert_matches_snapshot[entry_snoozed]
+  '''
+  ℹ️ Entrada pospuesta
+  
+  Entrada: WD Red Plus 4TB
+  Pospuesta hasta: 2026\-05\-15T12:00:00Z
+  '''
+# ---
+# name: test_operational_alert_matches_snapshot[llm_provider_rate_limited]
+  '''
+  ℹ️ Proveedor LLM con rate\-limit
+  
+  Proveedor: gemini\-flash \(rate\-limited\)
+  Estado: la caché y el reintento absorben el límite
+  '''
+# ---
+# name: test_operational_alert_matches_snapshot[poll_cycle_error]
+  '''
+  ⚠️ *Error en el ciclo de sondeo*
+  
+  Causa: RuntimeError en el ciclo de wallapop
+  Estado actual: el ciclo continuará en el siguiente tick
+  
+  Próximo paso:
+  1\. `hardware-hunter audit show --last 5`
+  2\. `hardware-hunter logs --last 50`
+  '''
+# ---
+# name: test_operational_alert_matches_snapshot[tinyfish_fallback_active]
+  '''
+  ℹ️ Fallback TinyFish activo
+  
+  Adapter: wallapop\_tinyfish en uso como camino de respaldo
+  Estado: sin alertas perdidas
+  '''
+# ---
+# name: test_operational_alert_matches_snapshot[tinyfish_fallback_recovered]
+  '''
+  ℹ️ Camino principal de Wallapop recuperado
+  
+  Adapter: wallapop\_api recuperado como camino principal
+  '''
+# ---
+# name: test_operational_alert_matches_snapshot[wallapop_api_degraded]
+  '''
+  ℹ️ Wallapop API degradada
+  
+  Adapter: wallapop\_api \(WallapopApiError\)
+  Fallback: wallapop\_tinyfish activo este ciclo
+  '''
+# ---
+# name: test_operational_alert_matches_snapshot[wallapop_both_paths_down]
+  '''
+  ⚠️ *Wallapop sin servicio*
+  
+  Causa: 3 fallos consecutivos · último error: TinyFishUnavailable
+  Estado actual: alertas de Wallapop en pausa \(eBay no afectado\)
+  
+  Próximo paso:
+  1\. `hardware-hunter audit show --last 5`
+  2\. revisa la conexión o parchea el adaptador si persiste
+  3\. `docker-compose restart hardware-hunter`
+  '''
+# ---
+# name: test_operational_alert_matches_snapshot[wallapop_session_expired]
+  '''
+  ℹ️ Sesión Wallapop expirada
+  
+  Adapter: wallapop\_api \(devuelve 401\)
+  Fallback: wallapop\_tinyfish activo \(sin alertas perdidas\)
+  
+  Próximo paso: `hardware-hunter login wallapop` cuando puedas
+  '''
+# ---
+# name: test_operational_alert_matches_snapshot[wallapop_session_renewed]
+  '''
+  ℹ️ Sesión Wallapop renovada
+  
+  Adapter: wallapop\_api \(camino principal reactivado\)
+  '''
+# ---

@@ -15,10 +15,13 @@ Three types live here:
 
 from __future__ import annotations
 
+import enum
 import re
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Final, Literal
+from typing import Any, Final, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -262,4 +265,275 @@ def render_phase1_listing_alert(snapshot: AlertSnapshot) -> RenderedAlert:
         parse_mode="MarkdownV2",
         photo_url=photo_url,
         inline_keyboard=[_phase1_button_row(str(snapshot.alert_id))],
+    )
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Operational alert renderer — Story 4.1 (FR21 / UX-DR13 / UX-DR14 / UX-DR15)
+# ─────────────────────────────────────────────────────────────────────────
+
+#: Operational-alert severity. ``warn`` renders the ⚠️ anatomy (bold
+#: headline + numbered CLI next-steps); ``info`` renders the plain-headline
+#: anatomy with an optional single hint.
+Severity = Literal["warn", "info"]
+
+
+class EventName(enum.Enum):
+    """Every Phase 1 operational-alert event.
+
+    The variant pool is finite per UX-DR13 — adding a variant is a PRD
+    amendment, not a code change. The renderer's spec registry
+    (:data:`_OPERATIONAL_EVENT_SPECS`) must carry an entry for every
+    member; a missing entry fails loud at render time.
+    """
+
+    daemon_started = "daemon_started"
+    daemon_stopped = "daemon_stopped"
+    wallapop_session_expired = "wallapop_session_expired"
+    wallapop_session_renewed = "wallapop_session_renewed"
+    wallapop_api_degraded = "wallapop_api_degraded"
+    wallapop_both_paths_down = "wallapop_both_paths_down"
+    tinyfish_fallback_active = "tinyfish_fallback_active"
+    tinyfish_fallback_recovered = "tinyfish_fallback_recovered"
+    ebay_token_refresh_failed = "ebay_token_refresh_failed"
+    ebay_quota_breach = "ebay_quota_breach"
+    llm_provider_rate_limited = "llm_provider_rate_limited"
+    entry_snoozed = "entry_snoozed"
+    poll_cycle_error = "poll_cycle_error"
+    # TODO(Epic 5 — Story 5.11): Phase 2 operational variants land here —
+    # phase2_disabled_global, phase2_disabled_entry, reconciliation_tripped,
+    # smoke_test_drift, circuit_breaker_opened.
+
+
+def _prose(text: str) -> str:
+    """Escape a plain-text fragment for MarkdownV2.
+
+    Use for every static template string and every ``ctx`` value — the
+    whole fragment is plain text with no intentional markup, so a
+    single escape pass over the assembled string is correct.
+    """
+    return escape_markdown_v2(text)
+
+
+def _cmd(command: str) -> str:
+    """Wrap a CLI command in a MarkdownV2 code span.
+
+    Inside a code span only backtick + backslash are special, and CLI
+    commands carry neither — so the command text needs no escaping.
+    """
+    return f"`{command}`"
+
+
+def _body_daemon_started(ctx: Mapping[str, Any]) -> list[str]:
+    version = str(ctx.get("version", "—"))
+    jobs = str(ctx.get("jobs", "—"))
+    return [_prose(f"Versión: {version} · jobs: {jobs}")]
+
+
+def _body_daemon_stopped(ctx: Mapping[str, Any]) -> list[str]:
+    return [_prose(f"Motivo: {ctx.get('reason', '—')}")]
+
+
+def _body_wallapop_session_expired(_ctx: Mapping[str, Any]) -> list[str]:
+    return [
+        _prose("Adapter: wallapop_api (devuelve 401)"),
+        _prose("Fallback: wallapop_tinyfish activo (sin alertas perdidas)"),
+        "",
+        _prose("Próximo paso: ")
+        + _cmd("hardware-hunter login wallapop")
+        + _prose(" cuando puedas"),
+    ]
+
+
+def _body_wallapop_session_renewed(_ctx: Mapping[str, Any]) -> list[str]:
+    return [_prose("Adapter: wallapop_api (camino principal reactivado)")]
+
+
+def _body_wallapop_api_degraded(ctx: Mapping[str, Any]) -> list[str]:
+    error_class = str(ctx.get("error_class", "—"))
+    return [
+        _prose(f"Adapter: wallapop_api ({error_class})"),
+        _prose("Fallback: wallapop_tinyfish activo este ciclo"),
+    ]
+
+
+def _body_wallapop_both_paths_down(ctx: Mapping[str, Any]) -> list[str]:
+    failures = ctx.get("consecutive_failures", "—")
+    error_class = str(ctx.get("last_error_class", "—"))
+    return [
+        _prose(f"Causa: {failures} fallos consecutivos · último error: {error_class}"),
+        _prose("Estado actual: alertas de Wallapop en pausa (eBay no afectado)"),
+        "",
+        _prose("Próximo paso:"),
+        _prose("1. ") + _cmd("hardware-hunter audit show --last 5"),
+        _prose("2. revisa la conexión o parchea el adaptador si persiste"),
+        _prose("3. ") + _cmd("docker-compose restart hardware-hunter"),
+    ]
+
+
+def _body_tinyfish_fallback_active(_ctx: Mapping[str, Any]) -> list[str]:
+    return [
+        _prose("Adapter: wallapop_tinyfish en uso como camino de respaldo"),
+        _prose("Estado: sin alertas perdidas"),
+    ]
+
+
+def _body_tinyfish_fallback_recovered(_ctx: Mapping[str, Any]) -> list[str]:
+    return [_prose("Adapter: wallapop_api recuperado como camino principal")]
+
+
+def _body_ebay_token_refresh_failed(_ctx: Mapping[str, Any]) -> list[str]:
+    return [
+        _prose("Causa: el endpoint de refresco rechazó el refresh token (HTTP 401)"),
+        _prose("Estado actual: alertas de eBay en pausa (Wallapop no afectado)"),
+        "",
+        _prose("Próximo paso:"),
+        _prose("1. ") + _cmd("hardware-hunter login ebay --ru-name <tu-runame>"),
+        _prose("2. ") + _cmd("docker-compose restart hardware-hunter"),
+    ]
+
+
+def _body_ebay_quota_breach(ctx: Mapping[str, Any]) -> list[str]:
+    used = ctx.get("used", "—")
+    budget = ctx.get("budget", "—")
+    return [
+        _prose(f"Cuota: {used}/{budget} peticiones usadas hoy"),
+        _prose("Estado: cadencia de eBay reducida hasta el reset de medianoche UTC"),
+    ]
+
+
+def _body_llm_provider_rate_limited(ctx: Mapping[str, Any]) -> list[str]:
+    provider = str(ctx.get("provider", "—"))
+    return [
+        _prose(f"Proveedor: {provider} (rate-limited)"),
+        _prose("Estado: la caché y el reintento absorben el límite"),
+    ]
+
+
+def _body_entry_snoozed(ctx: Mapping[str, Any]) -> list[str]:
+    entry = str(ctx.get("entry_display_name", "—"))
+    until = str(ctx.get("snooze_until", "—"))
+    return [
+        _prose(f"Entrada: {entry}"),
+        _prose(f"Pospuesta hasta: {until}"),
+    ]
+
+
+def _body_poll_cycle_error(ctx: Mapping[str, Any]) -> list[str]:
+    error_class = str(ctx.get("error_class", "—"))
+    marketplace = str(ctx.get("marketplace", "—"))
+    return [
+        _prose(f"Causa: {error_class} en el ciclo de {marketplace}"),
+        _prose("Estado actual: el ciclo continuará en el siguiente tick"),
+        "",
+        _prose("Próximo paso:"),
+        _prose("1. ") + _cmd("hardware-hunter audit show --last 5"),
+        _prose("2. ") + _cmd("hardware-hunter logs --last 50"),
+    ]
+
+
+@dataclass(frozen=True)
+class _OperationalEventSpec:
+    """Per-event rendering contract: canonical severity + headline + body builder."""
+
+    severity: Severity
+    headline: str
+    build_body: Callable[[Mapping[str, Any]], list[str]]
+
+
+#: The closed registry — every :class:`EventName` member MUST appear here.
+#: ``render_operational_alert`` raises ``KeyError`` for a missing entry,
+#: so a new enum variant without a spec fails the build immediately.
+_OPERATIONAL_EVENT_SPECS: Final[dict[EventName, _OperationalEventSpec]] = {
+    EventName.daemon_started: _OperationalEventSpec(
+        "info", "Daemon iniciado", _body_daemon_started
+    ),
+    EventName.daemon_stopped: _OperationalEventSpec(
+        "info", "Daemon detenido", _body_daemon_stopped
+    ),
+    EventName.wallapop_session_expired: _OperationalEventSpec(
+        "info", "Sesión Wallapop expirada", _body_wallapop_session_expired
+    ),
+    EventName.wallapop_session_renewed: _OperationalEventSpec(
+        "info", "Sesión Wallapop renovada", _body_wallapop_session_renewed
+    ),
+    EventName.wallapop_api_degraded: _OperationalEventSpec(
+        "info", "Wallapop API degradada", _body_wallapop_api_degraded
+    ),
+    EventName.wallapop_both_paths_down: _OperationalEventSpec(
+        "warn", "Wallapop sin servicio", _body_wallapop_both_paths_down
+    ),
+    EventName.tinyfish_fallback_active: _OperationalEventSpec(
+        "info", "Fallback TinyFish activo", _body_tinyfish_fallback_active
+    ),
+    EventName.tinyfish_fallback_recovered: _OperationalEventSpec(
+        "info", "Camino principal de Wallapop recuperado", _body_tinyfish_fallback_recovered
+    ),
+    EventName.ebay_token_refresh_failed: _OperationalEventSpec(
+        "warn", "eBay: token de refresco rechazado", _body_ebay_token_refresh_failed
+    ),
+    EventName.ebay_quota_breach: _OperationalEventSpec(
+        "info", "Cuota diaria de eBay alcanzada", _body_ebay_quota_breach
+    ),
+    EventName.llm_provider_rate_limited: _OperationalEventSpec(
+        "info", "Proveedor LLM con rate-limit", _body_llm_provider_rate_limited
+    ),
+    EventName.entry_snoozed: _OperationalEventSpec(
+        "info", "Entrada pospuesta", _body_entry_snoozed
+    ),
+    EventName.poll_cycle_error: _OperationalEventSpec(
+        "warn", "Error en el ciclo de sondeo", _body_poll_cycle_error
+    ),
+}
+
+
+def render_operational_alert(
+    severity: Severity,
+    event: EventName,
+    ctx: Mapping[str, Any],
+) -> RenderedAlert:
+    """Render a non-listing operational alert (FR21).
+
+    ``warn`` anatomy:
+      1. ``⚠️ *<bold headline>*``
+      2. blank line
+      3. cause line, state line, blank, ``Próximo paso:``, numbered
+         copy-paste-ready CLI commands
+
+    ``info`` anatomy:
+      1. ``<info-glyph> <plain headline>``
+      2. blank line
+      3. adapter/context line, optional fallback line, optional single
+         CLI hint softened with "cuando puedas"
+
+    Operational alerts never carry buttons or photos —
+    :attr:`RenderedAlert.inline_keyboard` and :attr:`~RenderedAlert.photo_url`
+    are always ``None`` (FR21).
+
+    ``severity`` must match the event's canonical severity; a mismatch
+    is a caller bug and raises :class:`ValueError`. The split exists so
+    the call site reads self-documenting (``severity="warn"``) while the
+    renderer stays the single source of truth for which events are loud.
+    """
+    spec = _OPERATIONAL_EVENT_SPECS[event]
+    if severity != spec.severity:
+        raise ValueError(
+            f"event {event.value!r} is a {spec.severity!r} alert, "
+            f"not {severity!r} — severity is fixed per UX-DR13"
+        )
+
+    headline = _prose(spec.headline)
+    if severity == "warn":
+        prefix = SEVERITY_TOKENS["operational_warn"]
+        row1 = f"{prefix}*{headline}*"
+    else:
+        prefix = SEVERITY_TOKENS["operational_info"]
+        row1 = f"{prefix}{headline}"
+
+    body = spec.build_body(ctx)
+    return RenderedAlert(
+        text="\n".join([row1, "", *body]),
+        parse_mode="MarkdownV2",
+        photo_url=None,
+        inline_keyboard=None,
     )
