@@ -63,6 +63,8 @@ from hardware_hunter.interfaces.page_fetcher import PageFetcher
 from hardware_hunter.interfaces.scheduler import Scheduler
 from hardware_hunter.observability.logging import get_logger
 from hardware_hunter.orchestration.daemon import Daemon
+from hardware_hunter.orchestration.degradation_reporter import DegradationReporter
+from hardware_hunter.orchestration.health_state import HealthState
 from hardware_hunter.orchestration.poll_loop import run_poll_cycle
 from hardware_hunter.orchestration.wallapop_fallback import WallapopFallbackFetcher
 
@@ -135,6 +137,15 @@ def compose_daemon(
         recipient_chat_id=env.TELEGRAM_CHAT_ID,
     )
 
+    # The health-state cache + degradation reporter are shared across
+    # every marketplace job — one NFR-R3 fan-out for the whole daemon.
+    health_state = HealthState()
+    reporter = DegradationReporter(
+        telegram_surface=telegram,
+        health_state=health_state,
+        dedup_window_seconds=config.observability.degradation_dedup_window_seconds,
+    )
+
     scheduler: Scheduler = AsyncioScheduler()
 
     wallapop_job = _build_wallapop_job(
@@ -144,6 +155,7 @@ def compose_daemon(
         evaluator=evaluator,
         store=store,
         telegram=telegram,
+        reporter=reporter,
         log=log,
     )
     ebay_job = _build_ebay_job(
@@ -214,6 +226,7 @@ def _build_wallapop_job(
     evaluator: CachingListingEvaluator,
     store: SqliteStore,
     telegram: TelegramBotSurface,
+    reporter: DegradationReporter,
     log: object,
 ) -> Callable[[], Awaitable[None]] | None:
     """Build the Wallapop poll closure, or return None when cookies are missing."""
@@ -230,6 +243,8 @@ def _build_wallapop_job(
     fallback: PageFetcher = WallapopFallbackFetcher(
         api_fetcher=api_fetcher,
         tinyfish_fetcher=tinyfish_fetcher,
+        reporter=reporter,
+        cookies_path=cookies_path,
     )
 
     async def _wallapop_cycle() -> None:

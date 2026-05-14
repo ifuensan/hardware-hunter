@@ -37,7 +37,7 @@ import json
 import logging
 from collections.abc import Callable, Mapping
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Protocol, runtime_checkable
 
 from hardware_hunter.domain.alert import EventName, Severity, render_operational_alert
 from hardware_hunter.domain.errors import TelegramError
@@ -48,6 +48,25 @@ from hardware_hunter.orchestration.health_state import HealthState
 #: Default dedup window — mirrors
 #: ``config.observability.degradation_dedup_window_seconds``.
 DEFAULT_DEDUP_WINDOW_SECONDS: int = 300
+
+
+@runtime_checkable
+class Reporter(Protocol):
+    """Structural type for "something that can report a degradation".
+
+    Orchestration code (the Wallapop two-path fetcher, the poll loop)
+    depends on this Protocol, not on the concrete
+    :class:`DegradationReporter` — which keeps the dependency one-way
+    (orchestration never imports a concrete sink) and lets tests pass a
+    recording fake without subclassing.
+    """
+
+    async def report(
+        self,
+        severity: Severity,
+        event: EventName,
+        ctx: Mapping[str, Any],
+    ) -> None: ...
 
 
 def _utc_now() -> datetime:
@@ -160,4 +179,5 @@ class DegradationReporter:
 __all__ = [
     "DEFAULT_DEDUP_WINDOW_SECONDS",
     "DegradationReporter",
+    "Reporter",
 ]
