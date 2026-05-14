@@ -391,9 +391,51 @@ def cmd_test_search(
 
 
 @app.command("explain")
-def cmd_explain() -> None:
-    """Replay an LLM evaluation for a specific listing (Epic 3)."""
-    _placeholder()
+def cmd_explain(
+    url: Annotated[str, typer.Argument(help="The marketplace listing URL to evaluate.")],
+    entry: Annotated[
+        str | None,
+        typer.Option("--entry", help="Evaluate only this wishlist entry ref (skips heuristic)."),
+    ] = None,
+    output_format: Annotated[
+        str,
+        typer.Option("--format", help="Output format: 'human' (default) or 'json'."),
+    ] = "human",
+    data_dir: Annotated[
+        Path,
+        typer.Option("--data-dir", "-d", help="Daemon state dir (default: /app/data)."),
+    ] = _DEFAULT_DATA_DIR,
+    config_path: Annotated[
+        Path,
+        typer.Option("--config-path", "-c", help="Path to config.yaml."),
+    ] = _DEFAULT_CONFIG_PATH,
+    wishlist_path: Annotated[
+        Path,
+        typer.Option("--wishlist-path", "-w", help="Path to wishlist.yaml."),
+    ] = _DEFAULT_WISHLIST_PATH,
+    env_path: Annotated[
+        Path,
+        typer.Option("--env-path", "-e", help="Path to .env."),
+    ] = _DEFAULT_ENV_PATH,
+) -> None:
+    """Replay the full LLM evaluation for one listing URL (Story 4.7)."""
+    from hardware_hunter.cli.commands.explain_cmd import run
+    from hardware_hunter.config.config_yaml import load_config
+    from hardware_hunter.config.env import load_env_or_exit
+    from hardware_hunter.config.wishlist_yaml import load_wishlist
+
+    env = load_env_or_exit(env_path)
+    exit_code = run(
+        url=url,
+        env=env,
+        config=load_config(config_path),
+        wishlist=load_wishlist(wishlist_path),
+        data_dir=data_dir,
+        entry_ref=entry,
+        output_format=output_format,
+    )
+    if exit_code != 0:
+        raise typer.Exit(code=exit_code)
 
 
 @app.command("health")

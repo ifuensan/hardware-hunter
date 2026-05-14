@@ -178,6 +178,26 @@ def print_table(table: Table, *, width: int = _DEFAULT_TABLE_WIDTH) -> None:
     console.print(table)
 
 
+def print_panel(
+    body: str,
+    *,
+    title: str | None = None,
+    width: int = _DEFAULT_TABLE_WIDTH,
+) -> None:
+    """Print a bordered :class:`rich.panel.Panel` to stdout.
+
+    Used by ``hardware-hunter explain`` (Story 4.7) to box one
+    evaluation per panel. ``markup=False`` so listing text containing
+    ``[...]`` isn't eaten by rich's markup parser.
+    """
+    from rich.box import ROUNDED
+    from rich.panel import Panel
+    from rich.text import Text
+
+    console = _build_console(sys.stdout, width=width)
+    console.print(Panel(Text(body), title=title, box=ROUNDED, width=width))
+
+
 _PROSE_WIDTH = 4096
 
 

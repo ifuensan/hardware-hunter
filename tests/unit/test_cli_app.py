@@ -138,7 +138,6 @@ def test_bare_invocation_without_env_exits_missing_creds() -> None:
 @pytest.mark.parametrize(
     "argv",
     [
-        ["explain"],
         ["logs"],
         ["smoke-test"],
         ["phase2", "enable", "wd_red_plus_4tb"],

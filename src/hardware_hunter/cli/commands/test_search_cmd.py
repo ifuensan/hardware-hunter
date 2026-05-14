@@ -96,9 +96,7 @@ def run(
     entry = _resolve_entry(query_or_entry, wishlist)
     # ``marketplace`` is narrowed to a valid Marketplace literal by the
     # membership guard above.
-    targets: tuple[Marketplace, ...] = (
-        (marketplace,) if marketplace is not None else _MARKETPLACES
-    )
+    targets: tuple[Marketplace, ...] = (marketplace,) if marketplace is not None else _MARKETPLACES
     outcome = asyncio.run(
         _search_all(
             entry=entry,
