@@ -353,6 +353,10 @@ def cmd_smoke_test() -> None:
 
 _DEFAULT_DATA_DIR = Path("/app/data")
 
+# eBay Browse-API OAuth scope — kept as a plain string here so typer can
+# use it as a default without importing the adapter at module-load time.
+_EBAY_DEFAULT_SCOPE = "https://api.ebay.com/oauth/api_scope"
+
 
 @login_app.command("wallapop")
 def cmd_login_wallapop(
@@ -382,9 +386,45 @@ def cmd_login_wallapop(
 
 
 @login_app.command("ebay")
-def cmd_login_ebay() -> None:
-    """eBay OAuth flow (Epic 2)."""
-    _placeholder()
+def cmd_login_ebay(
+    ru_name: Annotated[
+        str,
+        typer.Option(
+            "--ru-name",
+            help="Your eBay RuName (registered redirect-URL name).",
+        ),
+    ],
+    data_dir: Annotated[
+        Path,
+        typer.Option(
+            "--data-dir",
+            "-d",
+            help="Where to write the OAuth token file (default: /app/data).",
+        ),
+    ] = _DEFAULT_DATA_DIR,
+    scope: Annotated[
+        str,
+        typer.Option("--scope", help="OAuth scope to request (default: Browse API scope)."),
+    ] = _EBAY_DEFAULT_SCOPE,
+    env_path: Annotated[
+        Path,
+        typer.Option("--env-path", "-e", help="Path to .env (default: ./config/.env)."),
+    ] = _DEFAULT_ENV_PATH,
+) -> None:
+    """eBay OAuth authorization-code flow (Story 2.10)."""
+    from hardware_hunter.cli.commands.login_ebay import run
+    from hardware_hunter.config.env import load_env_or_exit
+
+    env = load_env_or_exit(env_path)
+    exit_code = run(
+        data_dir,
+        app_id=env.EBAY_APP_ID,
+        cert_id=env.EBAY_CERT_ID,
+        ru_name=ru_name,
+        scope=scope,
+    )
+    if exit_code != 0:
+        raise typer.Exit(code=exit_code)
 
 
 @phase2_app.command("enable")

@@ -143,7 +143,6 @@ def test_bare_invocation_without_env_exits_missing_creds() -> None:
         ["health"],
         ["logs"],
         ["smoke-test"],
-        ["login", "ebay"],
         ["phase2", "enable", "wd_red_plus_4tb"],
         ["phase2", "disable", "wd_red_plus_4tb"],
         ["phase2", "status"],
@@ -169,6 +168,18 @@ def test_login_wallapop_in_non_tty_exits_1(runner: CliRunner) -> None:
     result = runner.invoke(app, ["login", "wallapop", "--data-dir", "/tmp"])
     assert result.exit_code == 1
     assert "interactive terminal" in result.stderr
+
+
+def test_login_ebay_missing_ru_name_exits_usage(runner: CliRunner) -> None:
+    """``login ebay`` requires ``--ru-name``; omitting it is a usage error.
+
+    Confirms the Story 2.10 command is mounted with its required option
+    without needing a populated ``.env`` (the env load happens after
+    typer's argument parsing).
+    """
+    result = runner.invoke(app, ["login", "ebay"])
+    assert result.exit_code == 2  # FR48 usage error
+    assert "ru-name" in result.stderr.lower() or "ru_name" in result.stderr.lower()
 
 
 # ─────────────────────────────────────────────────────────────────────────

@@ -128,6 +128,21 @@ class EbayAuthFailed(EbayError):
     """
 
 
+class EbayOAuthExchangeFailed(EbayError):
+    """The authorization-code → token exchange was rejected (HTTP 4xx).
+
+    Raised by ``hardware-hunter login ebay`` when eBay refuses to swap
+    the operator-pasted authorization code for tokens — usually a stale
+    or mistyped code. ``ebay_message`` carries eBay's own error text so
+    the CLI can surface it verbatim.
+    """
+
+    def __init__(self, status_code: int, ebay_message: str) -> None:
+        self.status_code = status_code
+        self.ebay_message = ebay_message
+        super().__init__(f"eBay OAuth exchange failed (HTTP {status_code}): {ebay_message}")
+
+
 class EbayQuotaExceeded(EbayError):
     """Daily request budget would be exceeded by the next call.
 
