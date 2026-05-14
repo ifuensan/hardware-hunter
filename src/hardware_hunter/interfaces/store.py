@@ -50,8 +50,20 @@ class Store(ABC):
         """``True`` iff the (listing, entry) pair already triggered an alert."""
 
     @abstractmethod
-    async def record_seen(self, listing: Listing, entry_key: EntryKey) -> None:
-        """Mark the (listing, entry) pair as seen — no-op if already present."""
+    async def record_seen(
+        self,
+        listing: Listing,
+        entry_key: EntryKey,
+        *,
+        match_fired: bool = False,
+    ) -> None:
+        """Mark the (listing, entry) pair as seen — no-op if already present.
+
+        ``match_fired`` records whether this sighting produced an alert
+        (``True``) or was dropped below the confidence threshold
+        (``False``). ``audit show --include-dropped`` (Story 4.5) reads
+        this flag to surface the dropped sightings.
+        """
 
     # ─────────────────────────────────────────────────────────────────
     # Phase 1: snooze state

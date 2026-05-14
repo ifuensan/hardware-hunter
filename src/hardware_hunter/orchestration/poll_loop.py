@@ -339,7 +339,7 @@ async def _dispatch_alert(
 
     try:
         await store.record_alert_snapshot(snapshot)
-        await store.record_seen(listing, entry.entry_key)
+        await store.record_seen(listing, entry.entry_key, match_fired=True)
     except Exception as exc:
         log.error(  # type: ignore[attr-defined]
             "alert_persist_failed",

@@ -1,0 +1,25 @@
+# serializer version: 1
+# name: test_show_json_golden
+  '''
+  [
+    {
+      "id": 1,
+      "type": "alert",
+      "timestamp": "2026-05-14T12:00:00Z",
+      "summary": "WD Red Plus 4TB (WD40EFPX) \u00b7 wallapop \u00b7 high"
+    },
+    {
+      "id": 2,
+      "type": "alert",
+      "timestamp": "2026-05-14T11:59:00Z",
+      "summary": "WD Red Plus 4TB (WD40EFPX) \u00b7 wallapop \u00b7 high"
+    },
+    {
+      "id": 3,
+      "type": "alert",
+      "timestamp": "2026-05-14T11:58:00Z",
+      "summary": "WD Red Plus 4TB (WD40EFPX) \u00b7 wallapop \u00b7 high"
+    }
+  ]
+  '''
+# ---

@@ -90,7 +90,13 @@ class _FakeStore(Store):
     async def is_seen(self, listing_id: str, entry_key: EntryKey) -> bool:
         return False
 
-    async def record_seen(self, listing: Listing, entry_key: EntryKey) -> None:
+    async def record_seen(
+        self,
+        listing: Listing,
+        entry_key: EntryKey,
+        *,
+        match_fired: bool = False,
+    ) -> None:
         return None
 
     # Snooze state.

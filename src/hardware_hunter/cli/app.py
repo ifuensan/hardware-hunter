@@ -484,9 +484,74 @@ def cmd_phase2_status() -> None:
 
 
 @audit_app.command("show")
-def cmd_audit_show() -> None:
-    """Show recent audit-log entries (Epic 4)."""
-    _placeholder()
+def cmd_audit_show(
+    last: Annotated[
+        int,
+        typer.Option("--last", "-n", help="Show the N most recent records (default 10)."),
+    ] = 10,
+    record_id: Annotated[
+        int | None,
+        typer.Option("--id", help="Show a single record by audit_id, in full detail."),
+    ] = None,
+    type_filter: Annotated[
+        str | None,
+        typer.Option("--type", help="Filter by record type: alert, callback, or dropped."),
+    ] = None,
+    since: Annotated[
+        str | None,
+        typer.Option("--since", help="Only records at/after this ISO 8601 date or datetime."),
+    ] = None,
+    include_dropped: Annotated[
+        bool,
+        typer.Option("--include-dropped", help="Include dropped-below-threshold sightings."),
+    ] = False,
+    output_format: Annotated[
+        str,
+        typer.Option("--format", help="Output format: 'human' (default) or 'json'."),
+    ] = "human",
+    data_dir: Annotated[
+        Path,
+        typer.Option("--data-dir", "-d", help="Daemon state dir (default: /app/data)."),
+    ] = _DEFAULT_DATA_DIR,
+) -> None:
+    """Inspect the local append-only audit log (Story 4.5)."""
+    from hardware_hunter.cli.commands.audit_cmd import run_show
+
+    exit_code = run_show(
+        data_dir=data_dir,
+        last=last,
+        record_id=record_id,
+        type_filter=type_filter,
+        since=since,
+        include_dropped=include_dropped,
+        output_format=output_format,
+    )
+    if exit_code != 0:
+        raise typer.Exit(code=exit_code)
+
+
+@audit_app.command("export")
+def cmd_audit_export(
+    since: Annotated[
+        str | None,
+        typer.Option("--since", help="Only records at/after this ISO 8601 date or datetime."),
+    ] = None,
+    output_format: Annotated[
+        str,
+        typer.Option("--format", help="Output format (only 'json' / JSONL is supported)."),
+    ] = "json",
+    data_dir: Annotated[
+        Path,
+        typer.Option("--data-dir", "-d", help="Daemon state dir (default: /app/data)."),
+    ] = _DEFAULT_DATA_DIR,
+) -> None:
+    """Stream the full audit log as JSON Lines (Story 4.5)."""
+    from hardware_hunter.cli.commands.audit_cmd import run_export
+
+    _ = output_format  # JSONL is the only supported shape; flag kept for symmetry
+    exit_code = run_export(data_dir=data_dir, since=since)
+    if exit_code != 0:
+        raise typer.Exit(code=exit_code)
 
 
 @wishlist_app.command("list")

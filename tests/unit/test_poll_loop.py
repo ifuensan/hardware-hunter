@@ -165,15 +165,23 @@ class _FakeStore(Store):
         self.snapshots: list[AlertSnapshot] = []
         self.snooze_until: dict[EntryKey, datetime] = {}
         self.record_seen_calls: list[tuple[str, EntryKey]] = []
+        self.match_fired_calls: list[tuple[str, bool]] = []
         self.record_alert_calls: list[AlertSnapshot] = []
         self.meta: dict[str, str] = {}
 
     async def is_seen(self, listing_id: str, entry_key: EntryKey) -> bool:
         return (listing_id, entry_key) in self.seen
 
-    async def record_seen(self, listing: Listing, entry_key: EntryKey) -> None:
+    async def record_seen(
+        self,
+        listing: Listing,
+        entry_key: EntryKey,
+        *,
+        match_fired: bool = False,
+    ) -> None:
         self.record_seen_calls.append((listing.listing_id, entry_key))
         self.seen.add((listing.listing_id, entry_key))
+        self.match_fired_calls.append((listing.listing_id, match_fired))
 
     async def get_snooze_until(self, entry_key: EntryKey) -> datetime | None:
         return self.snooze_until.get(entry_key)

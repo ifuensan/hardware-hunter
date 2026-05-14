@@ -77,21 +77,33 @@ class SqliteStore(Store):
 
         return await asyncio.to_thread(_read)
 
-    async def record_seen(self, listing: Listing, entry_key: EntryKey) -> None:
+    async def record_seen(
+        self,
+        listing: Listing,
+        entry_key: EntryKey,
+        *,
+        match_fired: bool = False,
+    ) -> None:
         now = datetime.now(UTC).isoformat()
+        fired = 1 if match_fired else 0
 
         def _write() -> None:
+            # On conflict we bump last_seen_at and only ever ratchet
+            # match_fired up (0 → 1) — a later dropped sighting must not
+            # erase the record that this pairing once alerted.
             self._connection.execute(
                 """
                 INSERT INTO seen_listings (
                     listing_id, entry_manufacturer, entry_model, entry_ref,
                     url, first_seen_at, last_seen_at, match_fired
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT (listing_id, entry_manufacturer, entry_model, entry_ref)
-                DO UPDATE SET last_seen_at = excluded.last_seen_at
+                DO UPDATE SET
+                    last_seen_at = excluded.last_seen_at,
+                    match_fired = MAX(seen_listings.match_fired, excluded.match_fired)
                 """,
-                (listing.listing_id, *entry_key, listing.url, now, now),
+                (listing.listing_id, *entry_key, listing.url, now, now, fired),
             )
 
         async with self._write_lock:
