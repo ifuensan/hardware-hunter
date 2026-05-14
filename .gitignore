@@ -44,6 +44,9 @@ htmlcov/
 # Duplicate BMAD tooling — .claude/ is the canonical Claude Code skills location
 /.agents/
 
+# Claude Code runtime artifacts (the skills under .claude/ ARE tracked)
+.claude/scheduled_tasks.lock
+
 # OS
 .DS_Store
 Thumbs.db
