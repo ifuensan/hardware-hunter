@@ -1,0 +1,18 @@
+{
+  "id": "wd-red-plus-4tb-abc123",
+  "title": "WD Red Plus 4TB NAS disk",
+  "description": "Como nuevo, en caja",
+  "price": {
+    "amount": "55.00",
+    "currency": "EUR"
+  },
+  "location": {
+    "city": "Madrid"
+  },
+  "user": {
+    "id": "user-007",
+    "items_count": 42
+  },
+  "preferred_photo_url": "https://cdn.wallapop.com/p.jpg",
+  "publish_date": "2026-05-10T09:30:00Z"
+}

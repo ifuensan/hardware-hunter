@@ -1,0 +1,5 @@
+{
+  "kind": "wallapop_html",
+  "price_eur": "53.00",
+  "notes": "Q9 regression: the page renders 53,00 € (Spanish comma decimal). A naïve parser would read 0.53; the correct parser must yield 53.00."
+}

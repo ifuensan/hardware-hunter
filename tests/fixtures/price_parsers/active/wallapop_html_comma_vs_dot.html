@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<!--
+  Q9 regression fixture — the canonical comma-vs-dot drift that motivated
+  the smoke test in the first place. The page shows the price as "53,00 €"
+  (Spanish locale). A naïve parser that treats ',' as a thousands separator
+  reads this as 0.53 €. The correct parser must yield Decimal("53.00").
+-->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>WD Red Plus 4TB · Wallapop</title>
+</head>
+<body>
+  <main class="listing">
+    <h1 class="item-detail__title">WD Red Plus 4TB</h1>
+    <p class="item-detail__location">Barcelona</p>
+    <section class="item-detail__price">
+      <!-- No data-price-amount attribute on this page; the parser must
+           interpret the rendered "53,00 €" correctly. -->
+      <span class="item-detail__price-amount">53,00 €</span>
+    </section>
+    <p class="item-detail__description">Funcionando perfecto.</p>
+  </main>
+</body>
+</html>

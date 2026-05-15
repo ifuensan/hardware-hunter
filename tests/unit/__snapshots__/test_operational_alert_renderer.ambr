@@ -75,6 +75,27 @@
   2\. `hardware-hunter logs --last 50`
   '''
 # ---
+# name: test_operational_alert_matches_snapshot[smoke_test_failed]
+  '''
+  ⚠️ *Smoke test fallido*
+  
+  Fixture: wallapop\_html\_comma\_vs\_dot
+  Parser: 0\.53 € · esperado: 53\.00 € · delta: 52\.47 €
+  Estado actual: Fase 2 desactivada globalmente
+  
+  Próximo paso:
+  1\. `hardware-hunter phase2 smoke-test`
+  2\. `hardware-hunter audit show --type phase2_smoke_test --last 3`
+  3\. parchea el parser y reactiva con `hardware-hunter phase2 enable <entry>`
+  '''
+# ---
+# name: test_operational_alert_matches_snapshot[smoke_test_recovered]
+  '''
+  ℹ️ Smoke test recuperado
+  
+  Estado: parser de precios recuperado; Fase 2 puede reactivarse
+  '''
+# ---
 # name: test_operational_alert_matches_snapshot[tinyfish_fallback_active]
   '''
   ℹ️ Fallback TinyFish activo

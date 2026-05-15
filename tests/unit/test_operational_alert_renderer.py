@@ -62,6 +62,17 @@ _FIXTURES: dict[EventName, tuple[Severity, dict[str, Any]]] = {
             "last_affected_entry": "WD Red Plus 4TB / WD40EFPX",
         },
     ),
+    EventName.smoke_test_failed: (
+        "warn",
+        {
+            "fixture_name": "wallapop_html_comma_vs_dot",
+            "parsed_price": "0.53",
+            "expected_price": "53.00",
+            "delta_eur": "52.47",
+            "parser_error_class": "—",
+        },
+    ),
+    EventName.smoke_test_recovered: ("info", {}),
 }
 
 

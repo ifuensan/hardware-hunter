@@ -369,9 +369,12 @@ class EventName(enum.Enum):
     llm_provider_rate_limited = "llm_provider_rate_limited"
     entry_snoozed = "entry_snoozed"
     poll_cycle_error = "poll_cycle_error"
-    # Phase 2 — Story 5.5 lands the first variant here (the circuit-breaker
-    # lockout); the remaining Phase 2 lifecycle events follow in Story 5.11.
+    # Phase 2 — Stories 5.5 + 5.6 land the first three variants (circuit
+    # breaker lockout + smoke-test outcome alerts); the remaining Phase 2
+    # lifecycle events follow in Story 5.11.
     circuit_open = "circuit_open"
+    smoke_test_failed = "smoke_test_failed"
+    smoke_test_recovered = "smoke_test_recovered"
 
 
 def _prose(text: str) -> str:
@@ -488,6 +491,28 @@ def _body_entry_snoozed(ctx: Mapping[str, Any]) -> list[str]:
     ]
 
 
+def _body_smoke_test_failed(ctx: Mapping[str, Any]) -> list[str]:
+    fixture = str(ctx.get("fixture_name", "—"))
+    parsed = str(ctx.get("parsed_price", "—"))
+    expected = str(ctx.get("expected_price", "—"))
+    delta = str(ctx.get("delta_eur", "—"))
+    return [
+        _prose(f"Fixture: {fixture}"),
+        _prose(f"Parser: {parsed} € · esperado: {expected} € · delta: {delta} €"),
+        _prose("Estado actual: Fase 2 desactivada globalmente"),
+        "",
+        _prose("Próximo paso:"),
+        _prose("1. ") + _cmd("hardware-hunter phase2 smoke-test"),
+        _prose("2. ") + _cmd("hardware-hunter audit show --type phase2_smoke_test --last 3"),
+        _prose("3. parchea el parser y reactiva con ")
+        + _cmd("hardware-hunter phase2 enable <entry>"),
+    ]
+
+
+def _body_smoke_test_recovered(_ctx: Mapping[str, Any]) -> list[str]:
+    return [_prose("Estado: parser de precios recuperado; Fase 2 puede reactivarse")]
+
+
 def _body_circuit_open(ctx: Mapping[str, Any]) -> list[str]:
     failures = ctx.get("consecutive_failures", "—")
     threshold = ctx.get("threshold", "—")
@@ -571,6 +596,12 @@ _OPERATIONAL_EVENT_SPECS: Final[dict[EventName, _OperationalEventSpec]] = {
     ),
     EventName.circuit_open: _OperationalEventSpec(
         "warn", "Fase 2 desactivada globalmente", _body_circuit_open
+    ),
+    EventName.smoke_test_failed: _OperationalEventSpec(
+        "warn", "Smoke test fallido", _body_smoke_test_failed
+    ),
+    EventName.smoke_test_recovered: _OperationalEventSpec(
+        "info", "Smoke test recuperado", _body_smoke_test_recovered
     ),
 }
 
