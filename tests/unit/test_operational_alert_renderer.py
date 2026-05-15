@@ -73,6 +73,43 @@ _FIXTURES: dict[EventName, tuple[Severity, dict[str, Any]]] = {
         },
     ),
     EventName.smoke_test_recovered: ("info", {}),
+    EventName.phase2_disabled: (
+        "warn",
+        {
+            "reason": "receipt_mismatch",
+            "last_affected_entry": "WD Red Plus 4TB / WD40EFPX",
+        },
+    ),
+    EventName.phase2_re_enabled: (
+        "info",
+        {"entry": "WD Red Plus 4TB / WD40EFPX"},
+    ),
+    EventName.phase2_buy_callback_received: (
+        "info",
+        {
+            "entry": "WD Red Plus 4TB / WD40EFPX",
+            "alert_id": "12345678-1234-1234-1234-123456789abc",
+        },
+    ),
+    EventName.phase2_screenshot_missing: (
+        "warn",
+        {"receipt_id": "WP-2026-0001", "listing_id": "abc123"},
+    ),
+    EventName.phase2_buy_completion_slow: (
+        "info",
+        {
+            "entry": "WD Red Plus 4TB / WD40EFPX",
+            "elapsed_seconds": 87,
+            "budget_seconds": 60,
+        },
+    ),
+    EventName.buy_orchestrator_error: (
+        "warn",
+        {
+            "error_class": "TinyFishSessionLost",
+            "alert_id": "12345678-1234-1234-1234-123456789abc",
+        },
+    ),
 }
 
 

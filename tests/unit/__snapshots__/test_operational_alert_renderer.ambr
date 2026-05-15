@@ -1,4 +1,18 @@
 # serializer version: 1
+# name: test_operational_alert_matches_snapshot[buy_orchestrator_error]
+  '''
+  ⚠️ *Error en el orquestador de compra*
+  
+  Causa: TinyFishSessionLost
+  Alert: 12345678\-1234\-1234\-1234\-123456789abc
+  Estado actual: Fase 2 desactivada por seguridad
+  
+  Próximo paso:
+  1\. `hardware-hunter audit show --last 5`
+  2\. `hardware-hunter logs --last 100`
+  3\. `hardware-hunter phase2 enable <entry>`
+  '''
+# ---
 # name: test_operational_alert_matches_snapshot[circuit_open]
   '''
   ⚠️ *Fase 2 desactivada globalmente*
@@ -61,6 +75,57 @@
   
   Proveedor: gemini\-flash \(rate\-limited\)
   Estado: la caché y el reintento absorben el límite
+  '''
+# ---
+# name: test_operational_alert_matches_snapshot[phase2_buy_callback_received]
+  '''
+  ℹ️ Buy callback recibido
+  
+  Entrada: WD Red Plus 4TB / WD40EFPX
+  Alert: 12345678\-1234\-1234\-1234\-123456789abc
+  Estado: compra en curso
+  '''
+# ---
+# name: test_operational_alert_matches_snapshot[phase2_buy_completion_slow]
+  '''
+  ℹ️ Compra completada con retraso
+  
+  Entrada: WD Red Plus 4TB / WD40EFPX
+  Duración: 87s \(presupuesto: 60s\)
+  Estado: la compra terminó pero excedió el presupuesto
+  '''
+# ---
+# name: test_operational_alert_matches_snapshot[phase2_disabled]
+  '''
+  ⚠️ *Fase 2 desactivada globalmente*
+  
+  Causa: receipt\_mismatch
+  Última entrada afectada: WD Red Plus 4TB / WD40EFPX
+  Estado actual: Fase 2 desactivada globalmente
+  
+  Próximo paso:
+  1\. `hardware-hunter audit show --last 5`
+  2\. revisa el motivo y parchea si es un bug
+  3\. `hardware-hunter phase2 enable <entry>`
+  '''
+# ---
+# name: test_operational_alert_matches_snapshot[phase2_re_enabled]
+  '''
+  ℹ️ Fase 2 reactivada
+  
+  Entrada: WD Red Plus 4TB / WD40EFPX
+  '''
+# ---
+# name: test_operational_alert_matches_snapshot[phase2_screenshot_missing]
+  '''
+  ⚠️ *Captura del recibo no disponible*
+  
+  Recibo: WP\-2026\-0001 · listing: abc123
+  Estado: la compra puede haberse completado, pero no se capturó el recibo
+  
+  Próximo paso:
+  1\. `hardware-hunter audit show --last 5`
+  2\. revisa el marketplace manualmente para confirmar la transacción
   '''
 # ---
 # name: test_operational_alert_matches_snapshot[poll_cycle_error]

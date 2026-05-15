@@ -369,12 +369,17 @@ class EventName(enum.Enum):
     llm_provider_rate_limited = "llm_provider_rate_limited"
     entry_snoozed = "entry_snoozed"
     poll_cycle_error = "poll_cycle_error"
-    # Phase 2 — Stories 5.5 + 5.6 land the first three variants (circuit
-    # breaker lockout + smoke-test outcome alerts); the remaining Phase 2
-    # lifecycle events follow in Story 5.11.
+    # Phase 2 operational variants (Stories 5.5, 5.6, 5.11). The set is
+    # closed: any new variant is a PRD amendment.
     circuit_open = "circuit_open"
     smoke_test_failed = "smoke_test_failed"
     smoke_test_recovered = "smoke_test_recovered"
+    phase2_disabled = "phase2_disabled"
+    phase2_re_enabled = "phase2_re_enabled"
+    phase2_buy_callback_received = "phase2_buy_callback_received"
+    phase2_screenshot_missing = "phase2_screenshot_missing"
+    phase2_buy_completion_slow = "phase2_buy_completion_slow"
+    buy_orchestrator_error = "buy_orchestrator_error"
 
 
 def _prose(text: str) -> str:
@@ -513,6 +518,75 @@ def _body_smoke_test_recovered(_ctx: Mapping[str, Any]) -> list[str]:
     return [_prose("Estado: parser de precios recuperado; Fase 2 puede reactivarse")]
 
 
+def _body_phase2_disabled(ctx: Mapping[str, Any]) -> list[str]:
+    reason = str(ctx.get("reason", "—"))
+    last_entry = str(ctx.get("last_affected_entry", "—"))
+    return [
+        _prose(f"Causa: {reason}"),
+        _prose(f"Última entrada afectada: {last_entry}"),
+        _prose("Estado actual: Fase 2 desactivada globalmente"),
+        "",
+        _prose("Próximo paso:"),
+        _prose("1. ") + _cmd("hardware-hunter audit show --last 5"),
+        _prose("2. revisa el motivo y parchea si es un bug"),
+        _prose("3. ") + _cmd("hardware-hunter phase2 enable <entry>"),
+    ]
+
+
+def _body_phase2_re_enabled(ctx: Mapping[str, Any]) -> list[str]:
+    entry = str(ctx.get("entry", "—"))
+    return [_prose(f"Entrada: {entry}")]
+
+
+def _body_phase2_buy_callback_received(ctx: Mapping[str, Any]) -> list[str]:
+    entry = str(ctx.get("entry", "—"))
+    alert_id = str(ctx.get("alert_id", "—"))
+    return [
+        _prose(f"Entrada: {entry}"),
+        _prose(f"Alert: {alert_id}"),
+        _prose("Estado: compra en curso"),
+    ]
+
+
+def _body_phase2_screenshot_missing(ctx: Mapping[str, Any]) -> list[str]:
+    receipt_id = str(ctx.get("receipt_id", "—"))
+    listing_id = str(ctx.get("listing_id", "—"))
+    return [
+        _prose(f"Recibo: {receipt_id} · listing: {listing_id}"),
+        _prose("Estado: la compra puede haberse completado, pero no se capturó el recibo"),
+        "",
+        _prose("Próximo paso:"),
+        _prose("1. ") + _cmd("hardware-hunter audit show --last 5"),
+        _prose("2. revisa el marketplace manualmente para confirmar la transacción"),
+    ]
+
+
+def _body_phase2_buy_completion_slow(ctx: Mapping[str, Any]) -> list[str]:
+    elapsed = ctx.get("elapsed_seconds", "—")
+    budget = ctx.get("budget_seconds", "—")
+    entry = str(ctx.get("entry", "—"))
+    return [
+        _prose(f"Entrada: {entry}"),
+        _prose(f"Duración: {elapsed}s (presupuesto: {budget}s)"),
+        _prose("Estado: la compra terminó pero excedió el presupuesto"),
+    ]
+
+
+def _body_buy_orchestrator_error(ctx: Mapping[str, Any]) -> list[str]:
+    error_class = str(ctx.get("error_class", "—"))
+    alert_id = str(ctx.get("alert_id", "—"))
+    return [
+        _prose(f"Causa: {error_class}"),
+        _prose(f"Alert: {alert_id}"),
+        _prose("Estado actual: Fase 2 desactivada por seguridad"),
+        "",
+        _prose("Próximo paso:"),
+        _prose("1. ") + _cmd("hardware-hunter audit show --last 5"),
+        _prose("2. ") + _cmd("hardware-hunter logs --last 100"),
+        _prose("3. ") + _cmd("hardware-hunter phase2 enable <entry>"),
+    ]
+
+
 def _body_circuit_open(ctx: Mapping[str, Any]) -> list[str]:
     failures = ctx.get("consecutive_failures", "—")
     threshold = ctx.get("threshold", "—")
@@ -602,6 +676,32 @@ _OPERATIONAL_EVENT_SPECS: Final[dict[EventName, _OperationalEventSpec]] = {
     ),
     EventName.smoke_test_recovered: _OperationalEventSpec(
         "info", "Smoke test recuperado", _body_smoke_test_recovered
+    ),
+    EventName.phase2_disabled: _OperationalEventSpec(
+        "warn", "Fase 2 desactivada globalmente", _body_phase2_disabled
+    ),
+    EventName.phase2_re_enabled: _OperationalEventSpec(
+        "info", "Fase 2 reactivada", _body_phase2_re_enabled
+    ),
+    EventName.phase2_buy_callback_received: _OperationalEventSpec(
+        "info",
+        "Buy callback recibido",
+        _body_phase2_buy_callback_received,
+    ),
+    EventName.phase2_screenshot_missing: _OperationalEventSpec(
+        "warn",
+        "Captura del recibo no disponible",
+        _body_phase2_screenshot_missing,
+    ),
+    EventName.phase2_buy_completion_slow: _OperationalEventSpec(
+        "info",
+        "Compra completada con retraso",
+        _body_phase2_buy_completion_slow,
+    ),
+    EventName.buy_orchestrator_error: _OperationalEventSpec(
+        "warn",
+        "Error en el orquestador de compra",
+        _body_buy_orchestrator_error,
     ),
 }
 
