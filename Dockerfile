@@ -39,17 +39,20 @@ ENV PYTHONUNBUFFERED=1 \
 
 # Non-root runtime user. APP_UID/APP_GID default to 1000 (typical homelab UID);
 # override at build time with --build-arg APP_UID=$(id -u) APP_GID=$(id -g) to
-# keep bind-mounted volumes writable from the host without sudo.
+# keep bind-mounted volumes writable from the host without sudo. Only
+# /app/data and /app/config are owned by the runtime user — the rest of /app
+# stays root-owned so the daemon cannot mutate the copied artefacts
+# (container immutability, Sonar docker:S6504).
 RUN groupadd -g ${APP_GID} salvager \
  && useradd  -u ${APP_UID} -g ${APP_GID} -d /app -s /usr/sbin/nologin -M salvager \
  && mkdir -p /app/data /app/config \
- && chown ${APP_UID}:${APP_GID} /app /app/data /app/config
+ && chown ${APP_UID}:${APP_GID} /app/data /app/config
 
-# Copy the built venv and source from the builder stage (chown inline to keep
-# the image small — a separate `chown -R /app` would duplicate the venv layer).
-COPY --from=builder --chown=${APP_UID}:${APP_GID} /app/.venv /app/.venv
-COPY --from=builder --chown=${APP_UID}:${APP_GID} /app/src /app/src
-COPY --chown=${APP_UID}:${APP_GID} pyproject.toml ./
+# Copied artefacts stay root-owned + world-readable so the salvager user can
+# read+exec but not mutate them (immutability, Sonar docker:S6504).
+COPY --from=builder --chown=root:root --chmod=755 /app/.venv /app/.venv
+COPY --from=builder --chown=root:root --chmod=755 /app/src /app/src
+COPY --chown=root:root --chmod=644 pyproject.toml ./
 
 # Volumes for operator-owned state (NFR-PR1, NFR-S2 mode 0600 verified at startup).
 VOLUME ["/app/data", "/app/config"]
