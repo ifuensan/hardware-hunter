@@ -61,6 +61,14 @@ app.add_typer(phase2_app, name="phase2")
 app.add_typer(audit_app, name="audit")
 app.add_typer(wishlist_app, name="wishlist")
 
+# `dev` subcommand group (Story 5.17): release-audit support — fires
+# canonical alert variants against the configured Telegram chat so the
+# operator can run the UX-DR32 client-variance audit without provoking
+# the underlying daemon state each time.
+from hardware_hunter.cli.commands import dev_cmd as _dev_cmd  # noqa: E402
+
+_dev_cmd.register(app)
+
 
 # Default paths — defined here (before the root callback) because typer
 # evaluates the callback's default arguments at decoration time. Each

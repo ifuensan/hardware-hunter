@@ -268,6 +268,13 @@ def test_render_operational_alert_has_a_single_caller() -> None:
     allowed = {
         src_root / "domain" / "alert.py",  # the definition
         src_root / "orchestration" / "degradation_reporter.py",  # the one caller
+        # Story 5.17 — the release-audit ``dev emit-alert`` command
+        # builds rendered operational variants for one-shot Telegram
+        # capture. It is NOT the runtime degradation path (no dedup,
+        # no health-state), so NFR-R3 is not engaged here; it is an
+        # operator-driven, audited bypass for the v1.0 client-variance
+        # audit only.
+        src_root / "cli" / "dev_alert_fixtures.py",
     }
     call_re = re.compile(r"\brender_operational_alert\s*\(")
 

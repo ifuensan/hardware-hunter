@@ -1,0 +1,9 @@
+🚫 *Compra abortada* · WD Red Plus 4TB
+Causa: Captura del recibo no disponible
+Recibo: `WP-2026-0001`
+
+La compra puede haberse completado, pero no se capturó el recibo\.
+
+Próximo paso:
+1\. `hardware-hunter audit show --id 42`
+2\. `hardware-hunter phase2 reconcile WP-2026-0001`

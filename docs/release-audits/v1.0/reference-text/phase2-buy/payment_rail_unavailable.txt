@@ -1,0 +1,9 @@
+🚫 *Compra abortada* · WD Red Plus 4TB \(WD40EFPX\)
+Causa: Raíl de pago no disponible
+\- Detalle: TinyFishUnavailable
+
+La compra NO se ha ejecutado\.
+
+Próximo paso:
+1\. `hardware-hunter audit show --last 5`
+2\. `hardware-hunter phase2 enable <entry>`

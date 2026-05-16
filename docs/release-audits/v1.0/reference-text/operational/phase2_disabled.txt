@@ -1,0 +1,10 @@
+⚠️ *Fase 2 desactivada globalmente*
+
+Causa: receipt\_mismatch
+Última entrada afectada: WD Red Plus 4TB / WD40EFPX
+Estado actual: Fase 2 desactivada globalmente
+
+Próximo paso:
+1\. `hardware-hunter audit show --last 5`
+2\. revisa el motivo y parchea si es un bug
+3\. `hardware-hunter phase2 enable <entry>`

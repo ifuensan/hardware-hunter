@@ -1,0 +1,11 @@
+🚫 *Compra abortada* · WD Red Plus 4TB \(WD40EFPX\)
+Causa: Reconciliación de precios falló
+\- Wallapop API: 53,00 €
+\- Wallapop HTML: 0,53 €
+\- Tolerancia: 1,00 €
+
+La compra NO se ha ejecutado\.
+
+Próximo paso:
+1\. `hardware-hunter audit show --last 1`
+2\. Revisa el parser HTML antes de reactivar Fase 2 con `hardware-hunter phase2 enable <entry>`

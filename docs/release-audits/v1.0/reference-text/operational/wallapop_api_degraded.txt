@@ -1,0 +1,4 @@
+ℹ️ Wallapop API degradada
+
+Adapter: wallapop\_api \(WallapopApiError\)
+Fallback: wallapop\_tinyfish activo este ciclo

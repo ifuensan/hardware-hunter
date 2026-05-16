@@ -1,0 +1,4 @@
+ℹ️ Fallback TinyFish activo
+
+Adapter: wallapop\_tinyfish en uso como camino de respaldo
+Estado: sin alertas perdidas

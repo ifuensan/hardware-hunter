@@ -1,0 +1,3 @@
+ℹ️ Camino principal de Wallapop recuperado
+
+Adapter: wallapop\_api recuperado como camino principal

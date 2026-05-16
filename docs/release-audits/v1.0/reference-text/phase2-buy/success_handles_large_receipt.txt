@@ -1,0 +1,5 @@
+✅ *Comprado* · 1\.234,56 € · eBay Checkout
+Receipt: `WP-2026-0001-VERY-LONG-RECEIPT-ID-X9`
+Listing: Crucial 16GB DDR4 3200 \(CT16G4DFD832A\)
+Tiempo total: 180 s
+`hardware-hunter audit show --id 99` para el registro completo de eventos\.

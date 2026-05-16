@@ -1,0 +1,6 @@
+ℹ️ Sesión Wallapop expirada
+
+Adapter: wallapop\_api \(devuelve 401\)
+Fallback: wallapop\_tinyfish activo \(sin alertas perdidas\)
+
+Próximo paso: `hardware-hunter login wallapop` cuando puedas

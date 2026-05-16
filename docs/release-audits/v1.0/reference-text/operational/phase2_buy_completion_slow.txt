@@ -1,0 +1,5 @@
+ℹ️ Compra completada con retraso
+
+Entrada: WD Red Plus 4TB / WD40EFPX
+Duración: 87s \(presupuesto: 60s\)
+Estado: la compra terminó pero excedió el presupuesto

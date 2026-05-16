@@ -1,0 +1,9 @@
+⚠️ *Wallapop sin servicio*
+
+Causa: 3 fallos consecutivos · último error: TinyFishUnavailable
+Estado actual: alertas de Wallapop en pausa \(eBay no afectado\)
+
+Próximo paso:
+1\. `hardware-hunter audit show --last 5`
+2\. revisa la conexión o parchea el adaptador si persiste
+3\. `docker-compose restart hardware-hunter`

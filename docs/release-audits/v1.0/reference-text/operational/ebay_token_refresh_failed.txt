@@ -1,0 +1,8 @@
+⚠️ *eBay: token de refresco rechazado*
+
+Causa: el endpoint de refresco rechazó el refresh token \(HTTP 401\)
+Estado actual: alertas de eBay en pausa \(Wallapop no afectado\)
+
+Próximo paso:
+1\. `hardware-hunter login ebay --ru-name <tu-runame>`
+2\. `docker-compose restart hardware-hunter`

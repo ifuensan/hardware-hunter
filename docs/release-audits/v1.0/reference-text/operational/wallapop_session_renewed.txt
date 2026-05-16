@@ -1,0 +1,3 @@
+ℹ️ Sesión Wallapop renovada
+
+Adapter: wallapop\_api \(camino principal reactivado\)

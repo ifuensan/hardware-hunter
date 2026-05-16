@@ -1,0 +1,5 @@
+✅ *Comprado* · 55,00 € · Wallapop Pay
+Receipt: `WP-2026-0001`
+Listing: WD Red Plus 4TB \(WD40EFPX\)
+Tiempo total: 42 s
+`hardware-hunter audit show --id 42` para el registro completo de eventos\.

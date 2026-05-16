@@ -1,0 +1,4 @@
+ℹ️ Cuota diaria de eBay alcanzada
+
+Cuota: 5000/5000 peticiones usadas hoy
+Estado: cadencia de eBay reducida hasta el reset de medianoche UTC

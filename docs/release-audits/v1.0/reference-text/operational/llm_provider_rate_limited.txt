@@ -1,0 +1,4 @@
+ℹ️ Proveedor LLM con rate\-limit
+
+Proveedor: gemini\-flash \(rate\-limited\)
+Estado: la caché y el reintento absorben el límite

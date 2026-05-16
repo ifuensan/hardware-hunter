@@ -1,0 +1,10 @@
+⚠️ *Error en el orquestador de compra*
+
+Causa: TinyFishSessionLost
+Alert: 12345678\-1234\-1234\-1234\-123456789abc
+Estado actual: Fase 2 desactivada por seguridad
+
+Próximo paso:
+1\. `hardware-hunter audit show --last 5`
+2\. `hardware-hunter logs --last 100`
+3\. `hardware-hunter phase2 enable <entry>`
