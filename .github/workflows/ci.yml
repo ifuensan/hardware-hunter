@@ -55,7 +55,31 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen
       - name: pytest --cov
-        run: uv run pytest --cov=hardware_hunter --cov-report=term-missing
+        run: uv run pytest --cov=hardware_hunter --cov-report=term-missing --cov-report=json
+      - name: Upload coverage.json artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-json
+          path: coverage.json
+          retention-days: 7
+
+  phase2-coverage:
+    name: phase2-coverage (NFR-M2)
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: Download coverage.json artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-json
+      - name: Phase 2 critical-path coverage gate (per-module >= 90%)
+        run: uv run python scripts/phase2_coverage_gate.py
 
   adapter-discipline:
     name: adapter-discipline (NFR-M1)
