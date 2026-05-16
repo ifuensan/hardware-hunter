@@ -47,11 +47,11 @@ def _coverage(pct_by_module: dict[str, float]) -> dict[str, object]:
 def test_critical_modules_match_the_ac() -> None:
     """The locked list mirrors Story 5.15's named modules verbatim."""
     expected = {
-        "src/hardware_hunter/orchestration/buy_orchestrator.py",
-        "src/hardware_hunter/orchestration/reconciler.py",
-        "src/hardware_hunter/orchestration/circuit_breaker.py",
-        "src/hardware_hunter/orchestration/smoke_test.py",
-        "src/hardware_hunter/adapters/sqlite_store/audit_writer.py",
+        "src/salvager/orchestration/buy_orchestrator.py",
+        "src/salvager/orchestration/reconciler.py",
+        "src/salvager/orchestration/circuit_breaker.py",
+        "src/salvager/orchestration/smoke_test.py",
+        "src/salvager/adapters/sqlite_store/audit_writer.py",
     }
     assert set(_gate.CRITICAL_MODULES) == expected
 
@@ -76,11 +76,11 @@ def test_module_missing_from_report_is_pending() -> None:
         {
             m: 95.0
             for m in _gate.CRITICAL_MODULES
-            if m != "src/hardware_hunter/orchestration/buy_orchestrator.py"
+            if m != "src/salvager/orchestration/buy_orchestrator.py"
         }
     )
     passing, pending, failing = _gate.check_thresholds(data)
-    assert pending == ["src/hardware_hunter/orchestration/buy_orchestrator.py"]
+    assert pending == ["src/salvager/orchestration/buy_orchestrator.py"]
     assert failing == []
     assert len(passing) == len(_gate.CRITICAL_MODULES) - 1
 
@@ -88,14 +88,14 @@ def test_module_missing_from_report_is_pending() -> None:
 def test_below_threshold_module_fails() -> None:
     data = _coverage(
         {
-            "src/hardware_hunter/orchestration/reconciler.py": 89.99,
-            "src/hardware_hunter/orchestration/circuit_breaker.py": 95.0,
-            "src/hardware_hunter/orchestration/smoke_test.py": 95.0,
-            "src/hardware_hunter/adapters/sqlite_store/audit_writer.py": 95.0,
+            "src/salvager/orchestration/reconciler.py": 89.99,
+            "src/salvager/orchestration/circuit_breaker.py": 95.0,
+            "src/salvager/orchestration/smoke_test.py": 95.0,
+            "src/salvager/adapters/sqlite_store/audit_writer.py": 95.0,
         }
     )
     _passing, _pending, failing = _gate.check_thresholds(data)
-    assert failing == [("src/hardware_hunter/orchestration/reconciler.py", 89.99)]
+    assert failing == [("src/salvager/orchestration/reconciler.py", 89.99)]
 
 
 def test_exactly_ninety_passes() -> None:
@@ -129,10 +129,10 @@ def test_main_passes_when_every_present_module_is_above_threshold(
     report = _write_report(
         tmp_path,
         {
-            "src/hardware_hunter/orchestration/reconciler.py": 100.0,
-            "src/hardware_hunter/orchestration/circuit_breaker.py": 94.5,
-            "src/hardware_hunter/orchestration/smoke_test.py": 98.0,
-            "src/hardware_hunter/adapters/sqlite_store/audit_writer.py": 100.0,
+            "src/salvager/orchestration/reconciler.py": 100.0,
+            "src/salvager/orchestration/circuit_breaker.py": 94.5,
+            "src/salvager/orchestration/smoke_test.py": 98.0,
+            "src/salvager/adapters/sqlite_store/audit_writer.py": 100.0,
         },
     )
     rc = _gate.main(["--report", str(report)])
@@ -149,16 +149,16 @@ def test_main_fails_with_named_module_when_below_threshold(
     report = _write_report(
         tmp_path,
         {
-            "src/hardware_hunter/orchestration/reconciler.py": 87.5,
-            "src/hardware_hunter/orchestration/circuit_breaker.py": 95.0,
-            "src/hardware_hunter/orchestration/smoke_test.py": 95.0,
-            "src/hardware_hunter/adapters/sqlite_store/audit_writer.py": 95.0,
+            "src/salvager/orchestration/reconciler.py": 87.5,
+            "src/salvager/orchestration/circuit_breaker.py": 95.0,
+            "src/salvager/orchestration/smoke_test.py": 95.0,
+            "src/salvager/adapters/sqlite_store/audit_writer.py": 95.0,
         },
     )
     rc = _gate.main(["--report", str(report)])
     assert rc == 1
     captured = capsys.readouterr()
-    assert "FAIL  src/hardware_hunter/orchestration/reconciler.py" in captured.out
+    assert "FAIL  src/salvager/orchestration/reconciler.py" in captured.out
     assert " 87.50%" in captured.out
     assert "NFR-M2" in captured.err
 

@@ -12,17 +12,17 @@ from uuid import uuid4
 
 import pytest
 
-from hardware_hunter.adapters.sqlite_store import (
+from salvager.adapters.sqlite_store import (
     MigrationRunner,
     Phase2AuditWriter,
     open_connection,
 )
-from hardware_hunter.adapters.sqlite_store.migrations import db_path_under
-from hardware_hunter.cli.commands import phase2_cmd
-from hardware_hunter.domain.alert import EventName
-from hardware_hunter.domain.phase2_audit import TransactionRecord
-from hardware_hunter.orchestration.degradation_reporter import Reporter
-from hardware_hunter.orchestration.smoke_test import PriceParser
+from salvager.adapters.sqlite_store.migrations import db_path_under
+from salvager.cli.commands import phase2_cmd
+from salvager.domain.alert import EventName
+from salvager.domain.phase2_audit import TransactionRecord
+from salvager.orchestration.degradation_reporter import Reporter
+from salvager.orchestration.smoke_test import PriceParser
 
 _T0 = datetime(2026, 5, 16, 6, 0, 0, tzinfo=UTC)
 _ENTRY_KEY = ("Western Digital", "WD Red Plus 4TB", "WD40EFPX")

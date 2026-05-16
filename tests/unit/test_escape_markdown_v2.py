@@ -19,7 +19,7 @@ from __future__ import annotations
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-from hardware_hunter.domain.alert import escape_markdown_v2
+from salvager.domain.alert import escape_markdown_v2
 
 # Order matches the renderer module's _MD_V2_RESERVED string.
 # Backslash is handled separately because it doubles itself.

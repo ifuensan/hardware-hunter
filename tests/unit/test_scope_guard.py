@@ -7,7 +7,7 @@ import io
 import pytest
 from ruamel.yaml import YAML
 
-from hardware_hunter.domain.scope_guard import (
+from salvager.domain.scope_guard import (
     FORBIDDEN_FIELDS,
     ScopeViolation,
     check_scope_violations,

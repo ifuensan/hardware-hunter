@@ -17,8 +17,8 @@ from __future__ import annotations
 import inspect
 import re
 
-from hardware_hunter.adapters.sqlite_store import audit_writer
-from hardware_hunter.adapters.sqlite_store.audit_writer import Phase2AuditWriter
+from salvager.adapters.sqlite_store import audit_writer
+from salvager.adapters.sqlite_store.audit_writer import Phase2AuditWriter
 
 _APPEND_ONLY_TABLES = frozenset({"tap_events", "transactions", "phase2_smoke_tests"})
 

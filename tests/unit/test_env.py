@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 from pydantic import SecretStr, ValidationError
 
-from hardware_hunter.config.env import (
+from salvager.config.env import (
     ENV_AUTH_EXIT_CODE,
     get_env_settings,
     load_env_or_exit,
@@ -182,7 +182,7 @@ def test_log_env_loaded_emits_names_only_via_subprocess(
     NAMES but NEVER their values. Runs via subprocess so the structured
     logger's stdout-writing handler can be captured cleanly."""
     snippet = f"""
-        from hardware_hunter.config.env import (
+        from salvager.config.env import (
             get_env_settings,
             log_env_loaded,
             reset_env_cache,

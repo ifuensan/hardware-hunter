@@ -9,17 +9,17 @@ from decimal import Decimal
 import pytest
 from pydantic import SecretStr
 
-from hardware_hunter.adapters.llm_gemini import (
+from salvager.adapters.llm_gemini import (
     GeminiCallable,
     GeminiFlashEvaluator,
 )
-from hardware_hunter.domain.errors import LlmEvaluationError, LlmRateLimited
-from hardware_hunter.domain.listing import Listing
-from hardware_hunter.domain.prompts import (
+from salvager.domain.errors import LlmEvaluationError, LlmRateLimited
+from salvager.domain.listing import Listing
+from salvager.domain.prompts import (
     FORBIDDEN_PROMPT_TERMS,
     build_evaluation_prompt,
 )
-from hardware_hunter.domain.wishlist import WishlistEntry
+from salvager.domain.wishlist import WishlistEntry
 
 # ─────────────────────────────────────────────────────────────────────────
 # Fixtures
@@ -344,7 +344,7 @@ def test_no_other_package_imports_google_genai() -> None:
     from pathlib import Path
 
     repo_root = Path(__file__).resolve().parents[2]
-    adapters_dir = repo_root / "src" / "hardware_hunter" / "adapters"
+    adapters_dir = repo_root / "src" / "salvager" / "adapters"
     for path in adapters_dir.rglob("*.py"):
         if "llm_gemini" in path.parts:
             continue

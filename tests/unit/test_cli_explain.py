@@ -1,4 +1,4 @@
-"""Tests for ``hardware-hunter explain <url>`` — Story 4.7 (FR44).
+"""Tests for ``salvager explain <url>`` — Story 4.7 (FR44).
 
 The marketplace fetcher and the LLM evaluator are mocked at the
 module-construction boundary so no network call is made. The contract
@@ -17,15 +17,15 @@ from typing import Any
 import pytest
 from pydantic import SecretStr
 
-from hardware_hunter.cli.commands import explain_cmd
-from hardware_hunter.cli.commands.explain_cmd import run
-from hardware_hunter.config.config_yaml import ConfigModel
-from hardware_hunter.config.env import EnvSettings
-from hardware_hunter.domain.errors import WallapopApiError
-from hardware_hunter.domain.evaluation import ListingEvaluation
-from hardware_hunter.domain.listing import Listing, SearchQuery
-from hardware_hunter.domain.wishlist import Wishlist, WishlistEntry
-from hardware_hunter.interfaces.page_fetcher import PageFetcher
+from salvager.cli.commands import explain_cmd
+from salvager.cli.commands.explain_cmd import run
+from salvager.config.config_yaml import ConfigModel
+from salvager.config.env import EnvSettings
+from salvager.domain.errors import WallapopApiError
+from salvager.domain.evaluation import ListingEvaluation
+from salvager.domain.listing import Listing, SearchQuery
+from salvager.domain.wishlist import Wishlist, WishlistEntry
+from salvager.interfaces.page_fetcher import PageFetcher
 
 _T0 = datetime(2026, 5, 14, 12, 0, 0, tzinfo=UTC)
 _WALLAPOP_URL = "https://es.wallapop.com/item/wd-red-plus-4tb-abc123"

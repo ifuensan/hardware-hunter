@@ -20,9 +20,9 @@ completedAt: 2026-05-10
 inputDocuments:
   - _bmad-output/planning-artifacts/prd.md
   - _bmad-output/planning-artifacts/architecture.md
-  - _bmad-output/planning-artifacts/prfaq-hardware-hunter.md
-  - _bmad-output/planning-artifacts/prfaq-hardware-hunter-distillate.md
-  - hardware-hunter-bmad-prompt.md
+  - _bmad-output/planning-artifacts/prfaq-salvager.md
+  - _bmad-output/planning-artifacts/prfaq-salvager-distillate.md
+  - salvager-bmad-prompt.md
 documentCounts:
   prd: 1
   architecture: 1
@@ -32,7 +32,7 @@ documentCounts:
   research: 0
   projectDocs: 0
 workflowType: ux-design
-project_name: hardware-hunter
+project_name: salvager
 user_name: ifuensan
 date: 2026-05-10
 uxScope:
@@ -41,15 +41,15 @@ uxScope:
   - onboarding-flow
   - failure-recovery-flow
 visualUI: false
-note: "hardware-hunter has no GUI. UX scope is Telegram message design, inline button choreography, operational alert tone, CLI ergonomics, and failure-recovery UX. No mockups, no wireframes, no design system."
+note: "salvager has no GUI. UX scope is Telegram message design, inline button choreography, operational alert tone, CLI ergonomics, and failure-recovery UX. No mockups, no wireframes, no design system."
 ---
 
-# UX Design Specification — hardware-hunter
+# UX Design Specification — salvager
 
 **Author:** ifuensan
 **Date:** 2026-05-10
 
-> **Scope note.** hardware-hunter has no graphical UI. The user surfaces are a Telegram bot (listing alerts, operational alerts) and an operator CLI (`hardware-hunter <subcommand>`). This document specifies UX for those two surfaces — message anatomy, button choreography, operational tone, CLI ergonomics, onboarding, and failure-recovery flows — not screens or wireframes.
+> **Scope note.** salvager has no graphical UI. The user surfaces are a Telegram bot (listing alerts, operational alerts) and an operator CLI (`salvager <subcommand>`). This document specifies UX for those two surfaces — message anatomy, button choreography, operational tone, CLI ergonomics, onboarding, and failure-recovery flows — not screens or wireframes.
 
 <!-- UX design content will be appended sequentially through collaborative workflow steps -->
 
@@ -57,7 +57,7 @@ note: "hardware-hunter has no GUI. UX scope is Telegram message design, inline b
 
 ### Project Vision
 
-hardware-hunter is a self-hosted personal agent. It watches Wallapop and eBay.es continuously against a YAML wishlist of specific homelab parts and surfaces matches in Telegram — including parts hidden inside larger listings — with opt-in autonomous purchase via a non-bypassable Telegram tap.
+salvager is a self-hosted personal agent. It watches Wallapop and eBay.es continuously against a YAML wishlist of specific homelab parts and surfaces matches in Telegram — including parts hidden inside larger listings — with opt-in autonomous purchase via a non-bypassable Telegram tap.
 
 **From a UX perspective, the product is two surfaces:**
 
@@ -97,9 +97,9 @@ There is no GUI. There is no website. There is no mobile app of our own. Telegra
 
 3. **Container-listing alerts on a phone screen.** The headline differentiator (FR14, container detection) means alerts can be for a wrapper listing — e.g., "NAS Synology DS220 con 2 discos" — where the wanted part is inside. The user needs to see BOTH the wrapper context AND the wanted part identification ("LLM thinks the discos are WD Red 4TB based on the photo metadata") in one glance. Information density vs. mobile readability is the tension.
 
-4. **Operator CLI in emergency mode.** Wallapop session expires Saturday morning; the user wants the agent healthy again before his coffee gets cold. Subcommand discoverability (`hardware-hunter --help` reads like a recovery playbook), error messages that include the next CLI invocation to run, and structured JSON output for piping into `jq`-based recovery scripts all matter.
+4. **Operator CLI in emergency mode.** Wallapop session expires Saturday morning; the user wants the agent healthy again before his coffee gets cold. Subcommand discoverability (`salvager --help` reads like a recovery playbook), error messages that include the next CLI invocation to run, and structured JSON output for piping into `jq`-based recovery scripts all matter.
 
-5. **No-GUI quality bar.** The product is a daemon, but UX still distinguishes hardware-hunter from the existing Wallapop bots. Message formatting, button labels, microcopy, and operator output texture are where the considered-design signal lives.
+5. **No-GUI quality bar.** The product is a daemon, but UX still distinguishes salvager from the existing Wallapop bots. Message formatting, button labels, microcopy, and operator output texture are where the considered-design signal lives.
 
 ### Design Opportunities
 
@@ -107,7 +107,7 @@ There is no GUI. There is no website. There is no mobile app of our own. Telegra
 
 2. **Operational alerts as self-documenting recovery flows.** Calm + instructional tone — every high-priority alert names cause + next CLI command. The user learns the system by reading alerts, not docs. Reduces operator-mode reading burden during stress.
 
-3. **CLI as a calm interface during chaos.** Clear next-step messages; no stack traces unless `--debug`; structured JSON ready to pipe. Stressed-operator UX is an underdesigned space in OSS infra-tools; hardware-hunter can be the exception.
+3. **CLI as a calm interface during chaos.** Clear next-step messages; no stack traces unless `--debug`; structured JSON ready to pipe. Stressed-operator UX is an underdesigned space in OSS infra-tools; salvager can be the exception.
 
 4. **Onboarding that respects the expert.** The user IS the operator IS the developer. No tutorial scaffolding, no guided wizard, no overhelpful CLI prompts. `init` scaffolds, `login` prompts for credentials, `validate-wishlist` confirms. The 60-second-setup story is the goal.
 
@@ -117,8 +117,8 @@ There is no GUI. There is no website. There is no mobile app of our own. Telegra
 |---|---|---|
 | **Telegram user-facing** (listing alerts, button labels, operational alerts the user reads) | **Spanish (Castilian)** | Daily-reading register for ifuensan; matches the (c3) Spanish-homelabber audience; "Comprar / Saltar / Ver" reads naturally |
 | **Operator / CLI surface** (CLI output, log lines, error messages, README, CONTRIBUTING, ROADMAP, code comments) | **English** | OSS standard; forker-friendly; aligns with Stack Overflow / GitHub norms; FRs are already English |
-| **High-priority operational alerts (Telegram)** | Spanish, **calm + instructional** tone | Names the cause + the next CLI command in one read. "⚠️ Fase 2 desactivada. Cross-source price reconciliation: API 53.00 vs HTML 0.53. Revisa el parser HTML, luego `hardware-hunter phase2 enable <entry>` para reactivar." Self-documenting under stress. |
-| **Informational operational alerts (Telegram)** | Spanish, **direct + minimal** tone | Lower-stakes signal; no next-step needed. "ℹ️ Sesión Wallapop expirada. Ejecuta `hardware-hunter login wallapop` cuando puedas." |
+| **High-priority operational alerts (Telegram)** | Spanish, **calm + instructional** tone | Names the cause + the next CLI command in one read. "⚠️ Fase 2 desactivada. Cross-source price reconciliation: API 53.00 vs HTML 0.53. Revisa el parser HTML, luego `salvager phase2 enable <entry>` para reactivar." Self-documenting under stress. |
+| **Informational operational alerts (Telegram)** | Spanish, **direct + minimal** tone | Lower-stakes signal; no next-step needed. "ℹ️ Sesión Wallapop expirada. Ejecuta `salvager login wallapop` cuando puedas." |
 | **Listing data inside alerts** | Whatever the marketplace published (typically Spanish on Wallapop, often Spanish or English on eBay.es) | We don't translate listing content — that's the seller's voice |
 
 **Bilingual asymmetry by design.** The user-facing surface (Telegram) lives in Spanish because it's daily reading for one person; the operator surface (CLI, code, docs) lives in English because it lives at the GitHub norm. A single fork-runner who doesn't read Spanish can override Telegram strings via a `config.yaml > telegram.locale` flag (post-launch enhancement, OQ-tracked); at v1 the user-surface strings are Spanish-only.
@@ -127,13 +127,13 @@ There is no GUI. There is no website. There is no mobile app of our own. Telegra
 
 ### Defining Experience
 
-The defining experience of hardware-hunter is a **5-second decision on a phone screen**:
+The defining experience of salvager is a **5-second decision on a phone screen**:
 
 > Phone buzzes. ifuensan glances. He sees photo, price, location, one-line LLM take, confidence level. He taps *Comprar* (or *Ver*, or *Saltar*). The agent handles the rest.
 
 Everything else exists to make that one moment trustworthy. Marketplace polling, listing dedup, LLM evaluation, prompt anchoring, container detection, cross-source price reconciliation, fail-closed buy flows, audit logging — all invisible scaffolding around a single Telegram message that has to be readable, scannable, and tappable in five seconds.
 
-The secondary experience is **the operator session**: the user opens a terminal on his laptop, runs `hardware-hunter login wallapop`, edits `wishlist.yaml`, runs `hardware-hunter validate-wishlist`, runs `docker-compose restart`. Twelve minutes from session-expired alert to back-in-production.
+The secondary experience is **the operator session**: the user opens a terminal on his laptop, runs `salvager login wallapop`, edits `wishlist.yaml`, runs `salvager validate-wishlist`, runs `docker-compose restart`. Twelve minutes from session-expired alert to back-in-production.
 
 ### Platform Strategy
 
@@ -162,9 +162,9 @@ These should require zero thought from the user; if any of them feels like work,
 | **Tapping a Phase 1 alert button** (*Ver* / *Saltar* / *Posponer 24h*) | Inline keyboard renders natively in Telegram; one tap; no confirmation modal; agent state updates invisibly |
 | **Tapping a Phase 2 *Comprar* button** | One tap; reconciliation + UI checks happen behind the scenes; user gets a confirmation message with receipt screenshot when the transaction completes |
 | **Reading an operational alert at 09:30 Saturday morning** | The alert names the cause AND the next CLI command; user pastes the command, runs it, problem solved without opening docs |
-| **Adding a new wishlist entry** | Edit `wishlist.yaml` in a text editor, run `hardware-hunter validate-wishlist`, restart the daemon; no migration, no UI, no recompilation |
-| **Inspecting why an alert fired** | `hardware-hunter audit show --last 1` returns the alert snapshot + LLM evaluation + confidence — no log spelunking |
-| **Marketplace adapter break recovery** | Operational alert says "Wallapop API responding 401; run `hardware-hunter login wallapop`"; user runs it; cookie refreshed; daemon resumes on next poll |
+| **Adding a new wishlist entry** | Edit `wishlist.yaml` in a text editor, run `salvager validate-wishlist`, restart the daemon; no migration, no UI, no recompilation |
+| **Inspecting why an alert fired** | `salvager audit show --last 1` returns the alert snapshot + LLM evaluation + confidence — no log spelunking |
+| **Marketplace adapter break recovery** | Operational alert says "Wallapop API responding 401; run `salvager login wallapop`"; user runs it; cookie refreshed; daemon resumes on next poll |
 | **Snoozing an entry that's noisy that day** | One tap on *Posponer 24h*; entry-level snooze takes effect immediately; user moves on |
 
 What happens automatically (without user intervention):
@@ -179,7 +179,7 @@ What happens automatically (without user intervention):
 
 What does NOT happen automatically (by design):
 
-- Wallapop session re-login (anti-bot risk; manual `hardware-hunter login wallapop` always).
+- Wallapop session re-login (anti-bot risk; manual `salvager login wallapop` always).
 - Phase 2 re-enable after auto-disable (operator must explicitly `phase2 enable <entry>`).
 - Config-file overwrite during `init` (refuses without `--force` + interactive confirm).
 - Buying without a Telegram tap (no fully-autonomous mode exists; FR29).
@@ -196,7 +196,7 @@ The moments that determine whether the product feels right or wrong.
 
 3. **First Phase 2 auto-disable.** Journey 3 (Q9 scenario). When this fires, the user is on his phone, mildly stressed. If the alert tells him *what failed and what to run next* in one read, he handles it in 10 minutes and trusts the system more (the agent caught a bug). If the alert is cryptic, he turns Phase 2 off permanently. **Operational alert quality determines whether reconciliation is a feature or a fear.**
 
-4. **First Wallapop session expiry.** The agent stops alerting on Wallapop. The operational alert tells him to run `hardware-hunter login wallapop`. He runs it on his laptop, completes the browser flow, restarts the daemon. **If the recovery is smooth, the daemon-style operation feels mature; if there's friction, the user starts dreading Saturdays.**
+4. **First Wallapop session expiry.** The agent stops alerting on Wallapop. The operational alert tells him to run `salvager login wallapop`. He runs it on his laptop, completes the browser flow, restarts the daemon. **If the recovery is smooth, the daemon-style operation feels mature; if there's friction, the user starts dreading Saturdays.**
 
 5. **First container-detection alert that's a true positive.** PRD Success Criterion: ≥ 1 user-confirmed container alert in first 90 days. **This is when the headline differentiator stops being a claim and becomes a fact.**
 
@@ -238,7 +238,7 @@ The LLM verifies a match against an entry; it never picks. No off-wishlist alert
 
 ### Primary Emotional Goals
 
-The dominant feeling we are designing for is **calm confidence** — the agent runs in the background, alerts are purposeful (not noise), the user trusts that nothing important is being missed and nothing surprising will happen. This is unusual for a product: most software wants users excited, engaged, scrolling. hardware-hunter wants users **mostly absent** — the product succeeds when ifuensan stops thinking about it.
+The dominant feeling we are designing for is **calm confidence** — the agent runs in the background, alerts are purposeful (not noise), the user trusts that nothing important is being missed and nothing surprising will happen. This is unusual for a product: most software wants users excited, engaged, scrolling. salvager wants users **mostly absent** — the product succeeds when ifuensan stops thinking about it.
 
 **Primary emotional goal:** Calm — the user no longer wakes up wondering if a deal slipped past, no longer refreshes Wallapop at lunch, no longer feels the time-tax pull. The agent is on watch.
 
@@ -257,7 +257,7 @@ The dominant feeling we are designing for is **calm confidence** — the agent r
 |---|---|---|
 | Read README | "This sounds like exactly what I need" | Honest framing ("personal monitoring tool"), explicit (c3) scope, customer-FAQ that admits when saved searches are a better fit |
 | `git clone` + `docker-compose up` first run | Mild curiosity, no resistance | Single-command install; no surprises; example wishlist that demonstrates the schema |
-| First `hardware-hunter login wallapop` | Brief friction, expected | Manual login is anti-bot-correct; user understands the trade-off from README |
+| First `salvager login wallapop` | Brief friction, expected | Manual login is anti-bot-correct; user understands the trade-off from README |
 | First `validate-wishlist` runs green | Quiet satisfaction | "It accepted my YAML" — small win that signals the system is working |
 | Wait for first alert | Patience, mild anticipation | No fake "system loading…" indicators; the user knows it polls every 15 min |
 
@@ -284,7 +284,7 @@ The dominant feeling we are designing for is **calm confidence** — the agent r
 | Stage | Desired feeling | What creates it |
 |---|---|---|
 | Decide to enable Phase 2 for one entry | Considered, not impulsive | The 4–8 week trust window is real; user decides when, not the product |
-| Run `hardware-hunter phase2 enable WD40EFPX` | Felt sense of stepping over a threshold | CLI confirms "Phase 2 enabled for WD Red Plus 4TB / WD40EFPX. Default confidence threshold: high." |
+| Run `salvager phase2 enable WD40EFPX` | Felt sense of stepping over a threshold | CLI confirms "Phase 2 enabled for WD Red Plus 4TB / WD40EFPX. Default confidence threshold: high." |
 | First Phase 2 alert with [✅ Comprar] button | Brief nervousness, not fear | The agent has 6 weeks of clean Phase 1 history; the trust transfers |
 | Tap [✅ Comprar] | Decision-tap, not commitment-anxiety | Reconciliation + UI checks happen invisibly; user already trusts the agent's judgment |
 | Receive `✅ Comprado · 60.00€ via Wallapop Pay · Receipt: WAL-7Q4-XYZ · [screenshot]` | Quiet satisfaction → habit formation | Receipt confirmation is factual; screenshot proves the transaction; audit log records it |
@@ -295,7 +295,7 @@ The dominant feeling we are designing for is **calm confidence** — the agent r
 |---|---|---|
 | Operational alert fires (`⚠️ Fase 2 desactivada…`) | Mild alarm, not panic | Calm + instructional tone; cause + next step in one read |
 | Read alert | Recognition ("the system caught a real bug") | Specific data (API 53.00 vs HTML 0.53) makes the cause concrete and verifiable |
-| Run `hardware-hunter audit show --last 1` | Confirmed understanding | Audit log shows the exact alert + reconciliation result |
+| Run `salvager audit show --last 1` | Confirmed understanding | Audit log shows the exact alert + reconciliation result |
 | Patch the parser, run `phase2 enable` | Recovered control | Operator action restores Phase 2; no auto-recovery means no surprise re-enables |
 | Reflection 30 min later | **Increased trust** | The agent did its job. The reconciliation stack worked exactly as designed. Phase 2 trust is now stronger, not weaker. |
 
@@ -350,7 +350,7 @@ The emotional goals translate to specific UX choices, several of which override 
 
 **1. The agent is good plumbing, not a personality.**
 
-No bot personality, no emoji-heavy "friendly" tone, no "Hi! I'm hardware-hunter 🤖". Operational alerts and CLI output are direct, factual, and infrastructural. The product feels mature because it doesn't perform maturity.
+No bot personality, no emoji-heavy "friendly" tone, no "Hi! I'm salvager 🤖". Operational alerts and CLI output are direct, factual, and infrastructural. The product feels mature because it doesn't perform maturity.
 
 **2. Silence is success.**
 
@@ -410,7 +410,7 @@ Hardware-hunter has no graphical UI, so traditional "favorite app" inspiration d
 
 - Subcommand-first ergonomics: `gh pr create`, `gh issue list`. Hierarchical and discoverable via `gh <noun> --help`.
 - `--json <fields>` flag for machine output. Default human-readable with subtle color.
-- **Take:** Mirror the structure with `hardware-hunter <noun> <verb>` (`phase2 enable`, `audit show`). Use `--format json` exactly as gh does.
+- **Take:** Mirror the structure with `salvager <noun> <verb>` (`phase2 enable`, `audit show`). Use `--format json` exactly as gh does.
 
 **`git`.**
 
@@ -422,7 +422,7 @@ Hardware-hunter has no graphical UI, so traditional "favorite app" inspiration d
 
 - Verb-noun pattern (`kubectl get pods`, `kubectl describe deployment`). Predictable.
 - `kubectl <verb> <resource>` works for any new resource, by convention. Discoverability via `kubectl api-resources`.
-- **Take:** Predictability is more valuable than cleverness. `hardware-hunter audit show` and `hardware-hunter phase2 enable` follow the same shape; new operator commands fit the same pattern.
+- **Take:** Predictability is more valuable than cleverness. `salvager audit show` and `salvager phase2 enable` follow the same shape; new operator commands fit the same pattern.
 
 **`restic` / `borg` (backup tools).**
 
@@ -458,7 +458,7 @@ Hardware-hunter has no graphical UI, so traditional "favorite app" inspiration d
 **Stripe Dashboard "audit log."**
 
 - Append-only event log; queryable by time and event type; per-event detail page.
-- **Take:** `hardware-hunter audit show` is the equivalent. The Stripe metaphor: each alert/tap/transaction is an immutable event row; investigation means reading rows, not reconstructing state.
+- **Take:** `salvager audit show` is the equivalent. The Stripe metaphor: each alert/tap/transaction is an immutable event row; investigation means reading rows, not reconstructing state.
 
 **Uptime Kuma.**
 
@@ -472,14 +472,14 @@ Hardware-hunter has no graphical UI, so traditional "favorite app" inspiration d
 | **Photo-first listing alert layout** | Price-watch bots | Phase 1 + Phase 2 listing alerts (Telegram) |
 | **Severity-prefix on operational alerts** (`⚠️`/`ℹ️`) | PagerDuty, AlertManager | All operational Telegram alerts (FR21) |
 | **Receipt as factual confirmation, not celebration** | Stripe | Phase 2 buy confirmation message |
-| **Subcommand hierarchy** (noun verb) | `gh`, `kubectl` | `hardware-hunter <area> <action>` (phase2/audit/login) |
+| **Subcommand hierarchy** (noun verb) | `gh`, `kubectl` | `salvager <area> <action>` (phase2/audit/login) |
 | **Error message includes next command** | git, restic | Every CLI error; every operational Telegram alert in calm-instructional tone |
 | **Stable exit codes for scripting** | git, all UNIX tools | FR48 locked codes 0/1/2/3/4/5 |
 | **`--format json` for machine output** | gh, jq-friendly tools | Every read-only operator command |
 | **Color when TTY, plain when piped** | gh, ripgrep | All CLI output |
 | **Append-only audit/event log** | Stripe, Sentry, AWS CloudTrail | Phase 2 audit log (FR36) |
 | **Issue dedup / event grouping** | Sentry | seen-listings dedup index (FR10) |
-| **Health command on demand** | Uptime Kuma, kubectl | `hardware-hunter health` (FR47) |
+| **Health command on demand** | Uptime Kuma, kubectl | `salvager health` (FR47) |
 | **Silence when nothing to report** | ripgrep, restic, cron | All scheduled jobs; daemon log spam discipline |
 | **Calm operational reporting under stress** | restic, borg | Q9 silent-failure recovery alerts |
 
@@ -537,15 +537,15 @@ These come from products in adjacent spaces that erode the calm-confidence emoti
 - ZebraBot's commercial-service model (web dashboard, account management) — out of (c3) scope.
 - Wallapop's own native saved-search alerts — these are the minimum-viable alternative; we differentiate, not imitate.
 
-The throughline: hardware-hunter inherits its UX register from **infrastructure-grade tools** (kubectl, git, restic, PagerDuty, Stripe), not from **consumer or B2C-engagement tools**. That alignment with the operator/maintainer mindset is what makes the no-GUI surface feel considered rather than minimal.
+The throughline: salvager inherits its UX register from **infrastructure-grade tools** (kubectl, git, restic, PagerDuty, Stripe), not from **consumer or B2C-engagement tools**. That alignment with the operator/maintainer mindset is what makes the no-GUI surface feel considered rather than minimal.
 
 ## Design System Foundation
 
 ### Design System Choice
 
-GUI design systems (Material Design, Ant Design, MUI, Tailwind UI, etc.) are **rejected by definition** — hardware-hunter has no graphical UI. Adopting one would imply a phantom dashboard we have no plans to build and conflict with the (c3) "no web UI/dashboard" scope contract.
+GUI design systems (Material Design, Ant Design, MUI, Tailwind UI, etc.) are **rejected by definition** — salvager has no graphical UI. Adopting one would imply a phantom dashboard we have no plans to build and conflict with the (c3) "no web UI/dashboard" scope contract.
 
-The design system for hardware-hunter is **two coordinated micro-systems**, one per surface, sharing a common tone:
+The design system for salvager is **two coordinated micro-systems**, one per surface, sharing a common tone:
 
 1. **Telegram message system** — fixed-template message bodies, severity prefix vocabulary, button label vocabulary, callback_data format, MarkdownV2 conventions.
 2. **CLI styling system** — color tokens, layout primitives, error format, help format, JSON schema conventions; built on **`rich`** (Astral-adjacent ecosystem; pairs natively with typer).
@@ -556,12 +556,12 @@ Both are bespoke (built in-repo), thin (no external design dependencies beyond `
 
 - **No GUI exists** — every GUI design system option is moot.
 - **`rich` for CLI** — typer ships native rich integration; it's the de-facto modern Python CLI rendering library; it gives us styled tables (`audit show`/`health`/`phase2 status`), syntax-highlighted JSON, and Panel components for emphasized blocks at the cost of one runtime dep already counted in NFR-M5's 30-dep budget.
-- **Custom Telegram conventions** — there is no "Telegram design system" library to adopt. Bots build their own. We codify ours in `src/hardware_hunter/domain/alert.py` as a single rendering module so the format cannot drift across stories.
+- **Custom Telegram conventions** — there is no "Telegram design system" library to adopt. Bots build their own. We codify ours in `src/salvager/domain/alert.py` as a single rendering module so the format cannot drift across stories.
 - **Locked formats serve trust** — the FR22 freeze on Telegram alert format is a UX feature: ifuensan's eye learns where to look for price, where to look for the LLM take, where the buttons appear. Format drift would force re-learning.
 
 ### Implementation Approach
 
-**Telegram message system** — implementation lives in `src/hardware_hunter/domain/alert.py` (already locked in architecture).
+**Telegram message system** — implementation lives in `src/salvager/domain/alert.py` (already locked in architecture).
 
 **Rendering primitives:**
 
@@ -640,7 +640,7 @@ Examples:
 
 ---
 
-**CLI styling system** — implementation lives in `src/hardware_hunter/observability/styling.py` (a small module wrapping `rich`).
+**CLI styling system** — implementation lives in `src/salvager/observability/styling.py` (a small module wrapping `rich`).
 
 **Color tokens (semantic, terminal-respecting):**
 
@@ -677,7 +677,7 @@ Two lines. The `error:` prefix is `bold red`; the `hint:` prefix is `dim`. Stack
 
 ```text
 error: Wallapop session expired (cookie returned 401)
-hint: Run `hardware-hunter login wallapop` to re-authenticate
+hint: Run `salvager login wallapop` to re-authenticate
 ```
 
 **Help text format (typer + rich integration):**
@@ -699,8 +699,8 @@ hint: Run `hardware-hunter login wallapop` to re-authenticate
 **Terminal output examples:**
 
 ```text
-$ hardware-hunter health
-hardware-hunter v0.4.2
+$ salvager health
+salvager v0.4.2
 Daemon: running (PID 1, uptime 3d 14h 22m)
 
   Adapter         Status    Last Activity
@@ -718,18 +718,18 @@ Phase 2: enabled on 2 entries (WD40EFPX, WUH721414ALE6L4)
 ```
 
 ```text
-$ hardware-hunter validate-wishlist
+$ salvager validate-wishlist
 ✓ wishlist.yaml is valid (18 entries; 2 with Phase 2 enabled)
 ```
 
 ```text
-$ hardware-hunter validate-wishlist
+$ salvager validate-wishlist
 error: wishlist.yaml validation failed: entry 'WD Red 4TB' contains forbidden field 'expected_resale_value'
-hint: Remove the field. hardware-hunter does not support arbitrage scoring; see ROADMAP.md for the future-research repo path.
+hint: Remove the field. salvager does not support arbitrage scoring; see ROADMAP.md for the future-research repo path.
 ```
 
 ```text
-$ hardware-hunter audit show --last 1 --format json
+$ salvager audit show --last 1 --format json
 [{"id": 142, "type": "alert_snapshot", "ts": "2026-05-10T14:32:17.842Z", "entry": "Western Digital|WD Red Plus 4TB|WD40EFPX", "marketplace": "wallapop", "listing_id": "abc123", "price_eur": 48.00, "confidence": "high", "phase2_enabled_for_entry": true}]
 ```
 
@@ -762,7 +762,7 @@ $ hardware-hunter audit show --last 1 --format json
 For implementation:
 
 ```python
-# src/hardware_hunter/observability/styling.py (CLI side)
+# src/salvager/observability/styling.py (CLI side)
 THEME = {
     "error": "bold red",
     "warn": "bold yellow",
@@ -773,7 +773,7 @@ THEME = {
     "code": "cyan",
 }
 
-# src/hardware_hunter/domain/alert.py (Telegram side)
+# src/salvager/domain/alert.py (Telegram side)
 SEVERITY_TOKENS = {
     "operational_warn": "⚠️ ",
     "operational_info": "ℹ️ ",
@@ -800,7 +800,7 @@ These tokens are the **entire design system**. No additional palettes, no spacin
 
 ### Defining Experience
 
-If hardware-hunter nails one interaction perfectly, everything else follows: **the 5-second Telegram alert decision**.
+If salvager nails one interaction perfectly, everything else follows: **the 5-second Telegram alert decision**.
 
 > Phone buzzes. ifuensan glances at the lock screen. Within 5 seconds — without unlocking, scrolling, or thinking — he knows: *what part is this, how much, where, and what does the LLM think.* He taps one of three buttons. The agent absorbs the consequence.
 
@@ -983,7 +983,7 @@ Receipt: `WAL-7Q4-XYZ`
 Listing: WD Red Plus 4TB
 Tiempo total: 22 s
 
-`hardware-hunter audit show --id 142` for full event trail.
+`salvager audit show --id 142` for full event trail.
 ```
 
 **Anatomy fields:**
@@ -1017,7 +1017,7 @@ Causa: cross-source price reconciliation
 
 La compra NO se ha ejecutado. La Fase 2 sigue activa para esta entrada.
 Si el HTML está roto, ejecuta:
-`hardware-hunter audit show --last 1`
+`salvager audit show --last 1`
 y revisa el parser antes de reactivar.
 ```
 
@@ -1030,7 +1030,7 @@ y revisa el parser antes de reactivar.
 - **State of Phase 2:** explicit one-line statement of whether Phase 2 is still active for this entry, globally disabled, or partially disabled. Removes the cognitive load of figuring out the next state.
 - **Next step (if any):** the exact CLI command to investigate / recover. Copy-paste-ready.
 
-For the auto-disable variant (`🚫` + Phase 2 globally suspended), the message also names the trigger (3 consecutive failures, smoke-test drift, etc.) and the unlock command (`hardware-hunter phase2 enable <entry>`).
+For the auto-disable variant (`🚫` + Phase 2 globally suspended), the message also names the trigger (3 consecutive failures, smoke-test drift, etc.) and the unlock command (`salvager phase2 enable <entry>`).
 
 **Interaction.** None. No buttons. The follow-up happens in the operator's terminal.
 
@@ -1052,9 +1052,9 @@ Causa: 3 fallos consecutivos de reconciliation_tripped
 Estado actual: Fase 2 deshabilitada para 2 entradas
 
 Próximo paso:
-1. `hardware-hunter audit show --last 5` para revisar los fallos
+1. `salvager audit show --last 5` para revisar los fallos
 2. Patch del parser HTML (probablemente)
-3. `hardware-hunter phase2 enable WD40EFPX` para reactivar por entrada
+3. `salvager phase2 enable WD40EFPX` para reactivar por entrada
 ```
 
 **Anatomy fields:**
@@ -1063,7 +1063,7 @@ Próximo paso:
 - **Causa line:** single sentence naming the cause class + count or threshold context.
 - **Last affected entry:** the specific wishlist entry name (lets the user immediately know if it's their critical hunt or a side entry).
 - **Estado actual:** current state of Phase 2 — a single line that answers "what does this mean for my agent right now?".
-- **Próximo paso (numbered list):** ordered CLI commands. Copy-paste-ready. Never more than 4 steps; if recovery requires more, the third step says "see ROADMAP.md / `hardware-hunter docs recovery`" instead of cluttering the alert.
+- **Próximo paso (numbered list):** ordered CLI commands. Copy-paste-ready. Never more than 4 steps; if recovery requires more, the third step says "see ROADMAP.md / `salvager docs recovery`" instead of cluttering the alert.
 
 **Interaction.** None. The recovery is a CLI session.
 
@@ -1083,7 +1083,7 @@ Próximo paso:
 Adapter: wallapop_api (devuelve 401)
 Fallback: wallapop_tinyfish activo (sin alertas perdidas)
 
-Próximo paso: `hardware-hunter login wallapop` cuando puedas.
+Próximo paso: `salvager login wallapop` cuando puedas.
 ```
 
 **Anatomy fields:**
@@ -1106,7 +1106,7 @@ Próximo paso: `hardware-hunter login wallapop` cuando puedas.
 **Interaction sequence (composite from the most common recovery path):**
 
 ```text
-$ hardware-hunter audit show --last 1
+$ salvager audit show --last 1
 ┌─────┬──────────────────┬─────────────────────────┬──────────────────────────────┐
 │ ID  │ Type             │ Timestamp               │ Summary                      │
 ├─────┼──────────────────┼─────────────────────────┼──────────────────────────────┤
@@ -1121,12 +1121,12 @@ Cause: cross-source price reconciliation
 
 $ # operator inspects the HTML parser, finds the bug, ships a fix to the adapter
 $ # restarts the daemon
-$ docker-compose restart hardware-hunter
+$ docker-compose restart salvager
 [+] Restarting 1/1
- ✓ Container hardware-hunter  Started
+ ✓ Container salvager  Started
 
-$ hardware-hunter health
-hardware-hunter v0.4.2
+$ salvager health
+salvager v0.4.2
 Daemon: running (PID 1, uptime 12s)
 
   Adapter         Status    Last Activity
@@ -1137,7 +1137,7 @@ Daemon: running (PID 1, uptime 12s)
 Phase 2: globally disabled
          consecutive failures: 3/3 (circuit breaker open)
 
-$ hardware-hunter phase2 enable WD40EFPX
+$ salvager phase2 enable WD40EFPX
 ✓ Phase 2 enabled for WD Red Plus 4TB / WD40EFPX
   Confidence threshold: high
   Per-purchase max: 60.00 €
@@ -1157,11 +1157,11 @@ $ # ℹ️ Fase 2 reactivada para WD Red Plus 4TB
 
 ## Visual Design Foundation
 
-> **Scope note.** hardware-hunter has no GUI; "visual foundation" here means the *visual hierarchy* of Telegram messages and `rich`-rendered CLI output, plus the role assignments for the formatting primitives each surface offers. Step 6 (Design System Foundation) already locked the concrete tokens (severity emoji, button labels, rich theme); this section adds the rationale, type-role mapping, spacing discipline, and accessibility-equivalent constraints.
+> **Scope note.** salvager has no GUI; "visual foundation" here means the *visual hierarchy* of Telegram messages and `rich`-rendered CLI output, plus the role assignments for the formatting primitives each surface offers. Step 6 (Design System Foundation) already locked the concrete tokens (severity emoji, button labels, rich theme); this section adds the rationale, type-role mapping, spacing discipline, and accessibility-equivalent constraints.
 
 ### Color System
 
-hardware-hunter has no graphical UI; "color" exists in two contexts only — the operator's terminal (rendered by `rich`) and Telegram's emoji severity prefixes (rendered by the user's Telegram client). There is no brand palette, no accent hue, no logo color. The product inherits visual identity from the surfaces it lives on.
+salvager has no graphical UI; "color" exists in two contexts only — the operator's terminal (rendered by `rich`) and Telegram's emoji severity prefixes (rendered by the user's Telegram client). There is no brand palette, no accent hue, no logo color. The product inherits visual identity from the surfaces it lives on.
 
 **CLI color tokens (locked, mapped to `rich` style strings):**
 
@@ -1203,7 +1203,7 @@ These six emoji are the *entire* Telegram color palette. The choice is deliberat
 
 ### Typography System
 
-No fonts are selected by hardware-hunter. The user's Telegram client picks the chat font; the user's terminal picks the monospace font. Typography here means *role assignments* for the formatting primitives each surface offers.
+No fonts are selected by salvager. The user's Telegram client picks the chat font; the user's terminal picks the monospace font. Typography here means *role assignments* for the formatting primitives each surface offers.
 
 **Telegram MarkdownV2 type-role mapping (locked):**
 
@@ -1211,7 +1211,7 @@ No fonts are selected by hardware-hunter. The user's Telegram client picks the c
 |----------------------|-----------------------------------------------------|---------------------------------------|
 | `**bold**`           | Primary scan target — part name + price             | `**WD Red Plus 4TB** — **48,00 €**`   |
 | `_italics_`          | LLM verbatim take                                   | `_Photos clear, drive looks unused._` |
-| `` `code` ``         | Technical identifiers + suggested CLI commands      | `` `hardware-hunter login wallapop` ``|
+| `` `code` ``         | Technical identifiers + suggested CLI commands      | `` `salvager login wallapop` ``|
 | Plain text           | Connective context (location, marketplace, prefix)  | `📍 Valencia · Wallapop`              |
 | `[label](url)`       | Hyperlinks (rare; mostly listing URLs in audit)     | (escaped per MarkdownV2 rules)        |
 
@@ -1222,10 +1222,10 @@ The mapping serves the 5-second decision: bold catches the eye first (part + pri
 | rich primitive            | Role                                          | Example                              |
 |---------------------------|-----------------------------------------------|--------------------------------------|
 | `bold`                    | Section headings, primary values in tables    | `Daemon: running (PID 1, ...)`       |
-| `dim`                     | Hints, secondary fields, footnotes            | `hint: Run hardware-hunter login...` |
+| `dim`                     | Hints, secondary fields, footnotes            | `hint: Run salvager login...` |
 | `bold red` (`error`)      | Error prefix, fatal states                    | `error: Wallapop session expired`    |
 | `bold green` (`success`)  | Success prefix, healthy badges                | `✓ wishlist.yaml is valid`           |
-| `cyan` (`code`)           | Inline command names + paths in human output  | ``Run `hardware-hunter login` ``     |
+| `cyan` (`code`)           | Inline command names + paths in human output  | ``Run `salvager login` ``     |
 | Default (no style)        | Body content, table cells, prose lines        | (most output)                        |
 
 We do not define a "type scale" (h1/h2/h3/body) — the CLI surface is too short for one. Headings are simply `bold`; subheadings are `bold dim`; everything else is body. Rich's default proportional/monospace handling is preserved.
@@ -1269,7 +1269,7 @@ We do not define a "type scale" (h1/h2/h3/body) — the CLI surface is too short
 
 ### Accessibility Considerations
 
-hardware-hunter is a single-operator product, but accessibility-equivalent discipline still applies — the user's environment varies (terminal types, Telegram client versions, color-blind operator hat, screen reader on macOS Terminal, etc.).
+salvager is a single-operator product, but accessibility-equivalent discipline still applies — the user's environment varies (terminal types, Telegram client versions, color-blind operator hat, screen reader on macOS Terminal, etc.).
 
 **Color independence:**
 
@@ -1300,7 +1300,7 @@ hardware-hunter is a single-operator product, but accessibility-equivalent disci
 
 ## Design Direction Decision
 
-> **Scope note.** The standard "6–8 GUI mockup variations" framing is inapplicable to hardware-hunter (no GUI, no HTML mockups, no layout canvas). Direction exploration was scoped instead to the two surfaces where layout choices are real: textual variants of the Telegram listing alert, and density variants of the `rich`-rendered CLI output.
+> **Scope note.** The standard "6–8 GUI mockup variations" framing is inapplicable to salvager (no GUI, no HTML mockups, no layout canvas). Direction exploration was scoped instead to the two surfaces where layout choices are real: textual variants of the Telegram listing alert, and density variants of the `rich`-rendered CLI output.
 
 ### Design Directions Explored
 
@@ -1339,7 +1339,7 @@ Each variant was evaluated against the locked emotional goals (5-second decision
 
 **Why Direction E as the conditional extension.** Container detection (FR14) is the headline differentiator. Without a dedicated visual region, the wrapper context and the extracted candidate compete for the same scan zone, confusing the user about what they would actually be buying. The indented `↪︎` arrows borrow the Slack thread / git diff visual idiom — users parse them as "this came from above" without instruction.
 
-**Why CLI-2 for density.** hardware-hunter's CLI surface includes both binary commands (`validate-wishlist`, `phase2 enable`) and multi-record queries (`audit show`, `health`). A single global density choice would either over-decorate the binary commands (CLI-1) or under-render the multi-record commands (CLI-3). Adaptive density matches user expectations inherited from `gh` and `kubectl` and aligns with the locked spacing rules ("dense over airy", "no row separators").
+**Why CLI-2 for density.** salvager's CLI surface includes both binary commands (`validate-wishlist`, `phase2 enable`) and multi-record queries (`audit show`, `health`). A single global density choice would either over-decorate the binary commands (CLI-1) or under-render the multi-record commands (CLI-3). Adaptive density matches user expectations inherited from `gh` and `kubectl` and aligns with the locked spacing rules ("dense over airy", "no row separators").
 
 **What the choice resists.** Decorative variants (status emoji on every line, color gradients, animated indicators); GUI-style direction sets (which would create false expectations of a future dashboard); verbosity-by-default (which conflicts with silence-is-success).
 
@@ -1347,7 +1347,7 @@ Each variant was evaluated against the locked emotional goals (5-second decision
 
 **Phase 1 listing alert (`render_phase1_listing_alert`):**
 
-- Single rendering function in `src/hardware_hunter/domain/alert.py`.
+- Single rendering function in `src/salvager/domain/alert.py`.
 - Branches once on `snapshot.is_container`; both branches share the prefix, price, location, confidence, and button rows.
 - Container branch inserts the `↪︎ Wrapper:` and `↪︎ Extracted:` lines between the price row and the LLM take row.
 - Direct branch matches Direction A verbatim.
@@ -1357,11 +1357,11 @@ Each variant was evaluated against the locked emotional goals (5-second decision
 - Reuses the Phase 1 rendering branches; substitutes `📦` → `🟢`, appends `Phase 2 max: <€>` to the confidence row, swaps the inline keyboard to `[✅ Comprar] [❌ Saltar] [👁 Ver]`.
 - Implementation note: the two functions share a private helper that composes the body; only the prefix, confidence-row suffix, and keyboard differ.
 
-**CLI density (in `src/hardware_hunter/observability/styling.py`):**
+**CLI density (in `src/salvager/observability/styling.py`):**
 
 - `render_table(rows, columns) -> Table` for multi-record output; uses `box=MINIMAL`, no row separators, default 80-column width.
 - `render_prose(message, style) -> str` for single-record output; uses theme tokens (`success`, `error`, `warn`, `secondary`) directly.
-- Each operator command in `src/hardware_hunter/cli/commands/` chooses between the two helpers based on the result cardinality.
+- Each operator command in `src/salvager/cli/commands/` chooses between the two helpers based on the result cardinality.
 
 **Locked at v1:**
 
@@ -1376,24 +1376,24 @@ Each variant was evaluated against the locked emotional goals (5-second decision
 
 **Goal.** A new operator (ifuensan personal install OR a fork user) reaches "daemon running, first poll completed, Telegram bot reachable" in ≤ 30 minutes.
 
-**Entry point.** README on github.com/ifuensan/hardware-hunter.
+**Entry point.** README on github.com/ifuensan/salvager.
 
-**Success criteria.** `hardware-hunter health` reports all adapters healthy; the next poll fires; if a wishlist entry matches a live listing, an alert is delivered.
+**Success criteria.** `salvager health` reports all adapters healthy; the next poll fires; if a wishlist entry matches a live listing, an alert is delivered.
 
 ```mermaid
 flowchart TD
     A[README: read scope + c3 constraints] --> B{Decide: fork or skip?}
     B -- skip --> Z1[End: not a fit]
-    B -- proceed --> C[git clone + cd hardware-hunter]
+    B -- proceed --> C[git clone + cd salvager]
     C --> D[Edit .env: TELEGRAM_BOT_TOKEN, GEMINI_API_KEY, EBAY_APP_ID]
     D --> E[Edit wishlist.yaml from wishlist.example.yaml]
-    E --> F[hardware-hunter validate-wishlist]
+    E --> F[salvager validate-wishlist]
     F -- error --> F1[error: ... + hint: ...] --> E
-    F -- ok --> G[hardware-hunter login wallapop]
+    F -- ok --> G[salvager login wallapop]
     G --> G1[Browser opens for manual login]
     G1 --> G2[Cookie captured locally]
     G2 --> H[docker-compose up -d]
-    H --> I[hardware-hunter health]
+    H --> I[salvager health]
     I -- adapter unhealthy --> I1[Read error + hint, fix, restart] --> H
     I -- all healthy --> J[Wait for first poll cycle ≤ 15 min]
     J --> K{Match found?}
@@ -1456,9 +1456,9 @@ flowchart TD
     A[ifuensan reviews 6 weeks of Phase 1 audit log] --> B{Trust threshold met?}
     B -- no --> Z0[Wait more weeks]
     B -- yes --> C[Edit wishlist.yaml: phase2.enabled: true for WD40EFPX]
-    C --> D[hardware-hunter validate-wishlist]
+    C --> D[salvager validate-wishlist]
     D -- error --> D1[Fix YAML] --> C
-    D -- ok --> E[hardware-hunter phase2 enable WD40EFPX]
+    D -- ok --> E[salvager phase2 enable WD40EFPX]
     E --> F[CLI confirms: threshold + max + circuit reset]
     F --> G[Daemon next poll: WD40EFPX match found]
     G --> H{Pre-flight: smoke OK + circuit closed + entry enabled?}
@@ -1484,7 +1484,7 @@ flowchart TD
 
 - Pre-flight gating is invisible to the user but critical: a `🟢` alert renders only when ALL safety conditions hold. If any fails, the alert downgrades to `📦` (Phase 1) silently — the user never sees a "broken" Phase 2 alert.
 - The keyboard edit to `🟡 Comprando…` is the single feedback during the 22-second buy window. We resist progress-step messages.
-- Audit pointer in the receipt (`hardware-hunter audit show --id 142`) is the bridge to the CLI surface for any operator follow-up.
+- Audit pointer in the receipt (`salvager audit show --id 142`) is the bridge to the CLI surface for any operator follow-up.
 
 ### Journey 4 — Phase 2 auto-disable recovery (Q9 silent-failure scenario)
 
@@ -1504,16 +1504,16 @@ flowchart TD
     E --> F[Telegram: ⚠️ Fase 2 desactivada · cause + 3 next steps]
     F --> G[ifuensan reads alert on phone]
     G --> H[ifuensan opens laptop terminal]
-    H --> I[hardware-hunter audit show --last 5]
+    H --> I[salvager audit show --last 5]
     I --> J[CLI table shows 3 buy_failure rows + reconciliation values]
     J --> K[ifuensan inspects HTML parser code]
     K --> L{Bug identified?}
     L -- no --> L1[Read ROADMAP recovery docs] --> K
     L -- yes --> M[Patch parser, commit, build]
-    M --> N[docker-compose restart hardware-hunter]
-    N --> O[hardware-hunter health]
+    M --> N[docker-compose restart salvager]
+    N --> O[salvager health]
     O -- adapter unhealthy --> O1[Iterate fix] --> M
-    O -- ok --> P[hardware-hunter phase2 enable WD40EFPX]
+    O -- ok --> P[salvager phase2 enable WD40EFPX]
     P --> Q[CLI: enabled · circuit reset · max restored]
     Q --> R[Daemon next poll succeeds]
     R --> S[Telegram: ℹ️ Fase 2 reactivada para WD Red Plus 4TB]
@@ -1545,11 +1545,11 @@ flowchart TD
     E --> F[ifuensan sees alert, no urgency cue]
     F --> G{ifuensan opens laptop?}
     G -- not yet --> G1[TinyFish keeps polling] --> G
-    G -- yes --> H[hardware-hunter login wallapop]
+    G -- yes --> H[salvager login wallapop]
     H --> I[Browser opens, manual login + Wallapop challenge if any]
     I -- abandoned --> I1[Cookie not captured] --> Z1[End: session still expired, retry later]
     I -- complete --> J[Cookie captured, stored in .credentials/]
-    J --> K[hardware-hunter health]
+    J --> K[salvager health]
     K --> L[wallapop_api: healthy]
     L --> M[Daemon next poll: API path active]
     M --> N[Telegram: ℹ️ Sesión Wallapop renovada]
@@ -1575,7 +1575,7 @@ flowchart TD
     A[Decision: add new wishlist entry] --> B[Open wishlist.yaml in editor]
     B --> C[Add entry: model + price_max + confidence_threshold]
     C --> D[Save file]
-    D --> E[hardware-hunter validate-wishlist]
+    D --> E[salvager validate-wishlist]
     E -- forbidden field error --> E1[Edit out expected_resale_value or similar] --> C
     E -- schema error --> E2[Fix indentation / required field] --> C
     E -- ok --> F[Daemon hot-reload: file watcher detects change]
@@ -1599,7 +1599,7 @@ flowchart TD
 
 Across the six journeys, recurring patterns emerge that should be standardized in implementation.
 
-**Cross-surface alignment pattern.** Every Telegram alert that names a CLI command (`Próximo paso: hardware-hunter ...`) implies the CLI command, when run, returns output that matches the alert's claims verbatim. The audit-log row for the originating event is the shared source of truth. **Implication:** any new alert template must include a "see audit log via `audit show --id <n>`" pointer, and the audit log row must contain enough fields to explain the alert without reconstruction.
+**Cross-surface alignment pattern.** Every Telegram alert that names a CLI command (`Próximo paso: salvager ...`) implies the CLI command, when run, returns output that matches the alert's claims verbatim. The audit-log row for the originating event is the shared source of truth. **Implication:** any new alert template must include a "see audit log via `audit show --id <n>`" pointer, and the audit log row must contain enough fields to explain the alert without reconstruction.
 
 **Manual-recovery-boundary pattern.** Five of six journeys cross at least one manual-recovery boundary (login, phase2 enable, hot-reload-failed restart, parser patch). Each crossing is initiated by an explicit operator command, never auto-triggered. **Implication:** any future feature that proposes auto-recovery for these boundaries must be rejected at PRD review unless paired with a corresponding new manual-override path.
 
@@ -1629,7 +1629,7 @@ Across the six journeys, recurring patterns emerge that should be standardized i
 
 ## Component Strategy
 
-> **Scope note.** hardware-hunter has no GUI component library. The "components" specified here are the rendering primitives that produce Telegram messages and CLI output — the actual code units in `src/hardware_hunter/domain/alert.py` and `src/hardware_hunter/observability/styling.py`. Standard component fields (purpose, anatomy, states, variants, accessibility, content rules, interaction behavior) are applied to these code units to give implementers a precise target.
+> **Scope note.** salvager has no GUI component library. The "components" specified here are the rendering primitives that produce Telegram messages and CLI output — the actual code units in `src/salvager/domain/alert.py` and `src/salvager/observability/styling.py`. Standard component fields (purpose, anatomy, states, variants, accessibility, content rules, interaction behavior) are applied to these code units to give implementers a precise target.
 
 ### Foundation primitives (provided by libraries)
 
@@ -1646,7 +1646,7 @@ These are unmodified library primitives. We do not subclass or wrap them beyond 
 
 ### Custom Telegram message components
 
-Six rendering functions, all in `src/hardware_hunter/domain/alert.py`. Each consumes a domain object, returns a `RenderedAlert`, and is the *single source of truth* for its message shape. No other code path emits Telegram text.
+Six rendering functions, all in `src/salvager/domain/alert.py`. Each consumes a domain object, returns a `RenderedAlert`, and is the *single source of truth* for its message shape. No other code path emits Telegram text.
 
 #### `render_phase1_listing_alert(snapshot: AlertSnapshot) -> RenderedAlert`
 
@@ -1692,7 +1692,7 @@ Six rendering functions, all in `src/hardware_hunter/domain/alert.py`. Each cons
   - Row 2: `Receipt: \`{receipt_id}\``.
   - Row 3: `Listing: {entry_display_name}`.
   - Row 4: `Tiempo total: {total_seconds} s`.
-  - Row 5: `\`hardware-hunter audit show --id {audit_id}\` for full event trail.`
+  - Row 5: `\`salvager audit show --id {audit_id}\` for full event trail.`
   - **No inline keyboard** (informational only).
 - **States.** Single state; once delivered, the message is immutable.
 - **Variants.** None at v1. A future "buy with refund-pending" variant is OQ-tracked.
@@ -1748,7 +1748,7 @@ Six rendering functions, all in `src/hardware_hunter/domain/alert.py`. Each cons
 
 ### Custom CLI rendering components
 
-Two rendering helpers in `src/hardware_hunter/observability/styling.py`. Every operator command in `src/hardware_hunter/cli/commands/` calls one of these — no command writes to stdout directly.
+Two rendering helpers in `src/salvager/observability/styling.py`. Every operator command in `src/salvager/cli/commands/` calls one of these — no command writes to stdout directly.
 
 #### `render_table(rows: list[dict], columns: list[ColumnSpec]) -> Table`
 
@@ -1783,7 +1783,7 @@ Each CLI subcommand follows a stable contract that makes it function as a UX com
 
 | Field | Default behavior |
 |---|---|
-| **Name** | `hardware-hunter <noun> <verb>` (kebab-case, no abbreviations). |
+| **Name** | `salvager <noun> <verb>` (kebab-case, no abbreviations). |
 | **Args** | Positional args have explicit types and `--help` examples. Optional `--format json` on read commands. |
 | **Stdout (human)** | One `render_table` or `render_prose` call. No `print()` calls. |
 | **Stdout (JSON)** | When `--format json`: flat array (multi-record) or single object (single-record); no envelope; ISO 8601 timestamps. |
@@ -1793,14 +1793,14 @@ Each CLI subcommand follows a stable contract that makes it function as a UX com
 
 Subcommands at v1 (each is a "component" in the strategy):
 
-- `hardware-hunter init` — scaffolds config files; refuses overwrite without `--force`.
-- `hardware-hunter login wallapop` / `login ebay` — manual OAuth/cookie capture flows.
-- `hardware-hunter validate-wishlist` — schema + forbidden-field validation.
-- `hardware-hunter wishlist list` — `render_table` of all entries.
-- `hardware-hunter health` — multi-section output (header prose + `render_table` of adapters + Phase 2 state block).
-- `hardware-hunter audit show` — `render_table` of audit events; `--last N`, `--id N`, `--include-dropped`, `--format json`.
-- `hardware-hunter phase2 enable <entry>` / `disable <entry>` / `disable --all` / `status` — Phase 2 control surface.
-- `hardware-hunter smoke-test run` — manual smoke test invocation.
+- `salvager init` — scaffolds config files; refuses overwrite without `--force`.
+- `salvager login wallapop` / `login ebay` — manual OAuth/cookie capture flows.
+- `salvager validate-wishlist` — schema + forbidden-field validation.
+- `salvager wishlist list` — `render_table` of all entries.
+- `salvager health` — multi-section output (header prose + `render_table` of adapters + Phase 2 state block).
+- `salvager audit show` — `render_table` of audit events; `--last N`, `--id N`, `--include-dropped`, `--format json`.
+- `salvager phase2 enable <entry>` / `disable <entry>` / `disable --all` / `status` — Phase 2 control surface.
+- `salvager smoke-test run` — manual smoke test invocation.
 
 ### Component Implementation Strategy
 
@@ -1901,7 +1901,7 @@ Subcommands at v1 (each is a "component" in the strategy):
 
 | File | Format | Validation surface | Reload behavior |
 |---|---|---|---|
-| `wishlist.yaml` | Schema-validated YAML | `hardware-hunter validate-wishlist` (fail-loud) + daemon hot-reload via file watcher | Hot-reloads on save when valid; logs error and keeps last-good when invalid |
+| `wishlist.yaml` | Schema-validated YAML | `salvager validate-wishlist` (fail-loud) + daemon hot-reload via file watcher | Hot-reloads on save when valid; logs error and keeps last-good when invalid |
 | `.env` | dotenv (KEY=value) | Daemon startup checks required vars; `health` reports missing | Restart-only; does not hot-reload (security-sensitive) |
 | `config.yaml` | pydantic-settings YAML | Daemon startup parses; `health` reports schema errors | Restart-only at v1; hot-reload OQ-tracked |
 
@@ -1934,12 +1934,12 @@ hint: <fix or scope reference>
 | `<noun> <verb>` shape | `phase2 enable`, `audit show`, `wishlist list` — never `<verb> <noun>` |
 | Top-level `--help` reads as a recovery playbook | Grouped sections (Setup / Wishlist / Phase 2 / Audit / Lifecycle); each subcommand has 1+ examples |
 | Subcommand `--help` is the doc | No "see online docs"; the help text is sufficient for operator recovery |
-| Discoverability via `<noun> --help` | Listing all verbs under a noun (`hardware-hunter phase2 --help`) shows enable / disable / status |
+| Discoverability via `<noun> --help` | Listing all verbs under a noun (`salvager phase2 --help`) shows enable / disable / status |
 | `--format json` available on read commands only | `audit show`, `health`, `wishlist list`, `phase2 status`. Mutating commands always render via `render_prose` |
 | Stable exit codes | 0 / 1 / 2 / 3 / 4 / 5 — semver-bound, FR48 |
 | `--no-color` and `NO_COLOR` honored | All output legible without color |
 
-**When NOT to use.** No subcommand prompts the user interactively at v1 (e.g., `hardware-hunter init` asks no questions; it scaffolds from defaults). Future interactive flows (e.g., `init --interactive`) would require explicit OQ tracking and must remain non-default.
+**When NOT to use.** No subcommand prompts the user interactively at v1 (e.g., `salvager init` asks no questions; it scaffolds from defaults). Future interactive flows (e.g., `init --interactive`) would require explicit OQ tracking and must remain non-default.
 
 **Consistency this enforces.** A user who knows `audit show --last 5` can guess `phase2 status --last 5` exists and works the same way (in fact it does, with a slightly different field set). Predictability dominates cleverness.
 
@@ -1951,9 +1951,9 @@ hint: <fix or scope reference>
 
 | Operation | Confirmation mechanism |
 |---|---|
-| `hardware-hunter init` overwriting an existing config | Refuses without `--force`; `--force` requires interactive `Type 'OVERWRITE' to confirm:` prompt |
-| `hardware-hunter phase2 disable --all` | Requires interactive `Type the number of currently enabled entries to confirm:` prompt |
-| `hardware-hunter wishlist remove <entry>` (post-launch only; not at v1) | (OQ-tracked) — would follow the same `Type '<entry-id>' to confirm:` pattern |
+| `salvager init` overwriting an existing config | Refuses without `--force`; `--force` requires interactive `Type 'OVERWRITE' to confirm:` prompt |
+| `salvager phase2 disable --all` | Requires interactive `Type the number of currently enabled entries to confirm:` prompt |
+| `salvager wishlist remove <entry>` (post-launch only; not at v1) | (OQ-tracked) — would follow the same `Type '<entry-id>' to confirm:` pattern |
 | Routine actions (skip, snooze, single Phase 2 enable/disable, login) | **No confirmation.** Single command, no prompt. |
 
 **Pattern rule:** never use a y/n prompt for destructive operations — operators muscle-memory press 'y'. Always require typing a specific token (the file being overwritten, the count being affected). This pattern is borrowed from `gh repo delete`.
@@ -2047,7 +2047,7 @@ These rules trump local pattern decisions when they conflict.
 
 ## Responsive Design & Accessibility
 
-> **Scope note.** hardware-hunter has no responsive web layout; Telegram clients render the message body identically across platforms (iOS, Android, desktop, web), and the CLI auto-adapts to terminal width via `rich`. This section consolidates the responsive considerations that *do* apply (lock-screen previews, narrow-terminal degradation, Telegram client variance) and the accessibility-equivalent targets (color independence, screen reader compatibility, keyboard-only operation).
+> **Scope note.** salvager has no responsive web layout; Telegram clients render the message body identically across platforms (iOS, Android, desktop, web), and the CLI auto-adapts to terminal width via `rich`. This section consolidates the responsive considerations that *do* apply (lock-screen previews, narrow-terminal degradation, Telegram client variance) and the accessibility-equivalent targets (color independence, screen reader compatibility, keyboard-only operation).
 
 ### Responsive Strategy
 
@@ -2104,11 +2104,11 @@ There are **no breakpoints** in the traditional sense — Telegram and the termi
 
 **WCAG-equivalent compliance target: AA-equivalent for the surfaces we control.**
 
-WCAG is a web standard; hardware-hunter has no web. We adapt the AA principles to Telegram + CLI as follows.
+WCAG is a web standard; salvager has no web. We adapt the AA principles to Telegram + CLI as follows.
 
 **Perceivable (WCAG 1.x):**
 
-| WCAG principle | hardware-hunter implementation |
+| WCAG principle | salvager implementation |
 |---|---|
 | 1.1 Text alternatives | Every Telegram photo (listing image, receipt screenshot) is paired with text describing the same content (price, identifier, location). The photo is supplementary, not load-bearing. |
 | 1.3 Adaptable structure | Message anatomy uses semantic markdown (bold for scan targets, italics for LLM verbatim). Screen readers pick up the structure. |
@@ -2116,7 +2116,7 @@ WCAG is a web standard; hardware-hunter has no web. We adapt the AA principles t
 
 **Operable (WCAG 2.x):**
 
-| WCAG principle | hardware-hunter implementation |
+| WCAG principle | salvager implementation |
 |---|---|
 | 2.1 Keyboard accessible | CLI is keyboard-only by definition. Telegram inline buttons are tappable but Telegram itself supports keyboard navigation on desktop clients. |
 | 2.2 Enough time | No time-limited interactions. Alerts persist until tapped or dismissed; the listing's natural decay is the only timing. Phase 2 buy has a 30s timeout but the operator initiates the action. |
@@ -2126,7 +2126,7 @@ WCAG is a web standard; hardware-hunter has no web. We adapt the AA principles t
 
 **Understandable (WCAG 3.x):**
 
-| WCAG principle | hardware-hunter implementation |
+| WCAG principle | salvager implementation |
 |---|---|
 | 3.1 Readable | Spanish (Castilian) without regional slang on Telegram; English on CLI/docs. Both registers are direct, factual, no idiom. |
 | 3.2 Predictable | Alert format locked (FR22); button positions consistent across alerts; CLI subcommand outputs predictable. No surprise UI changes. |
@@ -2134,7 +2134,7 @@ WCAG is a web standard; hardware-hunter has no web. We adapt the AA principles t
 
 **Robust (WCAG 4.x):**
 
-| WCAG principle | hardware-hunter implementation |
+| WCAG principle | salvager implementation |
 |---|---|
 | 4.1 Compatible | Telegram MarkdownV2 is a stable spec; we use only Unicode 6.0+ emoji; CLI output is plain text + ANSI escape codes (universal terminal compatibility). |
 
@@ -2149,7 +2149,7 @@ WCAG is a web standard; hardware-hunter has no web. We adapt the AA principles t
 
 **What we cannot accommodate (acknowledged limitations):**
 
-- Operators requiring GUI accessibility tooling (high-contrast themes beyond terminal theming, font scaling beyond terminal config, magnification UI). hardware-hunter does not ship a GUI alternative.
+- Operators requiring GUI accessibility tooling (high-contrast themes beyond terminal theming, font scaling beyond terminal config, magnification UI). salvager does not ship a GUI alternative.
 - Audio-only operators. Telegram client's native notification sound is the only audio cue; we do not generate spoken summaries.
 - Cognitive accessibility for non-technical users. The product is for an expert operator; complexity reduction beyond what specificity-over-warmth provides is out of scope at v1.
 
@@ -2171,7 +2171,7 @@ WCAG is a web standard; hardware-hunter has no web. We adapt the AA principles t
 - Smoke test on kitty (Linux) and tmux session (any underlying terminal).
 - Test at widths: 60, 80, 100, 120, 200 cols.
 - Test with `NO_COLOR=1` and `--no-color`.
-- Test piped output (`hardware-hunter audit show | jq` and `| less`).
+- Test piped output (`salvager audit show | jq` and `| less`).
 
 **Accessibility testing:**
 

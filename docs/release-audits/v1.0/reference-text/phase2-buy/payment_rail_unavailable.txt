@@ -5,5 +5,5 @@ Causa: Raíl de pago no disponible
 La compra NO se ha ejecutado\.
 
 Próximo paso:
-1\. `hardware-hunter audit show --last 5`
-2\. `hardware-hunter phase2 enable <entry>`
+1\. `salvager audit show --last 5`
+2\. `salvager phase2 enable <entry>`

@@ -9,8 +9,8 @@
   La compra NO se ha ejecutado\.
   
   Próximo paso:
-  1\. `hardware-hunter audit show --last 5`
-  2\. `hardware-hunter phase2 enable <entry>`
+  1\. `salvager audit show --last 5`
+  2\. `salvager phase2 enable <entry>`
   '''
 # ---
 # name: test_every_variant_has_a_snapshot[marketplace_error]
@@ -22,8 +22,8 @@
   La compra NO se ha ejecutado\.
   
   Próximo paso:
-  1\. `hardware-hunter audit show --last 5`
-  2\. `hardware-hunter phase2 enable <entry>`
+  1\. `salvager audit show --last 5`
+  2\. `salvager phase2 enable <entry>`
   '''
 # ---
 # name: test_every_variant_has_a_snapshot[missing_element]
@@ -35,8 +35,8 @@
   La compra NO se ha ejecutado\.
   
   Próximo paso:
-  1\. `hardware-hunter audit show --last 5`
-  2\. `hardware-hunter phase2 enable <entry>`
+  1\. `salvager audit show --last 5`
+  2\. `salvager phase2 enable <entry>`
   '''
 # ---
 # name: test_every_variant_has_a_snapshot[payment_rail_unavailable]
@@ -48,8 +48,8 @@
   La compra NO se ha ejecutado\.
   
   Próximo paso:
-  1\. `hardware-hunter audit show --last 5`
-  2\. `hardware-hunter phase2 enable <entry>`
+  1\. `salvager audit show --last 5`
+  2\. `salvager phase2 enable <entry>`
   '''
 # ---
 # name: test_every_variant_has_a_snapshot[reconciliation_tripped]
@@ -63,8 +63,8 @@
   La compra NO se ha ejecutado\.
   
   Próximo paso:
-  1\. `hardware-hunter audit show --last 1`
-  2\. Revisa el parser HTML antes de reactivar Fase 2 con `hardware-hunter phase2 enable <entry>`
+  1\. `salvager audit show --last 1`
+  2\. Revisa el parser HTML antes de reactivar Fase 2 con `salvager phase2 enable <entry>`
   '''
 # ---
 # name: test_every_variant_has_a_snapshot[screenshot_missing]
@@ -76,8 +76,8 @@
   La compra puede haberse completado, pero no se capturó el recibo\.
   
   Próximo paso:
-  1\. `hardware-hunter audit show --id 42`
-  2\. `hardware-hunter phase2 reconcile WP-2026-0001`
+  1\. `salvager audit show --id 42`
+  2\. `salvager phase2 reconcile WP-2026-0001`
   '''
 # ---
 # name: test_every_variant_has_a_snapshot[timeout]
@@ -89,8 +89,8 @@
   La compra NO se ha ejecutado\.
   
   Próximo paso:
-  1\. `hardware-hunter audit show --last 5`
-  2\. `hardware-hunter phase2 enable <entry>`
+  1\. `salvager audit show --last 5`
+  2\. `salvager phase2 enable <entry>`
   '''
 # ---
 # name: test_every_variant_has_a_snapshot[ui_check_failed]
@@ -102,8 +102,8 @@
   La compra NO se ha ejecutado\.
   
   Próximo paso:
-  1\. `hardware-hunter audit show --last 5`
-  2\. `hardware-hunter phase2 enable <entry>`
+  1\. `salvager audit show --last 5`
+  2\. `salvager phase2 enable <entry>`
   '''
 # ---
 # name: test_failure_circuit_open_snapshot
@@ -116,8 +116,8 @@
   La compra NO se ha ejecutado\.
   
   Próximo paso:
-  1\. `hardware-hunter audit show --last 5`
-  2\. `hardware-hunter phase2 enable <entry>`
+  1\. `salvager audit show --last 5`
+  2\. `salvager phase2 enable <entry>`
   '''
 # ---
 # name: test_failure_reconciliation_tripped_snapshot
@@ -131,8 +131,8 @@
   La compra NO se ha ejecutado\.
   
   Próximo paso:
-  1\. `hardware-hunter audit show --last 1`
-  2\. Revisa el parser HTML antes de reactivar Fase 2 con `hardware-hunter phase2 enable <entry>`
+  1\. `salvager audit show --last 1`
+  2\. Revisa el parser HTML antes de reactivar Fase 2 con `salvager phase2 enable <entry>`
   '''
 # ---
 # name: test_failure_screenshot_missing_uses_alternate_reassurance
@@ -144,8 +144,8 @@
   La compra puede haberse completado, pero no se capturó el recibo\.
   
   Próximo paso:
-  1\. `hardware-hunter audit show --id 42`
-  2\. `hardware-hunter phase2 reconcile WP-2026-0001`
+  1\. `salvager audit show --id 42`
+  2\. `salvager phase2 reconcile WP-2026-0001`
   '''
 # ---
 # name: test_success_escapes_entry_name_specials
@@ -154,7 +154,7 @@
   Receipt: `WP-2026-0001`
   Listing: WD\_Red\+Plus \*4TB\* \(ref\!\)
   Tiempo total: 42 s
-  `hardware-hunter audit show --id 7` para el registro completo de eventos\.
+  `salvager audit show --id 7` para el registro completo de eventos\.
   '''
 # ---
 # name: test_success_handles_large_receipt
@@ -163,7 +163,7 @@
   Receipt: `WP-2026-0001-VERY-LONG-RECEIPT-ID-X9`
   Listing: Crucial 16GB DDR4 3200 \(CT16G4DFD832A\)
   Tiempo total: 180 s
-  `hardware-hunter audit show --id 99` para el registro completo de eventos\.
+  `salvager audit show --id 99` para el registro completo de eventos\.
   '''
 # ---
 # name: test_success_renders_locked_anatomy
@@ -172,6 +172,6 @@
   Receipt: `WP-2026-0001`
   Listing: WD Red Plus 4TB \(WD40EFPX\)
   Tiempo total: 42 s
-  `hardware-hunter audit show --id 42` para el registro completo de eventos\.
+  `salvager audit show --id 42` para el registro completo de eventos\.
   '''
 # ---

@@ -52,18 +52,18 @@ Once the release workflow completes (~5 minutes):
 gh run list --workflow Release --limit 1
 
 # 2. Image pulls cleanly without auth.
-docker pull ghcr.io/ifuensan/hardware-hunter:0.2.0
-docker run --rm ghcr.io/ifuensan/hardware-hunter:0.2.0 version
-#    → expected: hardware-hunter 0.2.0 (commit <sha>)
+docker pull ghcr.io/ifuensan/salvager:0.2.0
+docker run --rm ghcr.io/ifuensan/salvager:0.2.0 version
+#    → expected: salvager 0.2.0 (commit <sha>)
 
 # 3. `:latest` tracks the new release.
-docker pull ghcr.io/ifuensan/hardware-hunter:latest
-docker inspect ghcr.io/ifuensan/hardware-hunter:latest \
+docker pull ghcr.io/ifuensan/salvager:latest
+docker inspect ghcr.io/ifuensan/salvager:latest \
   --format '{{.RepoTags}}'
 #    → should include both 0.2.0 and latest
 
 # 4. The GHCR package page shows the v0.2.0 tag publicly.
-xdg-open 'https://github.com/ifuensan/hardware-hunter/pkgs/container/hardware-hunter'
+xdg-open 'https://github.com/ifuensan/salvager/pkgs/container/salvager'
 ```
 
 ---
@@ -77,15 +77,15 @@ After GHCR is happy, the **v1.0.0 promotion gate opens**:
    homelab host. Pin to `:0.2.0` explicitly in `docker-compose.yml`
    (don't follow `:latest` for the burn-in window — you want
    reproducibility while diagnosing any issues).
-2. **Sanity check**: `docker-compose logs hardware-hunter | head -50`
+2. **Sanity check**: `docker-compose logs salvager | head -50`
    to confirm `daemon_started` lands and the version line matches.
-3. **Smoke test the safety stack**: `hardware-hunter phase2 smoke-test`
+3. **Smoke test the safety stack**: `salvager phase2 smoke-test`
    should return `RESULT: pass` against the bundled fixture set.
 4. **Phase 1 only first**: leave Phase 2 disabled (the default) until
    Phase 1 polling has been clean for a few days. Phase 1 cadence is
    every 15 min Wallapop / 30 min eBay, so within a day you'll see
    the system operate against real listings.
-5. **Phase 2 enablement**: pick ONE wishlist entry, `hardware-hunter
+5. **Phase 2 enablement**: pick ONE wishlist entry, `salvager
    phase2 enable <entry>`, set a conservative `max_price_eur`, watch
    for the first Phase 2 alert. Do NOT tap Comprar until you've
    reviewed the listing visually — this is your first end-to-end

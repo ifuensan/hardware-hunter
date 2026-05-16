@@ -7,13 +7,13 @@ from pathlib import Path
 
 import pytest
 
-from hardware_hunter.adapters.sqlite_store import (
+from salvager.adapters.sqlite_store import (
     MigrationRunner,
     Phase2AuditWriter,
     open_connection,
 )
-from hardware_hunter.adapters.sqlite_store.migrations import db_path_under
-from hardware_hunter.adapters.sqlite_store.phase2_state_reader import (
+from salvager.adapters.sqlite_store.migrations import db_path_under
+from salvager.adapters.sqlite_store.phase2_state_reader import (
     SqlitePhase2StateReader,
 )
 

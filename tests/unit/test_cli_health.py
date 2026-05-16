@@ -1,4 +1,4 @@
-"""Tests for ``hardware-hunter health`` — Story 4.4 (FR47 / NFR-O2 / UX-DR25).
+"""Tests for ``salvager health`` — Story 4.4 (FR47 / NFR-O2 / UX-DR25).
 
 The command reads SQLite ``_meta`` + ``alert_snapshots`` + the
 filesystem directly — no running daemon required (AR14). Fixtures
@@ -17,10 +17,10 @@ from pathlib import Path
 import pytest
 from syrupy.assertion import SnapshotAssertion
 
-from hardware_hunter.adapters.sqlite_store.connection import open_connection
-from hardware_hunter.adapters.sqlite_store.migrations import MigrationRunner, db_path_under
-from hardware_hunter.cli.commands import health_cmd
-from hardware_hunter.cli.commands.health_cmd import run
+from salvager.adapters.sqlite_store.connection import open_connection
+from salvager.adapters.sqlite_store.migrations import MigrationRunner, db_path_under
+from salvager.cli.commands import health_cmd
+from salvager.cli.commands.health_cmd import run
 
 # A fixed "now" so humanized "ago" strings + 24h cutoffs are deterministic.
 _NOW = datetime(2026, 5, 14, 18, 0, 0, tzinfo=UTC)

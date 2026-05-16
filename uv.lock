@@ -478,7 +478,7 @@ wheels = [
 ]
 
 [[package]]
-name = "hardware-hunter"
+name = "salvager"
 version = "0.2.0"
 source = { editable = "." }
 dependencies = [

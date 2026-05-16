@@ -55,7 +55,7 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen
       - name: pytest --cov
-        run: uv run pytest --cov=hardware_hunter --cov-report=term-missing --cov-report=json
+        run: uv run pytest --cov=salvager --cov-report=term-missing --cov-report=json
       - name: Upload coverage.json artifact
         uses: actions/upload-artifact@v4
         with:

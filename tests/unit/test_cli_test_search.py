@@ -1,4 +1,4 @@
-"""Tests for ``hardware-hunter test-search`` — Story 4.6 (FR43).
+"""Tests for ``salvager test-search`` — Story 4.6 (FR43).
 
 The marketplace fetchers are mocked at the ``_build_fetcher`` boundary
 so no network call (and no credential file) is needed. The contract
@@ -17,15 +17,15 @@ from typing import Any
 import pytest
 from pydantic import SecretStr
 
-from hardware_hunter.cli.commands import test_search_cmd
-from hardware_hunter.cli.commands.test_search_cmd import run
-from hardware_hunter.config.config_yaml import ConfigModel
-from hardware_hunter.config.env import EnvSettings
-from hardware_hunter.domain.errors import TinyFishRateLimited
-from hardware_hunter.domain.evaluation import ListingEvaluation
-from hardware_hunter.domain.listing import Listing, SearchQuery
-from hardware_hunter.domain.wishlist import Wishlist, WishlistEntry
-from hardware_hunter.interfaces.page_fetcher import PageFetcher
+from salvager.cli.commands import test_search_cmd
+from salvager.cli.commands.test_search_cmd import run
+from salvager.config.config_yaml import ConfigModel
+from salvager.config.env import EnvSettings
+from salvager.domain.errors import TinyFishRateLimited
+from salvager.domain.evaluation import ListingEvaluation
+from salvager.domain.listing import Listing, SearchQuery
+from salvager.domain.wishlist import Wishlist, WishlistEntry
+from salvager.interfaces.page_fetcher import PageFetcher
 
 _T0 = datetime(2026, 5, 14, 12, 0, 0, tzinfo=UTC)
 

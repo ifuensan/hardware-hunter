@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Adapter Discipline Lint — NFR-M1 launch-blocker mechanism.
 
-Walks ``src/hardware_hunter/``; fails on any deny-listed import outside
+Walks ``src/salvager/``; fails on any deny-listed import outside
 ``adapters/``. Only ``adapters/`` may import marketplace SDKs / Hermes /
 TinyFish / LLM SDKs / python-telegram-bot / httpx. Zero external dep.
 Exit: 0 clean, 1 violations, 2 invocation error.
@@ -14,10 +14,10 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SRC_ROOT = REPO_ROOT / "src" / "hardware_hunter"
+SRC_ROOT = REPO_ROOT / "src" / "salvager"
 ADAPTERS_ROOT = SRC_ROOT / "adapters"
 
-# Modules forbidden outside ``src/hardware_hunter/adapters/``.
+# Modules forbidden outside ``src/salvager/adapters/``.
 # Suffix ``*`` means "any module starting with this prefix".
 DENY_LIST: tuple[str, ...] = (
     "hermes_agent",  # NFR-I1: Hermes via adapter only
@@ -86,7 +86,7 @@ def main() -> int:
         print(f"  {rel}:{line_no}: {import_str}", file=sys.stderr)
     print(
         f"\n{len(failures)} violation(s). These imports are allowed only inside "
-        f"src/hardware_hunter/adapters/.",
+        f"src/salvager/adapters/.",
         file=sys.stderr,
     )
     return 1

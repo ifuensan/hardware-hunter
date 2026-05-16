@@ -25,8 +25,8 @@ In Telegram, open a chat with [@BotFather](https://t.me/BotFather) and:
 
 When prompted:
 
-- **Name** — e.g. `Hardware Hunter — audit v1.0` (display name; can change later).
-- **Username** — must end in `_bot`; e.g. `hardware_hunter_audit_v10_bot`. Once
+- **Name** — e.g. `Salvager — audit v1.0` (display name; can change later).
+- **Username** — must end in `_bot`; e.g. `salvager_audit_v10_bot`. Once
   taken, it's yours forever, but you can `/deletebot` it after the audit.
 
 BotFather replies with the bot token. **Keep it** — this is the
@@ -63,7 +63,7 @@ Android phone, Desktop, Web in both browsers). Steps:
 If you prefer a group chat (so the audit messages don't mix with your
 existing 1-on-1):
 
-1. Create a new group, name it e.g. `Hardware Hunter — audit v1.0`.
+1. Create a new group, name it e.g. `Salvager — audit v1.0`.
 2. Add the audit bot as a member.
 3. Run the same `getUpdates` call; the group's chat_id surfaces under
    `.result[].my_chat_member.chat.id`. It's a negative integer.
@@ -93,7 +93,7 @@ Hardware-hunter loads `.env` by default; for audit runs override the
 path:
 
 ```sh
-hardware-hunter --env-path config/.env.audit dev emit-alert <variant>
+salvager --env-path config/.env.audit dev emit-alert <variant>
 ```
 
 (or symlink `config/.env` → `config/.env.audit` for the audit window
@@ -106,7 +106,7 @@ and symlink back when done.)
 From the candidate build, fire one harmless variant:
 
 ```sh
-hardware-hunter --env-path config/.env.audit dev emit-alert daemon_started
+salvager --env-path config/.env.audit dev emit-alert daemon_started
 ```
 
 Within ~1 s your audit chat should show:
@@ -128,7 +128,7 @@ If you see **nothing**:
 - Verify the bot has been `/start`-ed in the chat at least once.
 - Verify `TELEGRAM_BOT_TOKEN` matches what BotFather gave you (no
   trailing whitespace).
-- Check `docker-compose logs hardware-hunter` (or `journalctl -u …`)
+- Check `docker-compose logs salvager` (or `journalctl -u …`)
   for an HTTP error from the Telegram API — `401` means bad token,
   `400 chat not found` means bad chat_id.
 

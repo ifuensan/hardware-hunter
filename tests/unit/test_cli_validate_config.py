@@ -1,4 +1,4 @@
-"""Tests for ``hardware-hunter validate-config`` — Story 2.7."""
+"""Tests for ``salvager validate-config`` — Story 2.7."""
 
 from __future__ import annotations
 
@@ -12,8 +12,8 @@ import pytest
 from click.testing import Result
 from typer.testing import CliRunner
 
-from hardware_hunter.cli.app import app
-from hardware_hunter.config.env import reset_env_cache
+from salvager.cli.app import app
+from salvager.config.env import reset_env_cache
 
 VALID_ENV = textwrap.dedent(
     """\
@@ -211,7 +211,7 @@ def test_missing_config_file_exits_1(runner: CliRunner, tmp_path: Path) -> None:
     result = _invoke(runner, missing, env)
     assert result.exit_code == 1
     assert "not found" in result.stderr
-    assert "hardware-hunter init" in result.stderr
+    assert "salvager init" in result.stderr
 
 
 # ─────────────────────────────────────────────────────────────────────────

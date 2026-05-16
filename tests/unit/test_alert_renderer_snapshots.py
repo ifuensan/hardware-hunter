@@ -25,12 +25,12 @@ from uuid import UUID
 
 from syrupy.assertion import SnapshotAssertion
 
-from hardware_hunter.domain.alert import (
+from salvager.domain.alert import (
     AlertSnapshot,
     render_phase1_listing_alert,
 )
-from hardware_hunter.domain.evaluation import ListingEvaluation
-from hardware_hunter.domain.listing import Listing
+from salvager.domain.evaluation import ListingEvaluation
+from salvager.domain.listing import Listing
 
 # Stable values so syrupy diffs reflect renderer drift, never clock drift.
 _FIXED_ALERT_ID = UUID("12345678-1234-1234-1234-123456789abc")

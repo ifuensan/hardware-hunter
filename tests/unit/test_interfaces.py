@@ -14,14 +14,14 @@ from pathlib import Path
 
 import pytest
 
-from hardware_hunter.interfaces.listing_evaluator import (
+from salvager.interfaces.listing_evaluator import (
     ListingEvaluator,
     ListingEvaluatorError,
 )
-from hardware_hunter.interfaces.page_fetcher import PageFetcher, PageFetcherError
-from hardware_hunter.interfaces.scheduler import Scheduler, SchedulerError, SchedulerTask
-from hardware_hunter.interfaces.store import EntryKey, Store, StoreError
-from hardware_hunter.interfaces.telegram_surface import (
+from salvager.interfaces.page_fetcher import PageFetcher, PageFetcherError
+from salvager.interfaces.scheduler import Scheduler, SchedulerError, SchedulerTask
+from salvager.interfaces.store import EntryKey, Store, StoreError
+from salvager.interfaces.telegram_surface import (
     CallbackHandler,
     TelegramSurface,
     TelegramSurfaceError,
@@ -183,7 +183,7 @@ _ALLOWED_INTERFACE_TOP_LEVELS = frozenset(
         # blessed third-party
         "pydantic",
         # in-package
-        "hardware_hunter",
+        "salvager",
     }
 )
 
@@ -191,11 +191,11 @@ _ALLOWED_INTERFACE_TOP_LEVELS = frozenset(
 @pytest.mark.parametrize(
     "module_path",
     [
-        "src/hardware_hunter/interfaces/listing_evaluator.py",
-        "src/hardware_hunter/interfaces/page_fetcher.py",
-        "src/hardware_hunter/interfaces/scheduler.py",
-        "src/hardware_hunter/interfaces/store.py",
-        "src/hardware_hunter/interfaces/telegram_surface.py",
+        "src/salvager/interfaces/listing_evaluator.py",
+        "src/salvager/interfaces/page_fetcher.py",
+        "src/salvager/interfaces/scheduler.py",
+        "src/salvager/interfaces/store.py",
+        "src/salvager/interfaces/telegram_surface.py",
     ],
 )
 def test_interface_module_imports_only_whitelisted_packages(module_path: str) -> None:

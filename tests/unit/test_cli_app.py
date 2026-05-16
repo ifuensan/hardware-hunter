@@ -10,7 +10,7 @@ import sys
 import pytest
 from typer.testing import CliRunner
 
-from hardware_hunter.cli.app import app
+from salvager.cli.app import app
 
 
 @pytest.fixture
@@ -48,7 +48,7 @@ def test_help_lists_all_placeholder_subcommands(runner: CliRunner) -> None:
 def test_short_help_flag_works(runner: CliRunner) -> None:
     result = runner.invoke(app, ["-h"])
     assert result.exit_code == 0
-    assert "hardware-hunter" in result.stdout.lower()
+    assert "salvager" in result.stdout.lower()
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -59,8 +59,8 @@ def test_short_help_flag_works(runner: CliRunner) -> None:
 def test_version_human_format(runner: CliRunner) -> None:
     result = runner.invoke(app, ["version"])
     assert result.exit_code == 0
-    # Human format: "hardware-hunter <semver> (<commit>)"
-    assert "hardware-hunter" in result.stdout
+    # Human format: "salvager <semver> (<commit>)"
+    assert "salvager" in result.stdout
     # The version is read from pyproject.toml at runtime; assert on the
     # shape (semver MAJOR.MINOR.PATCH) rather than a hard-coded value
     # so version bumps don't break this test.
@@ -85,7 +85,7 @@ def test_version_json_format_is_parseable(runner: CliRunner) -> None:
 
 def test_version_commit_from_env_var(runner: CliRunner, monkeypatch: pytest.MonkeyPatch) -> None:
     """The Dockerfile bakes the commit at build time via this env var."""
-    monkeypatch.setenv("HARDWARE_HUNTER_COMMIT", "deadbeef")
+    monkeypatch.setenv("SALVAGER_COMMIT", "deadbeef")
     result = runner.invoke(app, ["version", "--format", "json"])
     payload = json.loads(result.stdout.strip())
     assert payload["commit"] == "deadbeef"
@@ -126,10 +126,10 @@ def test_bare_invocation_without_env_exits_missing_creds() -> None:
             "TINYFISH_API_KEY",
         }
     }
-    scrubbed_env["HARDWARE_HUNTER_COMMIT"] = "test-sha"
+    scrubbed_env["SALVAGER_COMMIT"] = "test-sha"
 
     result = subprocess.run(
-        [sys.executable, "-m", "hardware_hunter"],
+        [sys.executable, "-m", "salvager"],
         capture_output=True,
         text=True,
         check=False,

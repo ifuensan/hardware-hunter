@@ -1,6 +1,6 @@
 ---
 date: 2026-05-11
-project: hardware-hunter
+project: salvager
 stepsCompleted:
   - step-01-document-discovery
   - step-02-prd-analysis
@@ -15,9 +15,9 @@ documentsAssessed:
   epics: _bmad-output/planning-artifacts/epics.md
   ux: _bmad-output/planning-artifacts/ux-design-specification.md
 supportingInputs:
-  - _bmad-output/planning-artifacts/prfaq-hardware-hunter.md
-  - _bmad-output/planning-artifacts/prfaq-hardware-hunter-distillate.md
-  - hardware-hunter-bmad-prompt.md
+  - _bmad-output/planning-artifacts/prfaq-salvager.md
+  - _bmad-output/planning-artifacts/prfaq-salvager-distillate.md
+  - salvager-bmad-prompt.md
 priorReports:
   - _bmad-output/planning-artifacts/implementation-readiness-report-2026-05-10.md
 assessmentScope: full-four-artifact
@@ -26,7 +26,7 @@ assessmentScope: full-four-artifact
 # Implementation Readiness Assessment Report
 
 **Date:** 2026-05-11
-**Project:** hardware-hunter
+**Project:** salvager
 
 ## Document Discovery
 
@@ -41,9 +41,9 @@ assessmentScope: full-four-artifact
 
 ### Supporting Inputs (used by PRD authoring, not assessed here)
 
-- `_bmad-output/planning-artifacts/prfaq-hardware-hunter.md` (56 KB) — Working Backwards PRFAQ, 5 stages
-- `_bmad-output/planning-artifacts/prfaq-hardware-hunter-distillate.md` (18 KB) — LLM-optimized distillate
-- `hardware-hunter-bmad-prompt.md` (12 KB) — BMAD session kickoff
+- `_bmad-output/planning-artifacts/prfaq-salvager.md` (56 KB) — Working Backwards PRFAQ, 5 stages
+- `_bmad-output/planning-artifacts/prfaq-salvager-distillate.md` (18 KB) — LLM-optimized distillate
+- `salvager-bmad-prompt.md` (12 KB) — BMAD session kickoff
 
 ### Derived Artifacts (not assessed)
 
@@ -246,7 +246,7 @@ Epic 5 (Phase 2) cleanly inherits the architecture's Phase 1 vs Phase 2 file spl
 
 **Found.** `_bmad-output/planning-artifacts/ux-design-specification.md` (160 KB, 14 workflow steps complete).
 
-The UX workflow was explicitly reframed for the no-GUI product (`visualUI: false` in frontmatter; scope note in the document: "hardware-hunter has no graphical UI; user surfaces are a Telegram bot and an operator CLI"). The reframe is structural — every UX step that the standard skill would have produced for a GUI was rewritten to address Telegram message rendering and CLI ergonomics instead. No phantom GUI specification leaked in.
+The UX workflow was explicitly reframed for the no-GUI product (`visualUI: false` in frontmatter; scope note in the document: "salvager has no graphical UI; user surfaces are a Telegram bot and an operator CLI"). The reframe is structural — every UX step that the standard skill would have produced for a GUI was rewritten to address Telegram message rendering and CLI ergonomics instead. No phantom GUI specification leaked in.
 
 ### UX ↔ PRD Alignment
 
@@ -462,7 +462,7 @@ All four planning artifacts (PRD, Architecture, Epics & Stories, UX Design Speci
 
 Before Epic 1 Story 1.1 begins, verify:
 
-- [ ] **Tool availability.** `uv` ≥ latest, `python` ≥ 3.12, `docker` + `docker-compose`, `git`, GitHub account with GHCR write access (`ghcr.io/ifuensan/hardware-hunter`).
+- [ ] **Tool availability.** `uv` ≥ latest, `python` ≥ 3.12, `docker` + `docker-compose`, `git`, GitHub account with GHCR write access (`ghcr.io/ifuensan/salvager`).
 - [ ] **Secrets ready.** Gemini API key obtained, eBay developer credentials (App ID + Cert ID + Dev ID), Telegram bot created via @BotFather + chat ID captured. (These are needed for Epic 2 Story 2.6 and Epic 3 onwards; Epic 1 itself doesn't need them but blocking them at Epic 1 avoids stalls.)
 - [ ] **GitHub Actions configured.** Workflow file scaffolding planned, `GITHUB_TOKEN` permissions confirmed for GHCR write.
 - [ ] **Confidence in OQ defaults.** OQ1 (global auto-disable), OQ2 (strict ceiling for container detection), OQ4 (wishlist scale assumptions) — accept defaults for v1; revisit post-launch.
@@ -476,5 +476,5 @@ The two blocking Open Questions (OQ3 + OQ6) gate Phase 2 enablement specifically
 ---
 
 **Assessor:** Implementation Readiness skill (BMAD method, 2026-05-11)
-**Project:** hardware-hunter
+**Project:** salvager
 **Verdict:** ✅ READY FOR IMPLEMENTATION (Phase 4 — start with Epic 1 Story 1.1)

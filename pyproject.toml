@@ -1,5 +1,5 @@
 [project]
-name = "hardware-hunter"
+name = "salvager"
 version = "0.2.0"
 description = "Self-hosted personal agent for second-hand homelab parts on Wallapop and eBay.es."
 authors = [
@@ -21,7 +21,7 @@ dependencies = [
 ]
 
 [project.scripts]
-hardware-hunter = "hardware_hunter:main"
+salvager = "salvager:main"
 
 [build-system]
 requires = ["uv_build>=0.11.13,<0.12.0"]
@@ -98,7 +98,7 @@ markers = [
 asyncio_mode = "auto"
 
 [tool.coverage.run]
-source = ["src/hardware_hunter"]
+source = ["src/salvager"]
 branch = true
 
 [tool.coverage.report]

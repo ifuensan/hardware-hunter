@@ -11,12 +11,12 @@ from uuid import uuid4
 import pytest
 from pydantic import TypeAdapter, ValidationError
 
-from hardware_hunter.domain.alert import (
+from salvager.domain.alert import (
     AlertSnapshot,
     InlineButton,
     RenderedAlert,
 )
-from hardware_hunter.domain.audit import (
+from salvager.domain.audit import (
     AlertSnapshotAudit,
     AuditEntry,
     CallbackAudit,
@@ -24,8 +24,8 @@ from hardware_hunter.domain.audit import (
     TapEventAudit,
     TransactionAudit,
 )
-from hardware_hunter.domain.evaluation import ListingEvaluation
-from hardware_hunter.domain.listing import Listing, SearchQuery
+from salvager.domain.evaluation import ListingEvaluation
+from salvager.domain.listing import Listing, SearchQuery
 
 # ─────────────────────────────────────────────────────────────────────────
 # Listing + SearchQuery
@@ -287,7 +287,7 @@ _ALLOWED_DOMAIN_TOP_LEVELS = frozenset(
         # blessed third-party
         "pydantic",
         # in-package
-        "hardware_hunter",
+        "salvager",
     }
 )
 
@@ -295,12 +295,12 @@ _ALLOWED_DOMAIN_TOP_LEVELS = frozenset(
 @pytest.mark.parametrize(
     "module_path",
     [
-        "src/hardware_hunter/domain/alert.py",
-        "src/hardware_hunter/domain/audit.py",
-        "src/hardware_hunter/domain/evaluation.py",
-        "src/hardware_hunter/domain/listing.py",
-        "src/hardware_hunter/domain/scope_guard.py",
-        "src/hardware_hunter/domain/wishlist.py",
+        "src/salvager/domain/alert.py",
+        "src/salvager/domain/audit.py",
+        "src/salvager/domain/evaluation.py",
+        "src/salvager/domain/listing.py",
+        "src/salvager/domain/scope_guard.py",
+        "src/salvager/domain/wishlist.py",
     ],
 )
 def test_domain_module_imports_only_whitelisted_packages(module_path: str) -> None:

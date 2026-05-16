@@ -16,9 +16,9 @@ stepsCompleted:
   - step-12-complete
 releaseMode: phased
 inputDocuments:
-  - _bmad-output/planning-artifacts/prfaq-hardware-hunter-distillate.md
-  - _bmad-output/planning-artifacts/prfaq-hardware-hunter.md
-  - hardware-hunter-bmad-prompt.md
+  - _bmad-output/planning-artifacts/prfaq-salvager-distillate.md
+  - _bmad-output/planning-artifacts/prfaq-salvager.md
+  - salvager-bmad-prompt.md
 documentCounts:
   briefs: 0
   research: 0
@@ -40,14 +40,14 @@ classification:
     on container detection.
 ---
 
-# Product Requirements Document - hardware-hunter
+# Product Requirements Document - salvager
 
 **Author:** ifuensan
 **Date:** 2026-05-10
 
 ## Executive Summary
 
-hardware-hunter is a self-hosted, MIT-licensed agent that watches Wallapop and eBay.es continuously against a YAML wishlist of specific homelab parts (HDDs, RAM) and surfaces matches in Telegram — including parts hidden inside larger listings (a WD Red inside a "NAS DS220 con discos") that saved searches structurally cannot see. With opt-in Phase 2 enabled per wishlist entry, an explicit Telegram tap completes the purchase via the marketplace's protected payment rail.
+salvager is a self-hosted, MIT-licensed agent that watches Wallapop and eBay.es continuously against a YAML wishlist of specific homelab parts (HDDs, RAM) and surfaces matches in Telegram — including parts hidden inside larger listings (a WD Red inside a "NAS DS220 con discos") that saved searches structurally cannot see. With opt-in Phase 2 enabled per wishlist entry, an explicit Telegram tap completes the purchase via the marketplace's protected payment rail.
 
 **Primary user.** ifuensan (Spanish homelabber) personally; the OSS release is a side benefit for other Spanish homelabbers, not a go-to-market. No team, no funding, no resale.
 
@@ -79,8 +79,8 @@ Four differentiators, none of which the existing OSS Wallapop bots (wallabot, Wa
 | **Project Type** | `cli_tool` — self-hosted agent, docker-compose install, YAML/env config, Telegram as the user surface (no built-in GUI) |
 | **Domain** | `general` (sub-domain: marketplace agent / homelab tooling) |
 | **Complexity** | **High** — driven by Phase 2 autonomous purchase, two-path Wallapop adapter under anti-bot pressure, silent-failure-mode design, LLM evaluation with confidence, unproven container-detection accuracy |
-| **Project Context** | **Greenfield** — fresh repository at `github.com/ifuensan/hardware-hunter`; no prior code or docs |
-| **License / repo** | MIT, personal GitHub (`ifuensan/hardware-hunter`) |
+| **Project Context** | **Greenfield** — fresh repository at `github.com/ifuensan/salvager`; no prior code or docs |
+| **License / repo** | MIT, personal GitHub (`ifuensan/salvager`) |
 | **Stack (locked, not for PRD debate)** | Hermes Agent v0.13.0 (Nous Research, MIT) + TinyFish via MCP; runs on owned HPE DL160 Gen10 in Valencia colo; Telegram for alerts and approvals; LLM (Gemini Flash assumed) for listing evaluation |
 
 ## Success Criteria
@@ -99,7 +99,7 @@ The user (ifuensan) achieves success when:
 
 This is OSS scratch-own-itch; success ≠ commercial metrics. Sustainability is the right frame:
 
-- **Personal-utility holds.** ifuensan keeps using hardware-hunter for own homelab parts for 3+ consecutive months (inverse of the personal-use walk-away trigger).
+- **Personal-utility holds.** ifuensan keeps using salvager for own homelab parts for 3+ consecutive months (inverse of the personal-use walk-away trigger).
 - **Maintenance cost contained.** Steady-state ≤8 h/month after the first 6 months. Any rolling 3-month average >20 h/month invokes the sustained-burden walk-away.
 - **Marketplace breaks absorbable.** Expected 2–4 breaks/year, each absorbed in ≤30 h. Three consecutive failed patch attempts on a single break = technical-debt walk-away trigger.
 - **Cost ceiling held.** Running cost stays at €0 on existing homelab hardware (or ≤€10/month worst-case if TinyFish free tier disappears).
@@ -168,7 +168,7 @@ Ships ~4–8 weeks after Phase 1 stabilizes for the user:
 ### Vision (Future, separate research / not v1)
 
 - Multi-marketplace expansion beyond Wallapop + eBay.es ("much later, after validating Wallapop+eBay.es first"); documented in ROADMAP as a future research direction.
-- Arbitrage / flipping framing — **explicitly out of scope for hardware-hunter forever**; ROADMAP points to a separate-repo path under a different name.
+- Arbitrage / flipping framing — **explicitly out of scope for salvager forever**; ROADMAP points to a separate-repo path under a different name.
 - Possible publication on agentskills.io for Hermes ecosystem visibility.
 - "C&D-induced sunset" as a documented possible end state — not a goal, a planned graceful exit per the legal posture.
 
@@ -180,7 +180,7 @@ The user surface is narrow by design ((c3) personal-use): one human (ifuensan) w
 
 **Persona.** ifuensan, Spanish homelabber, runs a Synology RS818+ NAS in a closet in Valencia. Has been watching the second-hand market for a WD Red 4TB to round out his array. DDR4/HDD prices are climbing weekly.
 
-**Opening scene.** Tuesday, 16:42. He's at his day job. His wishlist YAML has 18 entries; hardware-hunter has been running on the homelab DL160 for 11 days; he has not opened Wallapop today.
+**Opening scene.** Tuesday, 16:42. He's at his day job. His wishlist YAML has 18 entries; salvager has been running on the homelab DL160 for 11 days; he has not opened Wallapop today.
 
 **Rising action.** His phone buzzes. Telegram:
 
@@ -240,11 +240,11 @@ A real listing fires. The agent surfaces alert "0.53€". Before any Phase 2 pur
 
 **Opening scene.** 09:30. Logs show 6 hours of `Wallapop unofficial API: 401 Unauthorized` — session cookie expired. Phase 1 was degraded on Wallapop overnight (the TinyFish Search/Fetch fallback path carried partial coverage), but eBay.es ran clean (independent adapter). Earlier Telegram:
 
-> "ℹ️ **Wallapop session expired.** Manual re-auth required (no silent re-login). Run `hardware-hunter login wallapop`."
+> "ℹ️ **Wallapop session expired.** Manual re-auth required (no silent re-login). Run `salvager login wallapop`."
 
-**Rising action.** He SSHes to the DL160, runs `hardware-hunter login wallapop`. The agent spins up a TinyFish Browser session, opens Wallapop's login page in a stealth Chromium, walks him through entering credentials + 2FA, persists the cookie file with restrictive perms. While he's there, he edits `wishlist.yaml` to add a Kingston KVR32N22D8/32 DDR4-3200 32GB kit he's been eyeing.
+**Rising action.** He SSHes to the DL160, runs `salvager login wallapop`. The agent spins up a TinyFish Browser session, opens Wallapop's login page in a stealth Chromium, walks him through entering credentials + 2FA, persists the cookie file with restrictive perms. While he's there, he edits `wishlist.yaml` to add a Kingston KVR32N22D8/32 DDR4-3200 32GB kit he's been eyeing.
 
-**Climax.** He runs `hardware-hunter validate-wishlist` — schema lints clean. He runs `hardware-hunter test-search "Kingston 32GB DDR4 3200"` — the agent surfaces three current listings as a read-only dry run, applying the wishlist-anchored prompt against each so he can sanity-check whether the LLM evaluation matches his judgment.
+**Climax.** He runs `salvager validate-wishlist` — schema lints clean. He runs `salvager test-search "Kingston 32GB DDR4 3200"` — the agent surfaces three current listings as a read-only dry run, applying the wishlist-anchored prompt against each so he can sanity-check whether the LLM evaluation matches his judgment.
 
 **Resolution.** He restarts the stack: `docker-compose down && docker-compose up -d`. Phase 1 backfills overnight; the new Kingston entry enters rotation. Total time: 12 minutes.
 
@@ -252,7 +252,7 @@ A real listing fires. The agent surfaces alert "0.53€". Before any Phase 2 pur
 
 ### Journey 5 — OSS contributor: fork runner
 
-**Persona.** Marc, another Spanish homelabber. Runs a small Mini PC at home with Proxmox and a couple of containers. Spotted hardware-hunter on a Spanish dev forum. Wants a Kingston 16GB DDR4-2666 SO-DIMM under €25.
+**Persona.** Marc, another Spanish homelabber. Runs a small Mini PC at home with Proxmox and a couple of containers. Spotted salvager on a Spanish dev forum. Wants a Kingston 16GB DDR4-2666 SO-DIMM under €25.
 
 **Opening scene.** Sunday afternoon. He's read the README and the legal disclaimer. He spins up a fresh Telegram bot via BotFather, generates a Wallapop secondary account he's "willing to lose" (per the customer-FAQ recommendation), clones the repo.
 
@@ -260,7 +260,7 @@ A real listing fires. The agent surfaces alert "0.53€". Before any Phase 2 pur
 
 **Climax.** Two days later: "Kingston KVR26N19S8/16 · 22€ · Madrid · confidence: medium · *photos show package, label visible* · [link]". He taps the link, buys manually via Wallapop Pay.
 
-**Resolution.** He stars the repo. Considers opening a PR with three additional Castilian-friendly wishlist examples for the README — the `CONTRIBUTING.md` lists wishlist contributions as one of the three explicit invitation categories. He never enables Phase 2; alerts are enough for him. (This is the (c3)-aligned fork-user posture: hardware-hunter saved him time, he didn't need the autonomous-purchase tier.)
+**Resolution.** He stars the repo. Considers opening a PR with three additional Castilian-friendly wishlist examples for the README — the `CONTRIBUTING.md` lists wishlist contributions as one of the three explicit invitation categories. He never enables Phase 2; alerts are enough for him. (This is the (c3)-aligned fork-user posture: salvager saved him time, he didn't need the autonomous-purchase tier.)
 
 **Capabilities revealed.** README with realistic example wishlists; `.env.example` covering all needed credentials; single `docker-compose up` install; Phase 2 disabled-by-default for safety; `CONTRIBUTING.md` with three invitation categories (wishlist examples, prompt improvements, Wallapop selector patches); legal disclaimer + secondary-account recommendation in README.
 
@@ -278,7 +278,7 @@ A real listing fires. The agent surfaces alert "0.53€". Before any Phase 2 pur
 | Receipt-vs-alert reconciliation (auto-disable on mismatch) | 2, 3 | Global auto-disable on first incident — scope TBD |
 | Daily Phase 2 synthetic smoke test | 3 | Independent of cross-source reconciliation |
 | Append-only SQLite audit log per Phase 2 purchase | 2, 3, 4 | Photo perceptual hashes + Telegram tap event + receipt |
-| Wallapop manual re-auth UX (no silent automated re-login) | 4 | `hardware-hunter login wallapop` CLI + cookie persistence |
+| Wallapop manual re-auth UX (no silent automated re-login) | 4 | `salvager login wallapop` CLI + cookie persistence |
 | Wishlist YAML validator + dry-run search | 4 | CLI commands for the operator hat |
 | docker-compose install + `.env.example` + README example wishlists | 4, 5 | Single launch artifact for OSS forkers |
 | `CONTRIBUTING.md` + `ROADMAP.md` as launch artifacts | 5 | Wishlist examples / prompt improvements / selector patches |
@@ -293,7 +293,7 @@ The product domain (`general` consumer/homelab tooling) has no regulatory regime
 ### Compliance & Legal Posture
 
 - **Wallapop ToS (rev. Apr 2026):** explicitly forbids scraping/bots. Realistic enforcement is account ban, not legal action (precedent: Tatuck/wallapop-scraper publicly hosted on GitHub; ZebraBot operating commercially in Spain for years without legal escalation).
-- **Operating posture:** comply-don't-fight on any C&D. Solo maintainer cannot litigate; pretending otherwise is unsustainable. README/repo position hardware-hunter as a "personal monitoring tool," not a "Wallapop scraper" — wording matters.
+- **Operating posture:** comply-don't-fight on any C&D. Solo maintainer cannot litigate; pretending otherwise is unsustainable. README/repo position salvager as a "personal monitoring tool," not a "Wallapop scraper" — wording matters.
 - **C&D contingency (documented in `ROADMAP.md` as a possible end state, not a goal):** read carefully, do not respond same-day, assess scope, comply with reasonable scope (rename, archive, code removal). MIT-licensed forks survive.
 - **Spanish web-scraping precedent:** Spanish courts have generally permitted scraping of public data (cited generically in customer FAQ, no specific case citation in shipped docs).
 - **Hacienda / tax integration:** **out of scope.** Personal use only by (c3); commercial-volume use would be a (c3) violation.
@@ -301,7 +301,7 @@ The product domain (`general` consumer/homelab tooling) has no regulatory regime
 ### Privacy & Data Handling (RGPD posture)
 
 - **All data local.** SQLite store on the user's homelab box; no remote logging, no telemetry, no cloud sync.
-- **User = data controller; hardware-hunter = processor.** Sellers' publicly posted listing data is processed only for the duration of evaluation/transaction. No profiling, no third-party sharing.
+- **User = data controller; salvager = processor.** Sellers' publicly posted listing data is processed only for the duration of evaluation/transaction. No profiling, no third-party sharing.
 - **Stored data classes:** wishlist YAML (user content), seen-listings dedup index (URL + perceptual photo hash), Phase 2 audit log (alert + tap + transaction), Wallapop session cookie file. All readable by the user via the filesystem.
 - **Retention:** indefinite local retention by default; user owns deletion. No automatic purge requirements (no remote sync to comply with).
 - **Cookie/credential hygiene:** restrictive filesystem permissions on cookie file and `.env`; never logged.
@@ -319,7 +319,7 @@ Three artifacts persisted **locally, append-only**, per Phase 2 purchase. Defend
 ### Anti-Bot Mitigation
 
 - **Polling at human-volume rates.** Cron-driven, not high-frequency streaming. Concrete rate limits captured in NFRs.
-- **Wallapop long-lived sessions with manual re-auth.** No silent automated re-login (anti-bot risk). Operator runs `hardware-hunter login wallapop` on cookie expiry.
+- **Wallapop long-lived sessions with manual re-auth.** No silent automated re-login (anti-bot risk). Operator runs `salvager login wallapop` on cookie expiry.
 - **Stealth Chromium for Phase 2 buy flow.** Via TinyFish Browser. Login flows go through real browser sessions, not API token forgery.
 - **Per-purchase circuit breaker.** N consecutive Phase 2 buy failures auto-disables autonomous mode globally; protects against silent anti-bot detection escalation.
 - **No mass-scraping pattern.** Listing fetches are scoped to wishlist matches, not bulk extraction. Reduces both anti-bot signal and LPI database-rights exposure.
@@ -346,7 +346,7 @@ Per the ACES (Columbia/Yale, WebConf 2026) findings on VLM shopping agents, stru
 ### Repository Hygiene (legal-driven)
 
 - No Wallapop trademarks, logos, or proprietary terms in repo name, package names, domain, or anywhere user-visible.
-- README positions hardware-hunter as a personal monitoring tool, NOT a "Wallapop scraper." Wording is operational, not aesthetic — reduces the trademark complaint surface and the cost of a forced rename.
+- README positions salvager as a personal monitoring tool, NOT a "Wallapop scraper." Wording is operational, not aesthetic — reduces the trademark complaint surface and the cost of a forced rename.
 - Adapter file names use marketplace names only where strictly necessary (e.g. `wallapop_adapter.py` is fine inside `adapters/`; the package itself is not named after Wallapop).
 - `CONTRIBUTING.md` carries an explicit "no arbitrage PRs" rule and a pointer to the future-research separate-repo path; closes the door on (c3)-violating contributions before they land.
 - `ROADMAP.md` names: future-multi-marketplace, future-arbitrage-as-separate-repo, "C&D-induced sunset" as documented end state.
@@ -363,7 +363,7 @@ Four innovations, ordered by structural significance:
 
 Standard VLM shopping-agent pattern (ACES: Columbia/Yale, WebConf 2026): user gives an open-ended preference ("find me a cheap NAS"); agent picks. Documented to suffer from position bias, sponsored-content bias, and open-ended price sensitivity.
 
-hardware-hunter inverts it. The user's YAML names exact references and per-SKU price ceilings; the LLM is asked one question per listing — *"does this listing match this wishlist entry?"* — and returns a confidence level. The LLM never picks what to buy; it only verifies.
+salvager inverts it. The user's YAML names exact references and per-SKU price ceilings; the LLM is asked one question per listing — *"does this listing match this wishlist entry?"* — and returns a confidence level. The LLM never picks what to buy; it only verifies.
 
 This is a deliberate framing choice with three structural consequences:
 
@@ -412,7 +412,7 @@ Surveyed OSS Wallapop bots and adjacent tools (May 2026):
 | **ScrapingBee** | No | No | No | N/A | Generic scraping API |
 | **Wallapop saved searches** | N/A | No (0% by definition) | No | N/A | Native, free, the minimum viable alternative |
 | **ZebraBot (zebrabot.es)** | Unknown (commercial) | Unknown | Unknown | Unknown | Commercial Spanish service, decade+ live, not OSS — useful as ToS-enforcement precedent |
-| **hardware-hunter** | Wishlist-anchored, confidence-leveled | **Yes** | **Yes (opt-in, HITL Telegram, per-entry)** | **Yes (official API)** | The combination is the moat |
+| **salvager** | Wishlist-anchored, confidence-leveled | **Yes** | **Yes (opt-in, HITL Telegram, per-entry)** | **Yes (official API)** | The combination is the moat |
 
 The four-bullet differentiator — wishlist YAML with per-SKU ceilings + container detection + opt-in Phase 2 via protected payment rails + eBay.es alongside Wallapop — is the combination none of the surveyed tools offers. Tatuck is the closest single-axis competitor (LLM evaluation) but framed as arbitrage; the framing difference is the moat.
 
@@ -435,22 +435,22 @@ Pre-launch: the accuracy dashboard (community-collected) is committed in PRFAQ a
 - **Container detection produces too many false positives.** Fallback: tighten `container_keywords[]`, raise the confidence threshold for container matches specifically (per-entry-class threshold, not just per-entry). Acceptable degradation: alerts on wrappers go quiet; direct-listing alerts continue to work.
 - **Adapter discipline slips during a rushed patch.** Fallback: CI lint hard-fails the build; a direct import never reaches main. Process is the safety net.
 - **Phase 2 guardrail stack misses a silent failure.** Fallback: per-purchase circuit breaker is the universal backstop — N consecutive Phase 2 anomalies (any kind) auto-disable autonomous mode globally. Adding a fourth independent defense is cheaper than waiting for the next failure class.
-- **All four innovations underperform together.** Fallback: hardware-hunter degrades to a more sophisticated wallabot — keyword alerts on Wallapop + eBay.es with deduplication. Still beats saved searches (eBay.es coverage, dedup, two-tier pricing) and hits the time-tax success criterion. The product survives even if the headline novelty doesn't.
+- **All four innovations underperform together.** Fallback: salvager degrades to a more sophisticated wallabot — keyword alerts on Wallapop + eBay.es with deduplication. Still beats saved searches (eBay.es coverage, dedup, two-tier pricing) and hits the time-tax success criterion. The product survives even if the headline novelty doesn't.
 
 ## CLI Tool Specific Requirements
 
 ### Project-Type Overview
 
-hardware-hunter has two interaction surfaces:
+salvager has two interaction surfaces:
 
-- **Daemon-style operation** (the steady state). Once installed and configured, hardware-hunter runs as a long-lived agent process inside docker-compose. **Hermes Agent's built-in scheduler** drives all polling jobs (no external cron). The daemon never blocks on user input; alerts go to Telegram; failures auto-disable rather than escalate.
-- **Operator CLI** (the maintenance surface). A single `hardware-hunter` binary with subcommands handles install-time setup, manual re-auth, wishlist editing, dry-runs, and audit-log inspection. ifuensan-as-operator (Journey 4) is the primary CLI consumer.
+- **Daemon-style operation** (the steady state). Once installed and configured, salvager runs as a long-lived agent process inside docker-compose. **Hermes Agent's built-in scheduler** drives all polling jobs (no external cron). The daemon never blocks on user input; alerts go to Telegram; failures auto-disable rather than escalate.
+- **Operator CLI** (the maintenance surface). A single `salvager` binary with subcommands handles install-time setup, manual re-auth, wishlist editing, dry-runs, and audit-log inspection. ifuensan-as-operator (Journey 4) is the primary CLI consumer.
 
 The Telegram bot is the primary *user* surface (alerts, taps, decisions). The CLI is the primary *operator* surface (setup, troubleshooting, audit). The two surfaces never overlap — no operator command takes Telegram input, and no Telegram interaction triggers CLI work.
 
 ### Technical Architecture Considerations
 
-- **Scheduler:** Hermes Agent's native scheduler (per kickoff: natural-language cron, no job limit, persists across restarts via Hermes' SQLite memory). hardware-hunter expresses polling cadence as Hermes scheduled jobs, not OS cron. Stack-swap implication: if Hermes is ever replaced, a `Scheduler` interface must abstract this — captured under adapter discipline.
+- **Scheduler:** Hermes Agent's native scheduler (per kickoff: natural-language cron, no job limit, persists across restarts via Hermes' SQLite memory). salvager expresses polling cadence as Hermes scheduled jobs, not OS cron. Stack-swap implication: if Hermes is ever replaced, a `Scheduler` interface must abstract this — captured under adapter discipline.
 - **Two-path Wallapop adapter** behind `PageFetcher` interface (unofficial API primary + TinyFish Search/Fetch fallback).
 - **eBay.es adapter** behind same `PageFetcher` interface (official eBay API primary; no fallback needed at v1 — eBay's API is structurally stable).
 - **Phase 2 buy flow** behind `BrowserSession` interface (TinyFish Browser via MCP).
@@ -462,40 +462,40 @@ Adapter discipline is a v1 launch blocker per the Innovation section; CI lint en
 
 ### Command Structure
 
-A single `hardware-hunter` binary, subcommand-organized. Daemon mode is the implicit default when no subcommand is given (or when launched via docker-compose); subcommands are for the operator.
+A single `salvager` binary, subcommand-organized. Daemon mode is the implicit default when no subcommand is given (or when launched via docker-compose); subcommands are for the operator.
 
 ```text
-hardware-hunter                         # daemon mode (Phase 1 + opted-in Phase 2 entries)
-hardware-hunter --version
-hardware-hunter --help
+salvager                         # daemon mode (Phase 1 + opted-in Phase 2 entries)
+salvager --version
+salvager --help
 
 # Setup & authentication
-hardware-hunter init                    # scaffold wishlist.yaml, config.yaml, .env from examples
-hardware-hunter login wallapop          # interactive: opens stealth Chromium, persists cookie
-hardware-hunter login ebay              # OAuth flow for eBay.es API
+salvager init                    # scaffold wishlist.yaml, config.yaml, .env from examples
+salvager login wallapop          # interactive: opens stealth Chromium, persists cookie
+salvager login ebay              # OAuth flow for eBay.es API
 
 # Wishlist & config
-hardware-hunter validate-wishlist [path]            # schema + reachability + duplicate-ref lint
-hardware-hunter validate-config [path]              # config.yaml + .env presence
-hardware-hunter test-search <query|--entry NAME>    # dry-run search (no alert sent)
-hardware-hunter explain <listing-url>               # one-shot LLM evaluation against current wishlist
+salvager validate-wishlist [path]            # schema + reachability + duplicate-ref lint
+salvager validate-config [path]              # config.yaml + .env presence
+salvager test-search <query|--entry NAME>    # dry-run search (no alert sent)
+salvager explain <listing-url>               # one-shot LLM evaluation against current wishlist
 
 # Phase 2 controls
-hardware-hunter phase2 status                       # show per-entry Phase 2 settings
-hardware-hunter phase2 enable <entry>               # turn on for a wishlist entry
-hardware-hunter phase2 disable <entry|--all>        # turn off (per-entry or globally)
-hardware-hunter phase2 smoke-test                   # run synthetic price-parse smoke test now
-hardware-hunter phase2 reconcile <receipt-id>       # re-run receipt-vs-alert reconciliation
+salvager phase2 status                       # show per-entry Phase 2 settings
+salvager phase2 enable <entry>               # turn on for a wishlist entry
+salvager phase2 disable <entry|--all>        # turn off (per-entry or globally)
+salvager phase2 smoke-test                   # run synthetic price-parse smoke test now
+salvager phase2 reconcile <receipt-id>       # re-run receipt-vs-alert reconciliation
 
 # Audit & diagnostics
-hardware-hunter audit show [--last N | --entry E]   # paginated audit log
-hardware-hunter audit export [--since DATE] <path>  # export audit rows (JSONL)
-hardware-hunter health                              # adapter status, scheduler status, last poll, last alert
-hardware-hunter logs [--tail | --since DURATION]    # structured log access
+salvager audit show [--last N | --entry E]   # paginated audit log
+salvager audit export [--since DATE] <path>  # export audit rows (JSONL)
+salvager health                              # adapter status, scheduler status, last poll, last alert
+salvager logs [--tail | --since DURATION]    # structured log access
 
 # Lifecycle
-hardware-hunter daemon                              # explicit daemon mode (default; rarely typed)
-hardware-hunter stop                                # graceful shutdown signal
+salvager daemon                              # explicit daemon mode (default; rarely typed)
+salvager stop                                # graceful shutdown signal
 ```
 
 Shell completion (bash + zsh) is a post-launch nice-to-have, not a v1 requirement. Subcommand grouping keeps completion straightforward to add later.
@@ -572,8 +572,8 @@ llm:
   confidence_default: high                # default per-entry confidence threshold
 
 paths:
-  data_dir: /var/lib/hardware-hunter      # SQLite, audit log, cookies
-  log_dir:  /var/log/hardware-hunter      # rotated by Hermes/docker
+  data_dir: /var/lib/salvager      # SQLite, audit log, cookies
+  log_dir:  /var/log/salvager      # rotated by Hermes/docker
 
 logging:
   level: info                             # debug, info, warn, error
@@ -587,11 +587,11 @@ logging:
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_CHAT_ID=
 
-# Wallapop (cookie file persisted separately by `hardware-hunter login wallapop`)
+# Wallapop (cookie file persisted separately by `salvager login wallapop`)
 WALLAPOP_USERNAME=
 WALLAPOP_PASSWORD=
 
-# eBay.es (OAuth tokens persisted separately after `hardware-hunter login ebay`)
+# eBay.es (OAuth tokens persisted separately after `salvager login ebay`)
 EBAY_CLIENT_ID=
 EBAY_CLIENT_SECRET=
 
@@ -616,13 +616,13 @@ LLM_API_KEY=
   - `5` — Phase 2 guardrail tripped (smoke-test drift, reconciliation mismatch, circuit breaker open)
   - These codes are stable across releases and documented in README.
 - **Pipeable JSON.** Every list/object-returning subcommand supports `--format json`. JSON goes to stdout; errors and progress to stderr. Suitable for `jq` chains in operator scripts.
-- **No interactive prompts in non-TTY contexts.** When stdout is not a TTY, commands fail fast on missing args rather than prompting (`hardware-hunter login wallapop` is the explicit exception — it's interactive by design).
-- **Daemon lifecycle.** `hardware-hunter daemon` (or implicit default) handles SIGTERM gracefully (drains in-flight LLM evaluations, flushes audit log, lets Telegram alerts complete, exits ≤30s). docker-compose `stop_grace_period: 30s` matches.
+- **No interactive prompts in non-TTY contexts.** When stdout is not a TTY, commands fail fast on missing args rather than prompting (`salvager login wallapop` is the explicit exception — it's interactive by design).
+- **Daemon lifecycle.** `salvager daemon` (or implicit default) handles SIGTERM gracefully (drains in-flight LLM evaluations, flushes audit log, lets Telegram alerts complete, exits ≤30s). docker-compose `stop_grace_period: 30s` matches.
 - **Dry-run philosophy.** `test-search` and `explain` never mutate state, never send Telegram messages, never count against rate limits beyond the actual fetch. Result printed as if the alert *would* fire — operator sees confidence, message body, button set.
 
 ### Sections Skipped
 
-Per CSV `skip_sections` for `cli_tool`: `visual_design`, `ux_principles`, `touch_interactions`. Confirmed correct: hardware-hunter has no visual UI; UX is structured around Telegram conversational patterns covered in the Output Formats subsection above.
+Per CSV `skip_sections` for `cli_tool`: `visual_design`, `ux_principles`, `touch_interactions`. Confirmed correct: salvager has no visual UI; UX is structured around Telegram conversational patterns covered in the Output Formats subsection above.
 
 ### Implementation Considerations
 
@@ -686,7 +686,7 @@ This section provides the strategic context behind the Phase 1 / Phase 2 / Visio
 | Phase 2 buy flow stability (PRFAQ-named hardest problem) | Phase 1 stabilization gate (4–8 weeks); fail-closed UI element checks; per-purchase circuit breaker; integration tests against recorded fixtures | Phase 1 stays the steady state if selector breakage outpaces patch cycles. Honest trade-off, not failure. |
 | Silent Phase 2 misbehavior (Q9 scenario) | Three independent defenses: cross-source price reconciliation at buy time, receipt-vs-alert reconciliation, daily synthetic smoke test (covered in Innovation section + Phase 2 Failure Defense FRs) | Per-purchase circuit breaker auto-disables Phase 2 globally on any anomaly; user investigates audit log; manual re-enable after green smoke test. |
 | Wallapop unofficial API breaks | Two-path adapter: API primary + TinyFish Search/Fetch fallback; either path carries Phase 1 alone | TinyFish covers Phase 1 if API path dies entirely; eBay.es independent path also continues. |
-| Wallapop session persistence | Long-lived sessions with manual re-auth (no silent automated re-login); operator runs `hardware-hunter login wallapop` on expiry | Manual re-auth is acceptable friction (Journey 4); automation here is anti-bot-risky. |
+| Wallapop session persistence | Long-lived sessions with manual re-auth (no silent automated re-login); operator runs `salvager login wallapop` on expiry | Manual re-auth is acceptable friction (Journey 4); automation here is anti-bot-risky. |
 | Both Wallapop adapter paths fail simultaneously | Two independent paths reduce probability; eBay.es independent adapter path keeps running regardless | Phase 1 degraded on Wallapop only; user notified via operational Telegram; operator patches at next opportunity. |
 | Wallapop ToS account ban | Customer-FAQ recommends secondary account ("willing to lose"); polling at human-volume rates; no mass-scraping; no silent re-login | Re-auth with replacement account; not a project-ending risk for any individual user. |
 | TinyFish service change or pricing | `PageFetcher` / `BrowserSession` interfaces; Playwright self-hosted as bare-metal fallback | Adapter swap is days of work, not weeks. Worst-case Phase 1 cost ~€10/month. |
@@ -714,7 +714,7 @@ This section provides the strategic context behind the Phase 1 / Phase 2 / Visio
 
 ## Functional Requirements
 
-> This section is the **capability contract** for hardware-hunter v1. UX, architecture, and epic decomposition must trace every feature back to one or more FRs below. A capability not listed here will not exist in the final product unless explicitly added via PRD revision.
+> This section is the **capability contract** for salvager v1. UX, architecture, and epic decomposition must trace every feature back to one or more FRs below. A capability not listed here will not exist in the final product unless explicitly added via PRD revision.
 
 ### Wishlist Management
 
@@ -780,7 +780,7 @@ This section provides the strategic context behind the Phase 1 / Phase 2 / Visio
 
 ### Operator Tools & Configuration
 
-- **FR39.** The operator interacts with hardware-hunter through a single `hardware-hunter` binary with subcommands. Daemon mode is the implicit default when no subcommand is given.
+- **FR39.** The operator interacts with salvager through a single `salvager` binary with subcommands. Daemon mode is the implicit default when no subcommand is given.
 - **FR40.** The operator can scaffold initial config files (`wishlist.yaml`, `config.yaml`, `.env`) from tracked examples via `init`; the command refuses to overwrite existing files unless `--force` is given alongside an interactive confirmation prompt.
 - **FR41.** The operator can authenticate Wallapop interactively via `login wallapop`, which opens a real browser session, walks the operator through credentials and 2FA, and persists the resulting cookie with restrictive filesystem permissions.
 - **FR42.** The operator can authenticate eBay.es via `login ebay`, completing OAuth and persisting tokens locally with restrictive permissions.
@@ -798,11 +798,11 @@ This section provides the strategic context behind the Phase 1 / Phase 2 / Visio
 - **FR51.** The repository ships a single `docker-compose.yml` install path with example wishlist entries for common HDD and RAM models, an `.env.example`, and a `config.example.yaml`; user-specific files (`wishlist.yaml`, `config.yaml`, `.env`) are gitignored.
 - **FR52.** The repository includes a `CONTRIBUTING.md` with an explicit "no arbitrage PRs" rule and three named invitation categories (wishlist examples, prompt improvements, Wallapop selector patches), pointing to a separate-repo path for arbitrage forks.
 - **FR53.** The repository includes a `ROADMAP.md` naming future-multi-marketplace expansion, future-arbitrage-as-separate-repo, and "C&D-induced sunset" as a documented possible end state.
-- **FR54.** The README positions hardware-hunter as a personal monitoring tool (not a "Wallapop scraper"), includes a legal disclaimer covering Spanish ToS posture and the secondary-account recommendation, and contains no Wallapop trademarks, logos, or proprietary terms in titles, package names, or domain references.
+- **FR54.** The README positions salvager as a personal monitoring tool (not a "Wallapop scraper"), includes a legal disclaimer covering Spanish ToS posture and the secondary-account recommendation, and contains no Wallapop trademarks, logos, or proprietary terms in titles, package names, or domain references.
 
 ## Non-Functional Requirements
 
-This section specifies HOW WELL hardware-hunter must perform, not WHAT it does. Categories not listed are explicitly out of scope: **Scalability** (single-user product; forks are independent installs; wishlist bounded at ~100 entries), **Accessibility** (Telegram is the user surface, accessibility delegated to Telegram clients; the CLI is operator-only).
+This section specifies HOW WELL salvager must perform, not WHAT it does. Categories not listed are explicitly out of scope: **Scalability** (single-user product; forks are independent installs; wishlist bounded at ~100 entries), **Accessibility** (Telegram is the user surface, accessibility delegated to Telegram clients; the CLI is operator-only).
 
 ### Performance
 
@@ -819,7 +819,7 @@ The performance envelope is shaped by the 4-hour listing half-life and the custo
 - **NFR-S1. Credential handling.** All marketplace credentials, Telegram bot tokens, TinyFish API keys, and LLM API keys are loaded exclusively from `.env` at process start; the agent never logs credentials, never persists them outside the cookie/token files, and never transmits them to remote services beyond their target API.
 - **NFR-S2. Cookie file permissions.** Wallapop session cookie file and eBay OAuth token file are created with mode `0600` (owner read/write only). The agent verifies permissions at startup and refuses to load if mode is permissive.
 - **NFR-S3. Transport security.** All external API calls (Wallapop, eBay, Telegram, TinyFish, LLM provider) use TLS 1.2 or higher. The agent rejects connections that fall back to weaker protocols or accept invalid certificates (no `--insecure` equivalent).
-- **NFR-S4. Audit log integrity.** The Phase 2 audit log is append-only at the application layer (no `UPDATE` or `DELETE` statements ever issued by hardware-hunter against `alert_snapshots`, `tap_events`, or `transactions`). Existing rows are never mutated; corrections, if needed, are appended as new annotation rows referencing the original.
+- **NFR-S4. Audit log integrity.** The Phase 2 audit log is append-only at the application layer (no `UPDATE` or `DELETE` statements ever issued by salvager against `alert_snapshots`, `tap_events`, or `transactions`). Existing rows are never mutated; corrections, if needed, are appended as new annotation rows referencing the original.
 - **NFR-S5. Payment-rail enforcement.** The agent has no codepath that initiates a transfer outside Wallapop Pay or eBay.es checkout. Any code change that adds an alternate rail requires an explicit PRD revision; CI lint flags introductions of relevant API calls outside the protected-rail wrapper.
 - **NFR-S6. Operator confirmation for destructive ops.** Operator commands that affect Phase 2 globally (`phase2 disable --all`) or destroy state (`init --force`) require an interactive confirmation prompt; in non-TTY contexts these commands fail rather than auto-proceed.
 - **NFR-S7. Local-only data plane.** The agent emits no telemetry, no usage analytics, no crash reports to any external service. Logs go to stdout (captured by docker-compose); audit log stays local; SQLite stores stay local.
@@ -871,7 +871,7 @@ The performance envelope is shaped by the 4-hour listing half-life and the custo
 - **NFR-O2. Health surface.** `health` command returns adapter status (Wallapop primary / Wallapop fallback / eBay.es / Telegram / TinyFish / LLM provider), Hermes scheduler status, last-poll timestamp per marketplace, last-alert timestamp, last Phase 2 event, and current Phase 2 enable/disable scope. Suitable for cron-driven external health checks.
 - **NFR-O3. Operator-readable audit log.** `audit show` paginates the Phase 2 audit log with human-readable formatting; `audit export` produces JSONL suitable for `jq` or external analysis.
 - **NFR-O4. Diagnostic completeness.** For any operational alert (Phase 2 disable, smoke-test drift, reconciliation tripped, circuit-breaker open, session expiry), the agent emits a structured log entry that contains the data necessary to root-cause the event without re-running the failing path. Operator must not need to enable debug logging to diagnose a production incident.
-- **NFR-O5. No mandatory log retention by hardware-hunter.** docker-compose / systemd / docker log driver owns log rotation; the agent makes no assumptions about how long logs are kept.
+- **NFR-O5. No mandatory log retention by salvager.** docker-compose / systemd / docker log driver owns log rotation; the agent makes no assumptions about how long logs are kept.
 
 ## Open Questions
 

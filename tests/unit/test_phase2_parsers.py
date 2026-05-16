@@ -13,8 +13,8 @@ from pathlib import Path
 
 import pytest
 
-from hardware_hunter.orchestration.phase2_parsers import default_price_parser_registry
-from hardware_hunter.orchestration.smoke_test import discover_fixtures
+from salvager.orchestration.phase2_parsers import default_price_parser_registry
+from salvager.orchestration.smoke_test import discover_fixtures
 
 SHIPPED_FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "price_parsers" / "active"
 

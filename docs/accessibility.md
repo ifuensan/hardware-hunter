@@ -15,7 +15,7 @@ the procedure is in
 
 ### Symptom
 
-When `hardware-hunter health`, `audit show --last 5`, or `phase2 status`
+When `salvager health`, `audit show --last 5`, or `phase2 status`
 are run inside Apple Terminal.app on macOS with VoiceOver enabled
 (`Cmd + F5`), VoiceOver does **not** announce the contents of the
 rendered tables. The visual output is correct and readable, but
@@ -37,7 +37,7 @@ expose these to VoiceOver as semantic table rows; the result is that
 VoiceOver reads whitespace where structured data was rendered.
 
 This is a long-standing limitation of Apple Terminal specifically and
-not a regression introduced by hardware-hunter. iTerm2, Alacritty,
+not a regression introduced by salvager. iTerm2, Alacritty,
 Kitty and other terminal emulators each handle accessibility
 differently — UX-DR32's release-gate audit explicitly scopes to Apple
 Terminal because it is the macOS default. iTerm2 + VoiceOver is known
@@ -53,15 +53,15 @@ without box-drawing characters. The workaround is to pipe through
 
 ```bash
 # Daemon liveness + adapter status — one event line per adapter.
-hardware-hunter health --format json \
+salvager health --format json \
   | jq -r '.adapters[] | "\(.name): \(.status), last activity \(.last_activity // "never")"'
 
 # Recent audit log — one line per record.
-hardware-hunter audit show --last 5 --format json \
+salvager audit show --last 5 --format json \
   | jq -r '.records[]? | "[\(.audit_id)] \(.type) \(.occurred_at): \(.summary // .verb // "")"'
 
 # Phase 2 enablement — one line per wishlist entry.
-hardware-hunter phase2 status --format json \
+salvager phase2 status --format json \
   | jq -r '.entries[]? | "\(.display_name): enabled=\(.phase2_enabled), max=\(.max_price_eur // "-")"'
 ```
 
@@ -102,7 +102,7 @@ as a follow-up if forker demand surfaces. Possible directions:
   three audited commands; longer to cover every CLI surface.
 - A documented `iTerm2 + VoiceOver` audit path post-v1.0 that opens
   the testing matrix beyond Apple Terminal.
-- A `hardware-hunter dev a11y-smoketest` command that fires each
+- A `salvager dev a11y-smoketest` command that fires each
   table renderer with synthetic populated data and writes the JSON
   equivalent for screen-reader validation — useful for regressions
   on the JSON contract specifically.

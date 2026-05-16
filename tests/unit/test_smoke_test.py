@@ -22,18 +22,18 @@ from typing import Any
 
 import pytest
 
-from hardware_hunter.adapters.sqlite_store import (
+from salvager.adapters.sqlite_store import (
     MigrationRunner,
     Phase2AuditWriter,
     open_connection,
 )
-from hardware_hunter.adapters.sqlite_store.migrations import db_path_under
-from hardware_hunter.adapters.sqlite_store.phase2_state_reader import (
+from salvager.adapters.sqlite_store.migrations import db_path_under
+from salvager.adapters.sqlite_store.phase2_state_reader import (
     SqlitePhase2StateReader,
 )
-from hardware_hunter.domain.alert import EventName
-from hardware_hunter.orchestration.degradation_reporter import Reporter
-from hardware_hunter.orchestration.smoke_test import (
+from salvager.domain.alert import EventName
+from salvager.orchestration.degradation_reporter import Reporter
+from salvager.orchestration.smoke_test import (
     SMOKE_TEST_FAILED_REASON,
     PriceParser,
     discover_fixtures,
@@ -375,7 +375,7 @@ async def test_all_pass_after_previous_fail_fires_recovered(
     try:
         # Seed a previous failed run — write a fail row + set the lockout
         # so the orchestrator sees the "previously failed" precondition.
-        from hardware_hunter.domain.phase2_audit import SmokeTestRecord
+        from salvager.domain.phase2_audit import SmokeTestRecord
 
         await writer.record_smoke_test(
             SmokeTestRecord(

@@ -1,4 +1,4 @@
-"""Tests for ``hardware-hunter init`` — Story 2.8 (FR40)."""
+"""Tests for ``salvager init`` — Story 2.8 (FR40)."""
 
 from __future__ import annotations
 
@@ -7,8 +7,8 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from hardware_hunter.cli.app import app
-from hardware_hunter.cli.commands.init_cmd import OVERWRITE_TOKEN, run
+from salvager.cli.app import app
+from salvager.cli.commands.init_cmd import OVERWRITE_TOKEN, run
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -32,12 +32,12 @@ def runner() -> CliRunner:
     ],
 )
 def test_bundled_templates_match_repo_examples(repo_name: str, bundled_name: str) -> None:
-    """The bundled copy under src/hardware_hunter/templates must match
+    """The bundled copy under src/salvager/templates must match
     the operator-facing copy at the repo root, byte for byte. Drift here
     means a user's `init` produces different content than what they see
     on GitHub when forking. This test is the sync mechanism."""
     repo_copy = (REPO_ROOT / repo_name).read_bytes()
-    bundled = (REPO_ROOT / "src" / "hardware_hunter" / "templates" / bundled_name).read_bytes()
+    bundled = (REPO_ROOT / "src" / "salvager" / "templates" / bundled_name).read_bytes()
     assert bundled == repo_copy
 
 
@@ -85,7 +85,7 @@ def test_init_renders_panel_with_each_path(
     assert str(target / "wishlist.yaml") in out
     assert str(target / "config.yaml") in out
     # The panel title is in the output too.
-    assert "hardware-hunter init" in out
+    assert "salvager init" in out
 
 
 # ─────────────────────────────────────────────────────────────────────────

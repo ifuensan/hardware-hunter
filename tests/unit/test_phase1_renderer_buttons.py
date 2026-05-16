@@ -17,13 +17,13 @@ from uuid import UUID
 
 import pytest
 
-from hardware_hunter.domain.alert import (
+from salvager.domain.alert import (
     BUTTON_LABELS,
     AlertSnapshot,
     render_phase1_listing_alert,
 )
-from hardware_hunter.domain.evaluation import ListingEvaluation
-from hardware_hunter.domain.listing import Listing
+from salvager.domain.evaluation import ListingEvaluation
+from salvager.domain.listing import Listing
 
 # UX-DR5 — callback_data format.
 _CALLBACK_DATA_RE = re.compile(r"^[a-z0-9_]+:[a-z0-9_]+:[A-Za-z0-9_\-]+$")

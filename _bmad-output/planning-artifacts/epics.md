@@ -9,16 +9,16 @@ inputDocuments:
   - _bmad-output/planning-artifacts/prd.md
   - _bmad-output/planning-artifacts/architecture.md
   - _bmad-output/planning-artifacts/ux-design-specification.md
-project_name: hardware-hunter
+project_name: salvager
 user_name: ifuensan
 date: 2026-05-10
 ---
 
-# hardware-hunter - Epic Breakdown
+# salvager - Epic Breakdown
 
 ## Overview
 
-This document provides the complete epic and story breakdown for hardware-hunter, decomposing the requirements from the PRD, UX Design Specification, and Architecture into implementable stories.
+This document provides the complete epic and story breakdown for salvager, decomposing the requirements from the PRD, UX Design Specification, and Architecture into implementable stories.
 
 ## Requirements Inventory
 
@@ -85,7 +85,7 @@ This document provides the complete epic and story breakdown for hardware-hunter
 
 **Operator Tools (FR39–FR48):**
 
-- **FR39.** The operator interacts with hardware-hunter through a single `hardware-hunter` binary with subcommands. Daemon mode is the implicit default when no subcommand is given.
+- **FR39.** The operator interacts with salvager through a single `salvager` binary with subcommands. Daemon mode is the implicit default when no subcommand is given.
 - **FR40.** The operator can scaffold initial config files (`wishlist.yaml`, `config.yaml`, `.env`) from tracked examples via `init`; the command refuses to overwrite existing files unless `--force` is given alongside an interactive confirmation prompt.
 - **FR41.** The operator can authenticate Wallapop interactively via `login wallapop`, which opens a real browser session, walks the operator through credentials and 2FA, and persists the resulting cookie with restrictive filesystem permissions.
 - **FR42.** The operator can authenticate eBay.es via `login ebay`, completing OAuth and persisting tokens locally with restrictive permissions.
@@ -106,7 +106,7 @@ This document provides the complete epic and story breakdown for hardware-hunter
 - **FR51.** The repository ships a single `docker-compose.yml` install path with example wishlist entries, an `.env.example`, and a `config.example.yaml`; user-specific files (`wishlist.yaml`, `config.yaml`, `.env`) are gitignored.
 - **FR52.** The repository includes a `CONTRIBUTING.md` with an explicit "no arbitrage PRs" rule and three named invitation categories (wishlist examples, prompt improvements, Wallapop selector patches), pointing to a separate-repo path for arbitrage forks.
 - **FR53.** The repository includes a `ROADMAP.md` naming future-multi-marketplace expansion, future-arbitrage-as-separate-repo, and "C&D-induced sunset" as a documented possible end state.
-- **FR54.** The README positions hardware-hunter as a personal monitoring tool (not a "Wallapop scraper"), includes a legal disclaimer covering Spanish ToS posture and the secondary-account recommendation, and contains no Wallapop trademarks, logos, or proprietary terms in titles, package names, or domain references.
+- **FR54.** The README positions salvager as a personal monitoring tool (not a "Wallapop scraper"), includes a legal disclaimer covering Spanish ToS posture and the secondary-account recommendation, and contains no Wallapop trademarks, logos, or proprietary terms in titles, package names, or domain references.
 
 ### NonFunctional Requirements
 
@@ -181,24 +181,24 @@ This document provides the complete epic and story breakdown for hardware-hunter
 
 **Architecture-driven implementation requirements (AR1–AR25):**
 
-- **AR1.** **Starter template** = minimal `uv` Python scaffold via `uv init --package hardware-hunter --python 3.12`. CPython ≥ 3.12. uv-managed `pyproject.toml` + committed `uv.lock`. **This is the first implementation story** — the directory layout encodes adapter discipline (NFR-M1) and cannot be added retroactively without rework.
+- **AR1.** **Starter template** = minimal `uv` Python scaffold via `uv init --package salvager --python 3.12`. CPython ≥ 3.12. uv-managed `pyproject.toml` + committed `uv.lock`. **This is the first implementation story** — the directory layout encodes adapter discipline (NFR-M1) and cannot be added retroactively without rework.
 - **AR2.** CLI framework: `typer` ≥ 0.12.1 (type-hint-driven, built on Click; matches the 18-subcommand structure for FR39–FR48).
 - **AR3.** Code quality toolchain: `ruff` (lint+format, replaces black+isort+flake8); `ty` (Astral type checker, beta as of May 2026) with `mypy` as immediate fallback if ty hits a stub it can't process — CI runs both for the first release. `pytest` + `pytest-cov` + `pytest-asyncio` + `syrupy` for tests.
 - **AR4.** Schema/config: `pydantic` v2 + `pydantic-settings` (.env loading with type validation). `PyYAML` for read; `ruamel.yaml` for round-trip preservation when CLI rewrites `wishlist.yaml`.
 - **AR5.** Runtime libraries: `httpx` (async-friendly HTTP); `python-telegram-bot` (Telegram); `google-genai` (default LLM provider, Gemini Flash, swappable behind `ListingEvaluator`).
 - **AR6.** **Hexagonal/ports-and-adapters internal architecture**: `domain/` (pure, stdlib + pydantic only) → `interfaces/` (ABCs) → `orchestration/` (composes interfaces) → `adapters/` (the only package allowed to import external SDKs).
-- **AR7.** **Custom AST-based adapter discipline lint** at `scripts/adapter_discipline_lint.py` (~50 LOC, zero external dep). Walks every `.py` file outside `src/hardware_hunter/adapters/**`; fails build on any import of a configured deny-list (`hermes_agent`, `tinyfish_*`, `google.genai`, `openai`, `anthropic`, `telegram`, marketplace SDK names). CI gate.
-- **AR8.** Persistence: single SQLite database file (`hardware_hunter.db`) with WAL mode (`PRAGMA journal_mode=WAL` at first connect) for concurrent CLI reads while daemon writes. Tables: `wishlist_runtime_state`, `seen_listings`, `alert_snapshots`, `tap_events`, `transactions`, `phase2_smoke_tests`, `phase2_state`, `_meta`.
+- **AR7.** **Custom AST-based adapter discipline lint** at `scripts/adapter_discipline_lint.py` (~50 LOC, zero external dep). Walks every `.py` file outside `src/salvager/adapters/**`; fails build on any import of a configured deny-list (`hermes_agent`, `tinyfish_*`, `google.genai`, `openai`, `anthropic`, `telegram`, marketplace SDK names). CI gate.
+- **AR8.** Persistence: single SQLite database file (`salvager.db`) with WAL mode (`PRAGMA journal_mode=WAL` at first connect) for concurrent CLI reads while daemon writes. Tables: `wishlist_runtime_state`, `seen_listings`, `alert_snapshots`, `tap_events`, `transactions`, `phase2_smoke_tests`, `phase2_state`, `_meta`.
 - **AR9.** **Append-only enforcement at application layer**: `Store` interface exposes only `record_*` writers for `alert_snapshots`/`tap_events`/`transactions`; no `update_*`/`delete_*` methods exist on these tables. Property test asserts the absence of mutation methods.
-- **AR10.** Hand-rolled migrations: numbered `.sql` files in `src/hardware_hunter/migrations/`; `_meta.schema_version` row; applied at daemon startup; CLI `validate-config` flags drift.
-- **AR11.** LLM evaluation cache hosted by Hermes Agent's built-in SQLite + FTS5 memory (separate database from `hardware_hunter.db`), keyed by listing URL. TTL 24h default; 1h for low-confidence.
+- **AR10.** Hand-rolled migrations: numbered `.sql` files in `src/salvager/migrations/`; `_meta.schema_version` row; applied at daemon startup; CLI `validate-config` flags drift.
+- **AR11.** LLM evaluation cache hosted by Hermes Agent's built-in SQLite + FTS5 memory (separate database from `salvager.db`), keyed by listing URL. TTL 24h default; 1h for low-confidence.
 - **AR12.** **`wishlist.yaml` is canonical Phase 2 source-of-truth.** `phase2 enable <entry>` and `phase2 disable <entry>` rewrite the YAML using `ruamel.yaml` (preserves comments and formatting). Daemon parses `wishlist.yaml` at the start of every poll cycle. SQLite carries no override table for Phase 2 enable/disable.
 - **AR13.** Phase 2 auto-disable persistence: a global "Phase 2 lockout" row in `phase2_state` SQLite table takes runtime precedence over YAML's per-entry `enabled: true` until explicitly cleared by `phase2 enable <entry>`.
 - **AR14.** Daemon ↔ CLI communication via shared filesystem + SQLite, no IPC, no HTTP control plane. Read-only CLI works whether daemon is running or not. Daemon picks up `wishlist.yaml` / `config.yaml` changes on next poll cycle (or 30-second config-rescan tick).
 - **AR15.** Concurrency: async daemon (`asyncio` + `httpx`) using Hermes' subagent primitive (up to 8 concurrent workers) for parallel per-listing LLM evaluation. Sync CLI subcommands.
 - **AR16.** Internal data flow: synchronous pipeline within async runtime — `poll_loop` → `PageFetcher.search` → `PageFetcher.fetch` → `Store.is_seen?` → `ListingEvaluator.evaluate` → `Store.record_seen` → `TelegramSurface.send_alert`. No event bus, no message broker.
 - **AR17.** Packaging: single `Dockerfile` (`python:3.12-slim` base) building a single-service `docker-compose.yml` mounting `./data` (SQLite, audit log, cookies) and `./config` (wishlist.yaml, config.yaml, .env). `restart: on-failure` with default backoff; `stop_grace_period: 30s` to match FR50 SIGTERM drain.
-- **AR18.** Image distribution: GitHub Container Registry (`ghcr.io/ifuensan/hardware-hunter`), semver-tagged (`v0.1.0`, …, `v1.0.0`). PyPI publication deferred post-launch.
+- **AR18.** Image distribution: GitHub Container Registry (`ghcr.io/ifuensan/salvager`), semver-tagged (`v0.1.0`, …, `v1.0.0`). PyPI publication deferred post-launch.
 - **AR19.** GitHub Actions CI on every PR + tag. Gates: `ruff check`, `ty` (with `mypy` fallback), `pytest --cov` with thresholds (≥ 90% on Phase 2 critical path), `python scripts/adapter_discipline_lint.py`, daemon smoke test. On tag push: build + push GHCR image.
 - **AR20.** Telegram operational alerts share the same chat as listing alerts, distinguished by severity prefix; no separate "ops chat" at v1. The bot silently drops any inbound message from any chat ID other than `TELEGRAM_CHAT_ID`.
 - **AR21.** Wallapop session cookie file in Netscape `cookies.txt` format; mode 0600. eBay OAuth refresh + access tokens in `oauth_tokens.json` (mode 0600) at `data_dir/auth/`; auto-refresh before expiry within the daemon.
@@ -211,8 +211,8 @@ This document provides the complete epic and story breakdown for hardware-hunter
 
 **Telegram message rendering surface (UX-DR1–UX-DR8):**
 
-- **UX-DR1.** Implement six rendering functions in `src/hardware_hunter/domain/alert.py`: `render_phase1_listing_alert`, `render_phase2_listing_alert`, `render_phase2_buy_success`, `render_phase2_buy_failure`, `render_operational_alert`, `render_callback_acknowledgment`. Each consumes a domain object and returns a `RenderedAlert`. No other code path emits Telegram text.
-- **UX-DR2.** Implement two CLI rendering helpers in `src/hardware_hunter/observability/styling.py`: `render_table(rows, columns) -> Table` (uses `box=MINIMAL`, no row separators, default 80-col width) and `render_prose(message, style, hint=None)` (single-record output via theme tokens). No CLI command writes to stdout directly.
+- **UX-DR1.** Implement six rendering functions in `src/salvager/domain/alert.py`: `render_phase1_listing_alert`, `render_phase2_listing_alert`, `render_phase2_buy_success`, `render_phase2_buy_failure`, `render_operational_alert`, `render_callback_acknowledgment`. Each consumes a domain object and returns a `RenderedAlert`. No other code path emits Telegram text.
+- **UX-DR2.** Implement two CLI rendering helpers in `src/salvager/observability/styling.py`: `render_table(rows, columns) -> Table` (uses `box=MINIMAL`, no row separators, default 80-col width) and `render_prose(message, style, hint=None)` (single-record output via theme tokens). No CLI command writes to stdout directly.
 - **UX-DR3.** Define `SEVERITY_TOKENS` constants module exposing the locked six-emoji palette: `operational_warn` = `⚠️ `, `operational_info` = `ℹ️ `, `phase1_listing` = `📦`, `phase2_listing` = `🟢`, `phase2_buy_success` = `✅`, `phase2_buy_failure` = `🚫`. Any other emoji forbidden in code review.
 - **UX-DR4.** Define `BUTTON_LABELS` constants module exposing the locked five-button vocabulary: `view` = `👁 Ver`, `skip_phase1` = `🙅 Saltar`, `snooze` = `😴 Posponer 24h`, `buy` = `✅ Comprar`, `skip_phase2` = `❌ Saltar`. Spanish at v1; locale flag is post-launch.
 - **UX-DR5.** `callback_data` format strictly `<surface>:<verb>:<id>` (three colon-segments, ≤ 64 bytes per Telegram limit). Constant in module-level config; CI lint ensures no deviation.
@@ -254,7 +254,7 @@ This document provides the complete epic and story breakdown for hardware-hunter
 
 **Cross-surface alignment + locking (UX-DR26–UX-DR28):**
 
-- **UX-DR26.** Every Telegram alert that names a CLI command must include an audit pointer (`hardware-hunter audit show --id <n>`) so the CLI returns output matching the alert verbatim. The audit-log row is the shared source of truth.
+- **UX-DR26.** Every Telegram alert that names a CLI command must include an audit pointer (`salvager audit show --id <n>`) so the CLI returns output matching the alert verbatim. The audit-log row is the shared source of truth.
 - **UX-DR27.** Bilingual asymmetry: Telegram surface in Spanish (Castilian); CLI / README / CONTRIBUTING / ROADMAP / code comments / log messages in English. No mixing. A `config.yaml > telegram.locale` flag for English Telegram is post-launch (OQ-tracked, NOT v1).
 - **UX-DR28.** Phase 1 alert capped at 6 logical rows + button row; Phase 2 alert same cap. Top-3-rows must contain decision-critical fields (severity + part + price + location) for iOS lock-screen preview optimization.
 
@@ -308,8 +308,8 @@ This document provides the complete epic and story breakdown for hardware-hunter
 | FR36 | Epic 5 | Append-only Phase 2 audit log with three artifacts |
 | FR37 | Epic 4 + Epic 5 | CLI commands `audit show`/`audit export` in Epic 4; Phase 2 writers populating the audit tables in Epic 5 |
 | FR38 | Epic 5 | No telemetry on audit data |
-| FR39 | Epic 1 | Single `hardware-hunter` binary with subcommand framework; daemon-default when no subcommand |
-| FR40 | Epic 2 | `hardware-hunter init` scaffolds config files; refuses overwrite without `--force` |
+| FR39 | Epic 1 | Single `salvager` binary with subcommand framework; daemon-default when no subcommand |
+| FR40 | Epic 2 | `salvager init` scaffolds config files; refuses overwrite without `--force` |
 | FR41 | Epic 2 | `login wallapop` interactive browser flow |
 | FR42 | Epic 2 | `login ebay` OAuth flow |
 | FR43 | Epic 4 | `test-search` dry-run command |
@@ -361,7 +361,7 @@ Every FR has at least one epic assigned. No orphan FRs.
 
 **NFRs:** NFR-P1 (≤ 20 min p95 alert latency), NFR-P3 (≤ 5s p95 per-listing LLM eval), NFR-I1 (Hermes v0.13.x pin), NFR-I2 (TinyFish via MCP, rate-limit enforcement), NFR-I3 (`ListingEvaluator` interface; lint enforces no LLM-SDK imports outside adapter), NFR-I4 (Wallapop schema-drift surfaces as adapter failure), NFR-I5 (eBay API rate-limit handling), NFR-I6 (Telegram retry semantics), NFR-R1 (Wallapop / eBay.es runtime independence), NFR-R2 (two-path Wallapop fallback within same poll cycle), NFR-C3 (≥ 60% LLM cache hit rate target)
 
-**Architecture:** AR6 (domain/interfaces/orchestration/adapters separation realized for the polling pipeline), AR8 (Phase 1 SQLite tables: `seen_listings`, `wishlist_runtime_state`, `alert_snapshots` Phase 1 columns, `_meta`), AR9 (`Store` interface foundation; `record_*` writers for `alert_snapshots`), AR10 (numbered SQL migrations applied at startup; Phase 1 migration creates Phase 1 tables), AR11 (Hermes SQLite + FTS5 hosts LLM evaluation cache, separate from `hardware_hunter.db`), AR15 (async daemon + Hermes subagents up to 8 concurrent for LLM eval), AR16 (synchronous internal pipeline)
+**Architecture:** AR6 (domain/interfaces/orchestration/adapters separation realized for the polling pipeline), AR8 (Phase 1 SQLite tables: `seen_listings`, `wishlist_runtime_state`, `alert_snapshots` Phase 1 columns, `_meta`), AR9 (`Store` interface foundation; `record_*` writers for `alert_snapshots`), AR10 (numbered SQL migrations applied at startup; Phase 1 migration creates Phase 1 tables), AR11 (Hermes SQLite + FTS5 hosts LLM evaluation cache, separate from `salvager.db`), AR15 (async daemon + Hermes subagents up to 8 concurrent for LLM eval), AR16 (synchronous internal pipeline)
 
 **UX-DRs:** UX-DR1 (Phase 1 listing alert renderer), UX-DR3 (`SEVERITY_TOKENS` constants module), UX-DR4 (`BUTTON_LABELS` constants module), UX-DR5 (`callback_data` `<surface>:<verb>:<id>` format), UX-DR6 (Direction A + E hybrid with container split), UX-DR8 (`escape_markdown_v2()` helper), UX-DR12 (acknowledgment row after Phase 1 tap), UX-DR15 (lock-screen 3-rows decision-critical), UX-DR28 (6-row alert cap), UX-DR29 (Phase 1 renderer snapshot tests via syrupy), UX-DR30 (Phase 1 property tests for exit codes and JSON parseability)
 
@@ -375,7 +375,7 @@ Every FR has at least one epic assigned. No orphan FRs.
 
 **Architecture:** AR14 (daemon ↔ CLI: shared filesystem + SQLite, no IPC), AR20 (Telegram chat allowlist; silently drop unknown chat IDs)
 
-**UX-DRs:** UX-DR13 (`render_operational_alert` for Phase 1-relevant events: `daemon_started`, `daemon_stopped`, `wallapop_session_expired`, `tinyfish_fallback_active`/`recovered`, `ebay_token_refresh_failed`), UX-DR14 (`⚠️` warn variants with numbered next-steps; `ℹ️` info variants direct + minimal), UX-DR15 (calm-instructional tone for `⚠️`; direct + minimal for `ℹ️`), UX-DR20 (JSON schema: snake_case + ISO 8601 + flat array + stderr JSON errors), UX-DR24 (no Telegram empty-state pings — silence is success), UX-DR25 (`health` distinguishes "watching, 0 matches in 24h" from "stuck poller"), UX-DR26 (audit pointer `hardware-hunter audit show --id <n>` in every alert that names a CLI command), UX-DR30 (property tests for `EventName` severity-vs-headline-style)
+**UX-DRs:** UX-DR13 (`render_operational_alert` for Phase 1-relevant events: `daemon_started`, `daemon_stopped`, `wallapop_session_expired`, `tinyfish_fallback_active`/`recovered`, `ebay_token_refresh_failed`), UX-DR14 (`⚠️` warn variants with numbered next-steps; `ℹ️` info variants direct + minimal), UX-DR15 (calm-instructional tone for `⚠️`; direct + minimal for `ℹ️`), UX-DR20 (JSON schema: snake_case + ISO 8601 + flat array + stderr JSON errors), UX-DR24 (no Telegram empty-state pings — silence is success), UX-DR25 (`health` distinguishes "watching, 0 matches in 24h" from "stuck poller"), UX-DR26 (audit pointer `salvager audit show --id <n>` in every alert that names a CLI command), UX-DR30 (property tests for `EventName` severity-vs-headline-style)
 
 ### Epic 5: Phase 2 — Autonomous Purchase with Safety Stack
 
@@ -393,24 +393,24 @@ Every FR has at least one epic assigned. No orphan FRs.
 
 ## Epic 1: Foundation — Installable Skeleton & OSS Posture
 
-**Goal.** An operator (or fork user) can `git clone`, `docker-compose up`, and reach a state where the daemon process starts cleanly, the container runs, the structured JSON logger emits `daemon_started`, and the image was built and pushed to `ghcr.io/ifuensan/hardware-hunter` by a green CI pipeline. The product exists as a runnable installable with adapter discipline (NFR-M1 launch blocker) enforced by CI, the typer CLI skeleton in place, and OSS posture documentation visible to fork users.
+**Goal.** An operator (or fork user) can `git clone`, `docker-compose up`, and reach a state where the daemon process starts cleanly, the container runs, the structured JSON logger emits `daemon_started`, and the image was built and pushed to `ghcr.io/ifuensan/salvager` by a green CI pipeline. The product exists as a runnable installable with adapter discipline (NFR-M1 launch blocker) enforced by CI, the typer CLI skeleton in place, and OSS posture documentation visible to fork users.
 
 ### Story 1.1: Bootstrap uv-managed Python package with hexagonal directory layout
 
 As ifuensan (sole maintainer),
-I want hardware-hunter initialized as a uv-managed Python 3.12 package with the full hexagonal directory tree (`domain/` / `interfaces/` / `orchestration/` / `adapters/` / `cli/` / `config/` / `observability/`) and a tracked `LICENSE` (MIT) + `.gitignore`,
+I want salvager initialized as a uv-managed Python 3.12 package with the full hexagonal directory tree (`domain/` / `interfaces/` / `orchestration/` / `adapters/` / `cli/` / `config/` / `observability/`) and a tracked `LICENSE` (MIT) + `.gitignore`,
 So that every later story has a stable place to land code and the adapter-discipline boundary (NFR-M1) cannot be retroactively introduced.
 
 **Acceptance Criteria:**
 
 **Given** a fresh working directory
-**When** I run `uv init --package hardware-hunter --python 3.12` followed by the dependency-add commands in architecture.md lines 188–196
+**When** I run `uv init --package salvager --python 3.12` followed by the dependency-add commands in architecture.md lines 188–196
 **Then** `pyproject.toml` and `uv.lock` are produced
 **And** the lockfile is committed
-**And** `uv run python -c "import hardware_hunter"` succeeds with no error
+**And** `uv run python -c "import salvager"` succeeds with no error
 
 **Given** the repository
-**When** I list `src/hardware_hunter/`
+**When** I list `src/salvager/`
 **Then** the seven sibling packages `cli/` / `domain/` / `interfaces/` / `orchestration/` / `adapters/` / `config/` / `observability/` exist as empty packages with `__init__.py` files
 **And** `tests/` contains `unit/` / `integration/` / `e2e/` / `fixtures/` sibling directories
 
@@ -428,8 +428,8 @@ So that NFR-M1 (adapter discipline launch blocker), NFR-M5 (≤ 30 direct deps),
 
 **Given** the repository
 **When** I read `scripts/adapter_discipline_lint.py`
-**Then** the script (≤ 100 LOC, zero external dep) walks every `.py` file under `src/hardware_hunter/`
-**And** for files outside `src/hardware_hunter/adapters/**`, it fails on any `import` or `from … import` of a configured deny-list (`hermes_agent`, `tinyfish*`, `google.genai`, `openai`, `anthropic`, `telegram`, `httpx`, Wallapop/eBay SDK names)
+**Then** the script (≤ 100 LOC, zero external dep) walks every `.py` file under `src/salvager/`
+**And** for files outside `src/salvager/adapters/**`, it fails on any `import` or `from … import` of a configured deny-list (`hermes_agent`, `tinyfish*`, `google.genai`, `openai`, `anthropic`, `telegram`, `httpx`, Wallapop/eBay SDK names)
 **And** the script exits 0 on a clean tree and 1 on any violation with a line-numbered report
 
 **Given** a PR opened against `main`
@@ -437,15 +437,15 @@ So that NFR-M1 (adapter discipline launch blocker), NFR-M5 (≤ 30 direct deps),
 **Then** the workflow includes named jobs `lint` (ruff), `type-check` (ty + mypy fallback), `test` (pytest --cov), `adapter-discipline` (the AST lint), `dep-footprint` (asserts `len(uv tree | grep -c "^\S") ≤ 30 direct deps`)
 **And** each job fails the workflow on non-zero exit
 
-**Given** a PR that introduces `import httpx` in `src/hardware_hunter/domain/listing.py`
+**Given** a PR that introduces `import httpx` in `src/salvager/domain/listing.py`
 **When** CI runs
 **Then** the `adapter-discipline` job fails with output naming the file and line number
 
 ### Story 1.3: Build and publish Docker image to GHCR
 
 As a fork user,
-I want a public Docker image at `ghcr.io/ifuensan/hardware-hunter:<semver>` produced automatically by CI on every tagged release,
-So that I can run `docker pull ghcr.io/ifuensan/hardware-hunter:latest` without building from source.
+I want a public Docker image at `ghcr.io/ifuensan/salvager:<semver>` produced automatically by CI on every tagged release,
+So that I can run `docker pull ghcr.io/ifuensan/salvager:latest` without building from source.
 
 **Acceptance Criteria:**
 
@@ -453,23 +453,23 @@ So that I can run `docker pull ghcr.io/ifuensan/hardware-hunter:latest` without 
 **When** I read `Dockerfile`
 **Then** it uses `python:3.12-slim` as base
 **And** it copies the uv-locked dependencies (`pyproject.toml` + `uv.lock`) and installs via `uv sync --frozen`
-**And** the entrypoint is `hardware-hunter` (resolves via uv-installed console script)
+**And** the entrypoint is `salvager` (resolves via uv-installed console script)
 
 **Given** the repository
 **When** I read `docker-compose.yml`
-**Then** it defines a single service named `hardware-hunter`
+**Then** it defines a single service named `salvager`
 **And** the service mounts `./data:/app/data` and `./config:/app/config`
 **And** `restart: on-failure` is set with default backoff
 **And** `stop_grace_period: 30s` is set (FR50)
 
 **Given** a tag `v0.1.0` pushed to `main`
 **When** the release workflow runs
-**Then** `ghcr.io/ifuensan/hardware-hunter:v0.1.0` and `:latest` are pushed
+**Then** `ghcr.io/ifuensan/salvager:v0.1.0` and `:latest` are pushed
 **And** the image is publicly pullable without authentication
 **And** the workflow uses `GITHUB_TOKEN` for authentication (no manual secrets)
 
 **Given** a pulled image
-**When** I run `docker run --rm ghcr.io/ifuensan/hardware-hunter:latest --version`
+**When** I run `docker run --rm ghcr.io/ifuensan/salvager:latest --version`
 **Then** the container prints the semver version and exits 0
 
 ### Story 1.4: Ship tracked example configuration files
@@ -503,17 +503,17 @@ So that I can `cp .env.example .env` (etc.) and have a working starting point.
 ### Story 1.5: Author OSS posture documentation (README, CONTRIBUTING, ROADMAP)
 
 As a fork user discovering the repo,
-I want a README that frames hardware-hunter as a personal monitoring tool (not a "Wallapop scraper"), a CONTRIBUTING with explicit "no arbitrage PRs" policy, and a ROADMAP naming future-research repo paths and C&D-induced sunset,
+I want a README that frames salvager as a personal monitoring tool (not a "Wallapop scraper"), a CONTRIBUTING with explicit "no arbitrage PRs" policy, and a ROADMAP naming future-research repo paths and C&D-induced sunset,
 So that I can decide whether the project fits my use case and how to contribute without violating the (c3) scope contract.
 
 **Acceptance Criteria:**
 
 **Given** the repository
 **When** I read `README.md`
-**Then** the first paragraph positions hardware-hunter as a personal monitoring tool, not a marketplace scraper
+**Then** the first paragraph positions salvager as a personal monitoring tool, not a marketplace scraper
 **And** it includes a legal disclaimer section covering Spanish ToS posture and the secondary-account recommendation
 **And** it contains no Wallapop trademarks, logos, or proprietary terms in titles, package names, or domain references
-**And** it includes a Quick Start showing `git clone` → `cp .env.example .env` → `cp wishlist.example.yaml wishlist.yaml` → `docker-compose up -d` → `hardware-hunter login wallapop`
+**And** it includes a Quick Start showing `git clone` → `cp .env.example .env` → `cp wishlist.example.yaml wishlist.yaml` → `docker-compose up -d` → `salvager login wallapop`
 
 **Given** the repository
 **When** I read `CONTRIBUTING.md`
@@ -534,7 +534,7 @@ So that NFR-O1 is satisfied from day one and downstream log scraping (docker-com
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/observability/logging.py`
+**Given** `src/salvager/observability/logging.py`
 **When** I import `get_logger(name)` from it
 **Then** the returned logger emits one JSON object per line on stdout
 **And** every record carries `level` (`debug`/`info`/`warn`/`error`), `ts` (ISO 8601 with millisecond precision and `Z` suffix), and `event` (snake_case event name)
@@ -545,7 +545,7 @@ So that NFR-O1 is satisfied from day one and downstream log scraping (docker-com
 **Then** `logger.info("foo")` produces no output and `logger.warn("bar")` produces a JSON record
 
 **Given** a CLI invocation that pipes stdout to `jq`
-**When** I run `hardware-hunter version | jq .event`
+**When** I run `salvager version | jq .event`
 **Then** the JSON parses cleanly and yields the event name (no stderr noise mixed into stdout)
 
 **Given** a daemon process raising an unhandled exception
@@ -561,7 +561,7 @@ So that every operator command produces visually consistent output without invit
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/observability/styling.py`
+**Given** `src/salvager/observability/styling.py`
 **When** I import `render_table` and `render_prose`
 **Then** `render_table(rows: list[dict], columns: list[ColumnSpec]) -> rich.table.Table` produces a `rich.table.Table` with `box=MINIMAL`, header row bolded, no row separators, default 80-col width
 **And** `render_prose(message: str, style: ThemeToken, hint: str | None = None) -> None` writes to stdout (or stderr for `error`/`warn`) using the locked token-to-style map: `success` (bold green + `✓ ` prefix), `error` (bold red + `error: ` prefix), `warn` (bold yellow + `warn: ` prefix), `info` (default), `secondary` (dim)
@@ -583,29 +583,29 @@ So that every operator command produces visually consistent output without invit
 ### Story 1.8: Implement typer CLI skeleton with version subcommand
 
 As ifuensan,
-I want a `hardware-hunter` console script that exposes the typer subcommand framework, registers the placeholder subcommand groups (`init` / `login` / `validate-wishlist` / `validate-config` / `test-search` / `explain` / `phase2` / `audit` / `health` / `logs`), and ships `hardware-hunter version` working end-to-end,
+I want a `salvager` console script that exposes the typer subcommand framework, registers the placeholder subcommand groups (`init` / `login` / `validate-wishlist` / `validate-config` / `test-search` / `explain` / `phase2` / `audit` / `health` / `logs`), and ships `salvager version` working end-to-end,
 So that FR39 is satisfied and every later story has a place to plug its subcommand in.
 
 **Acceptance Criteria:**
 
 **Given** the installed package
-**When** I run `hardware-hunter --help`
+**When** I run `salvager --help`
 **Then** the output lists usage, a one-paragraph description, and the placeholder subcommand groups
 **And** the help text uses the typer + rich theme (bold cyan titles per UX-DR21)
 **And** each subcommand listed has at least a one-line description
 
 **Given** the installed package
-**When** I run `hardware-hunter version`
+**When** I run `salvager version`
 **Then** stdout prints the semver version + git commit short SHA via `render_prose`
 **And** the exit code is 0
-**And** `hardware-hunter version --format json` emits a single JSON object `{"version": "0.1.0", "commit": "<sha>"}` to stdout
+**And** `salvager version --format json` emits a single JSON object `{"version": "0.1.0", "commit": "<sha>"}` to stdout
 
 **Given** the installed package
-**When** I run `hardware-hunter` with no subcommand
+**When** I run `salvager` with no subcommand
 **Then** the daemon-default mode is invoked (FR39); at v0.1 this is a stub that logs `daemon_started` and `daemon_stopped` and exits cleanly (real poll loop lands in Epic 3)
 
 **Given** the installed package
-**When** I run `hardware-hunter init` (not yet implemented in Epic 1)
+**When** I run `salvager init` (not yet implemented in Epic 1)
 **Then** the command exits with code 1 and message `error: not yet implemented in this build` + `hint: see ROADMAP.md` (placeholder until Epic 2 Story 2.8)
 
 **Given** any CLI invocation
@@ -623,12 +623,12 @@ So that FR39 is satisfied and every later story has a place to plug its subcomma
 ### Story 2.1: Define pydantic v2 schema for wishlist entries
 
 As ifuensan,
-I want `WishlistEntry` and `Wishlist` pydantic v2 models in `src/hardware_hunter/domain/wishlist.py` that enforce the FR1/FR2/FR4/FR5 field contract,
+I want `WishlistEntry` and `Wishlist` pydantic v2 models in `src/salvager/domain/wishlist.py` that enforce the FR1/FR2/FR4/FR5 field contract,
 So that every later component (validator, scope-guard, poll loop, alert renderer) shares one schema source-of-truth and FR4's `(manufacturer, model, ref)` entry-key contract is mechanically defined.
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/domain/wishlist.py`
+**Given** `src/salvager/domain/wishlist.py`
 **When** I import `WishlistEntry`
 **Then** the model declares required fields `manufacturer: str`, `model: str`, `ref: str`, `type: Literal["hdd", "ram"]`, `max_price_solo: Decimal | None`, `max_price_in_device: Decimal | None`, `keywords: list[str]`, `container_keywords: list[str]`, `phase2: Phase2Settings`, `confidence_threshold: Literal["low", "medium", "high"]`
 **And** `Phase2Settings` declares `enabled: bool = False` and `max_price_eur: Decimal | None = None`
@@ -661,7 +661,7 @@ So that FR3 is enforced at the schema layer and FR17's "no arbitrage scoring" is
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/domain/scope_guard.py`
+**Given** `src/salvager/domain/scope_guard.py`
 **When** I import `check_scope_violations(raw_yaml: dict) -> list[ScopeViolation]`
 **Then** the function returns an empty list for compliant YAML
 **And** for each occurrence of a forbidden field (case-insensitive match against `FORBIDDEN_FIELDS`), it returns a `ScopeViolation` with `path` (dotted path), `field_name`, and `line_number` (when available from ruamel.yaml CommentedMap)
@@ -672,8 +672,8 @@ So that FR3 is enforced at the schema layer and FR17's "no arbitrage scoring" is
 **Then** the operation fails with the locked error template:
 ```
 error: wishlist.yaml:42: forbidden field 'expected_resale_value' (entry: WD Red Plus 4TB)
-hint: hardware-hunter does not support arbitrage scoring per the (c3) scope contract.
-hint: See ROADMAP.md for the future-research repo path: github.com/ifuensan/hardware-hunter-research (stub).
+hint: salvager does not support arbitrage scoring per the (c3) scope contract.
+hint: See ROADMAP.md for the future-research repo path: github.com/ifuensan/salvager-research (stub).
 ```
 **And** the exit code is 3 (validation failure per FR48)
 
@@ -684,7 +684,7 @@ hint: See ROADMAP.md for the future-research repo path: github.com/ifuensan/hard
 ### Story 2.3: Implement wishlist loader with ruamel.yaml round-trip preservation
 
 As a developer writing `phase2 enable`/`phase2 disable`,
-I want a `load_wishlist(path) -> Wishlist` and `save_wishlist(path, wishlist) -> None` pair in `src/hardware_hunter/config/wishlist_yaml.py` that round-trips comments and formatting via `ruamel.yaml`,
+I want a `load_wishlist(path) -> Wishlist` and `save_wishlist(path, wishlist) -> None` pair in `src/salvager/config/wishlist_yaml.py` that round-trips comments and formatting via `ruamel.yaml`,
 So that AR12 (wishlist canonical for Phase 2 settings; rewrites preserve user comments) holds without rewriting the user's whole file on every CLI mutation.
 
 **Acceptance Criteria:**
@@ -708,45 +708,45 @@ So that AR12 (wishlist canonical for Phase 2 settings; rewrites preserve user co
 **And** only the `enabled:` line under the targeted entry is changed
 **And** YAML quoting style of unchanged values is preserved
 
-### Story 2.4: Implement `hardware-hunter validate-wishlist` CLI command
+### Story 2.4: Implement `salvager validate-wishlist` CLI command
 
 As an operator,
-I want `hardware-hunter validate-wishlist` to run the schema + scope-guard validation against `wishlist.yaml` and report success or precise errors,
+I want `salvager validate-wishlist` to run the schema + scope-guard validation against `wishlist.yaml` and report success or precise errors,
 So that FR3 is exercised on demand and FR40 (operator can validate before daemon start) is covered.
 
 **Acceptance Criteria:**
 
 **Given** a valid `wishlist.yaml` with 18 entries
-**When** I run `hardware-hunter validate-wishlist`
+**When** I run `salvager validate-wishlist`
 **Then** the command prints `✓ wishlist.yaml is valid (18 entries; 2 with Phase 2 enabled)` via `render_prose(style="success")`
 **And** the exit code is 0
-**And** `hardware-hunter validate-wishlist --format json` prints `{"valid": true, "entry_count": 18, "phase2_enabled_count": 2}` on stdout
+**And** `salvager validate-wishlist --format json` prints `{"valid": true, "entry_count": 18, "phase2_enabled_count": 2}` on stdout
 
 **Given** a `wishlist.yaml` with a forbidden field
-**When** I run `hardware-hunter validate-wishlist`
+**When** I run `salvager validate-wishlist`
 **Then** the output matches the locked error template from Story 2.2 (Story 2.2 AC)
 **And** the exit code is 3
 **And** stderr (not stdout) carries the error in JSON mode
 
 **Given** a `wishlist.yaml` with a duplicate `(manufacturer, model, ref)` tuple
-**When** I run `hardware-hunter validate-wishlist`
+**When** I run `salvager validate-wishlist`
 **Then** the output names both duplicate entries with their line numbers
 **And** the exit code is 3
 
 **Given** `wishlist.yaml` not existing at the configured path
-**When** I run `hardware-hunter validate-wishlist`
-**Then** the output is `error: wishlist.yaml not found at <path>` + `hint: run hardware-hunter init to scaffold one`
+**When** I run `salvager validate-wishlist`
+**Then** the output is `error: wishlist.yaml not found at <path>` + `hint: run salvager init to scaffold one`
 **And** the exit code is 1
 
 ### Story 2.5: Implement config.yaml schema and loader with pydantic-settings
 
 As ifuensan,
-I want `config.yaml` parsed by a pydantic-settings model in `src/hardware_hunter/config/config_yaml.py` with explicit field contracts for `schedule.*`, `llm.*`, `phase2.*`, `telegram.*`, `logging.*`, `paths.*`,
+I want `config.yaml` parsed by a pydantic-settings model in `src/salvager/config/config_yaml.py` with explicit field contracts for `schedule.*`, `llm.*`, `phase2.*`, `telegram.*`, `logging.*`, `paths.*`,
 So that FR49 (operational tunables file) is satisfied with type-safe schema and defaults documented in code.
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/config/config_yaml.py`
+**Given** `src/salvager/config/config_yaml.py`
 **When** I import `ConfigModel`
 **Then** the pydantic-settings model declares typed sections: `schedule` (`wallapop_minutes: int`, `ebay_minutes: int`), `llm` (`provider: Literal[...]`, `cache_ttl_hours: int`, `cache_ttl_hours_low_confidence: int`), `phase2` (`kill_switch_global: bool`, `reconciliation_tolerance_eur: Decimal`, `reconciliation_tolerance_pct: Decimal`, `circuit_breaker_threshold: int`, `smoke_test_hour_utc: int`), `telegram` (`retry_max_attempts: int`, `retry_backoff_seconds: float`, `locale: Literal["es-ES"] = "es-ES"`), `logging` (`level: Literal[...]`), `paths` (`data_dir: Path`, `config_dir: Path`)
 **And** every field has a documented default matching `config.example.yaml`
@@ -766,12 +766,12 @@ So that FR49 (operational tunables file) is satisfied with type-safe schema and 
 ### Story 2.6: Implement .env loader with pydantic-settings BaseSettings
 
 As ifuensan,
-I want `src/hardware_hunter/config/env.py` to load credentials from `.env` exactly once at process start via pydantic-settings BaseSettings, with no hot-reload,
+I want `src/salvager/config/env.py` to load credentials from `.env` exactly once at process start via pydantic-settings BaseSettings, with no hot-reload,
 So that FR49 (`.env` once at start), NFR-S1 (credentials never logged or persisted outside cookie/token files), and FR50 (clean lifecycle) hold.
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/config/env.py`
+**Given** `src/salvager/config/env.py`
 **When** I import `EnvSettings`
 **Then** the BaseSettings model declares required fields: `TELEGRAM_BOT_TOKEN: SecretStr`, `TELEGRAM_CHAT_ID: int`, `GEMINI_API_KEY: SecretStr`, `EBAY_APP_ID: SecretStr`, `EBAY_CERT_ID: SecretStr`, `EBAY_DEV_ID: SecretStr`, `TINYFISH_API_KEY: SecretStr`
 **And** every credential uses pydantic `SecretStr` so `repr()` and `str()` mask the value
@@ -790,70 +790,70 @@ So that FR49 (`.env` once at start), NFR-S1 (credentials never logged or persist
 **When** invoked twice in the same process
 **Then** the second call returns the same cached instance (singleton; no hot-reload per FR49)
 
-### Story 2.7: Implement `hardware-hunter validate-config` CLI command
+### Story 2.7: Implement `salvager validate-config` CLI command
 
 As an operator,
-I want `hardware-hunter validate-config` to load and validate `config.yaml` + `.env` and report success or precise errors,
+I want `salvager validate-config` to load and validate `config.yaml` + `.env` and report success or precise errors,
 So that I can sanity-check my configuration before starting the daemon.
 
 **Acceptance Criteria:**
 
 **Given** a valid `config.yaml` and `.env`
-**When** I run `hardware-hunter validate-config`
+**When** I run `salvager validate-config`
 **Then** the command prints `✓ config.yaml + .env are valid` via `render_prose(style="success")`
 **And** the exit code is 0
 
 **Given** a malformed `config.yaml`
-**When** I run `hardware-hunter validate-config`
+**When** I run `salvager validate-config`
 **Then** the output names the file, section, and field that failed validation
 **And** the exit code is 3
 
 **Given** a missing `.env` variable
-**When** I run `hardware-hunter validate-config`
+**When** I run `salvager validate-config`
 **Then** the output is `error: missing required env var: TELEGRAM_BOT_TOKEN` + `hint: see .env.example`
 **And** the exit code is 4 (auth)
 
-### Story 2.8: Implement `hardware-hunter init` subcommand
+### Story 2.8: Implement `salvager init` subcommand
 
 As a fork user (or ifuensan starting fresh),
-I want `hardware-hunter init` to copy the tracked example files (`.env.example` → `.env`, `wishlist.example.yaml` → `wishlist.yaml`, `config.example.yaml` → `config.yaml`) into the configured `config_dir`,
+I want `salvager init` to copy the tracked example files (`.env.example` → `.env`, `wishlist.example.yaml` → `wishlist.yaml`, `config.example.yaml` → `config.yaml`) into the configured `config_dir`,
 So that FR40 is satisfied with a single command that scaffolds my starting point and refuses to overwrite without `--force`.
 
 **Acceptance Criteria:**
 
 **Given** an empty `config_dir`
-**When** I run `hardware-hunter init`
+**When** I run `salvager init`
 **Then** the three target files are created from their `.example` siblings
 **And** the output is a `rich.panel.Panel` (box=ROUNDED per UX-DR style) listing the three files created with their paths
 **And** the exit code is 0
 
 **Given** a `config_dir` containing an existing `wishlist.yaml`
-**When** I run `hardware-hunter init` (without `--force`)
+**When** I run `salvager init` (without `--force`)
 **Then** the command prints `error: wishlist.yaml already exists at <path>` + `hint: pass --force to overwrite (you'll be asked to confirm)`
 **And** no files are written
 **And** the exit code is 1
 
 **Given** a `config_dir` containing an existing `wishlist.yaml`
-**When** I run `hardware-hunter init --force` in a TTY
+**When** I run `salvager init --force` in a TTY
 **Then** the command prompts `Type 'OVERWRITE' to confirm:` (per UX-DR23 — typing-a-token, never y/n)
 **And** if the operator types anything other than `OVERWRITE`, no files are written and exit code is 1
 **And** if the operator types `OVERWRITE`, all three files are overwritten and exit code is 0
 
 **Given** a non-TTY context (e.g., `docker-compose run`)
-**When** I run `hardware-hunter init --force`
+**When** I run `salvager init --force`
 **Then** the command fails immediately with `error: --force requires an interactive terminal` (per NFR-S6)
 **And** the exit code is 1
 
-### Story 2.9: Implement `hardware-hunter login wallapop` subcommand
+### Story 2.9: Implement `salvager login wallapop` subcommand
 
 As ifuensan,
-I want `hardware-hunter login wallapop` to open a real browser, walk me through Wallapop's login + 2FA, capture the resulting session cookie in Netscape format, and persist it to `data_dir/auth/wallapop_cookies.txt` with mode 0600,
+I want `salvager login wallapop` to open a real browser, walk me through Wallapop's login + 2FA, capture the resulting session cookie in Netscape format, and persist it to `data_dir/auth/wallapop_cookies.txt` with mode 0600,
 So that FR41 is satisfied with anti-bot-correct manual login and the cookie is filesystem-protected per NFR-S2 / AR21.
 
 **Acceptance Criteria:**
 
 **Given** a TTY context
-**When** I run `hardware-hunter login wallapop`
+**When** I run `salvager login wallapop`
 **Then** the command opens a browser window (TinyFish Browser via Hermes MCP, or fallback to Playwright when configured) pointing at Wallapop's login page
 **And** stdout prints `Opening browser for manual login...` via `render_prose(style="info")`
 **And** the command waits for the operator to complete login + 2FA in the browser
@@ -873,25 +873,25 @@ So that FR41 is satisfied with anti-bot-correct manual login and the cookie is f
 
 **Given** the operator abandons the browser session (closes window without logging in)
 **When** the configured timeout (default 5 minutes) expires
-**Then** the command exits with `error: login timeout: no cookie captured` + `hint: re-run hardware-hunter login wallapop when ready`
+**Then** the command exits with `error: login timeout: no cookie captured` + `hint: re-run salvager login wallapop when ready`
 **And** the exit code is 4 (auth)
 **And** no cookie file is written (no partial state)
 
 **Given** a non-TTY context
-**When** I run `hardware-hunter login wallapop`
+**When** I run `salvager login wallapop`
 **Then** the command fails immediately with `error: login wallapop requires an interactive terminal`
 **And** the exit code is 1
 
-### Story 2.10: Implement `hardware-hunter login ebay` subcommand
+### Story 2.10: Implement `salvager login ebay` subcommand
 
 As ifuensan,
-I want `hardware-hunter login ebay` to walk me through eBay's official OAuth flow and persist refresh + access tokens in `data_dir/auth/oauth_tokens.json` with mode 0600,
+I want `salvager login ebay` to walk me through eBay's official OAuth flow and persist refresh + access tokens in `data_dir/auth/oauth_tokens.json` with mode 0600,
 So that FR42 / NFR-I5 / NFR-S2 / AR21 are satisfied and the daemon can auto-refresh access tokens without further operator intervention.
 
 **Acceptance Criteria:**
 
 **Given** a TTY context with `EBAY_APP_ID` / `EBAY_CERT_ID` / `EBAY_DEV_ID` set
-**When** I run `hardware-hunter login ebay`
+**When** I run `salvager login ebay`
 **Then** the command prints the eBay OAuth consent URL via `render_prose` and opens the URL in the default browser (or instructs the operator to open it manually)
 **And** the command waits for the operator to complete the consent flow and paste back the authorization code
 
@@ -904,7 +904,7 @@ So that FR42 / NFR-I5 / NFR-S2 / AR21 are satisfied and the daemon can auto-refr
 
 **Given** an invalid authorization code
 **When** the exchange fails with HTTP 400
-**Then** the command prints `error: OAuth exchange failed: <eBay error message>` + `hint: re-run hardware-hunter login ebay and re-paste the code`
+**Then** the command prints `error: OAuth exchange failed: <eBay error message>` + `hint: re-run salvager login ebay and re-paste the code`
 **And** the exit code is 4
 
 **Given** the daemon running with valid refresh + access tokens
@@ -920,7 +920,7 @@ So that NFR-S2 + AR22 are enforced — a permissive permission can never be sile
 
 **Acceptance Criteria:**
 
-**Given** a startup-verification helper `verify_credential_permissions() -> None` in `src/hardware_hunter/config/permissions.py`
+**Given** a startup-verification helper `verify_credential_permissions() -> None` in `src/salvager/config/permissions.py`
 **When** I call it with all three files at mode 0600
 **Then** the function returns silently
 
@@ -933,7 +933,7 @@ So that NFR-S2 + AR22 are enforced — a permissive permission can never be sile
 **Given** the helper
 **When** a file does not exist
 **Then** the function treats it as "missing credential" and raises `CredentialMissingError` (a separate error class) with the path
-**And** the daemon prints `error: missing credential file: <path>` + `hint: run hardware-hunter login <marketplace>` and exits 4
+**And** the daemon prints `error: missing credential file: <path>` + `hint: run salvager login <marketplace>` and exits 4
 
 **Given** a CI test using `pyfakefs` or `tmp_path`
 **When** I create test files at modes 0600, 0640, 0644, 0755
@@ -947,62 +947,62 @@ So that NFR-S2 + AR22 are enforced — a permissive permission can never be sile
 ### Story 3.1: Define domain models for listing, evaluation, alert-snapshot
 
 As a developer writing adapters and the poll loop,
-I want pure-Python pydantic v2 models in `src/hardware_hunter/domain/listing.py`, `evaluation.py`, `alert.py`, and `audit.py` (Phase 1 subset),
+I want pure-Python pydantic v2 models in `src/salvager/domain/listing.py`, `evaluation.py`, `alert.py`, and `audit.py` (Phase 1 subset),
 So that every adapter, renderer, and store shares one schema source-of-truth and AR6 (pure domain, no SDK imports) is enforced from the start.
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/domain/listing.py`
+**Given** `src/salvager/domain/listing.py`
 **When** I import `Listing`
 **Then** the model has fields `listing_id: str`, `marketplace: Literal["wallapop", "ebay"]`, `url: str`, `title: str`, `description: str`, `price_eur: Decimal`, `location: str | None`, `photo_urls: list[str]`, `seller_id: str | None`, `seller_history_count: int | None`, `published_at: datetime | None`, `fetched_at: datetime`
 **And** `Listing.entry_key_match: tuple[str, str, str] | None` is the matched wishlist entry-key set by the LLM evaluator (None until evaluated)
 
-**Given** `src/hardware_hunter/domain/evaluation.py`
+**Given** `src/salvager/domain/evaluation.py`
 **When** I import `ListingEvaluation`
 **Then** the model has fields `listing_id: str`, `entry_key: tuple[str, str, str]`, `confidence: Literal["low", "medium", "high"]`, `one_line_take: str`, `is_container: bool`, `wrapper_text: str | None`, `extracted_text: str | None`, `evaluated_at: datetime`, `cache_hit: bool`
 **And** `ConfidenceLevel` is exposed as a re-exportable enum or Literal
 
-**Given** `src/hardware_hunter/domain/alert.py`
+**Given** `src/salvager/domain/alert.py`
 **When** I import `AlertSnapshot`
 **Then** the model has fields `alert_id: UUID`, `entry_key: tuple[str, str, str]`, `entry_display_name: str`, `listing: Listing`, `evaluation: ListingEvaluation`, `phase: Literal["phase1", "phase2"]`, `phase2_max_price_eur: Decimal | None`, `rendered_at: datetime`
 **And** `RenderedAlert` is the data shape every renderer produces: `text: str`, `parse_mode: Literal["MarkdownV2"]`, `photo_url: str | None`, `inline_keyboard: list[list[InlineButton]] | None`
 **And** `InlineButton` has `text: str` (label) and `callback_data: str` (format `<surface>:<verb>:<id>`)
 
-**Given** `src/hardware_hunter/domain/audit.py` (Phase 1 subset)
+**Given** `src/salvager/domain/audit.py` (Phase 1 subset)
 **When** I import `AuditEntry`
 **Then** the Phase 1 variants `AlertSnapshotAudit`, `CallbackAudit` are defined as pydantic discriminated unions with a `kind` field
 **And** Phase 2 variants `TapEventAudit`, `TransactionAudit` are declared but raise `Phase2GuardrailTripped` if instantiated (per AR24 stub policy)
 
-**Given** the entire `src/hardware_hunter/domain/` package
+**Given** the entire `src/salvager/domain/` package
 **When** the adapter-discipline lint runs
 **Then** no file in `domain/` imports anything outside `stdlib` + `pydantic` + `decimal` + `uuid` + `datetime` + `typing`
 
 ### Story 3.2: Define adapter interfaces (ABCs in `interfaces/`)
 
 As a developer composing the poll loop,
-I want abstract base classes for `PageFetcher`, `ListingEvaluator`, `Scheduler`, `TelegramSurface`, `Store` in `src/hardware_hunter/interfaces/`,
+I want abstract base classes for `PageFetcher`, `ListingEvaluator`, `Scheduler`, `TelegramSurface`, `Store` in `src/salvager/interfaces/`,
 So that `orchestration/` composes interfaces, never concrete adapters; the adapter-discipline boundary is mechanical.
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/interfaces/page_fetcher.py`
+**Given** `src/salvager/interfaces/page_fetcher.py`
 **When** I import `PageFetcher`
 **Then** the ABC declares `async def search(self, query: SearchQuery) -> list[Listing]` and `async def fetch(self, listing_url: str) -> Listing`
 **And** `SearchQuery` is a pydantic model in `domain/listing.py` with fields `keywords: list[str]`, `marketplace: Literal["wallapop", "ebay"]`, `max_price_eur: Decimal | None`
 
-**Given** `src/hardware_hunter/interfaces/listing_evaluator.py`
+**Given** `src/salvager/interfaces/listing_evaluator.py`
 **When** I import `ListingEvaluator`
 **Then** the ABC declares `async def evaluate(self, listing: Listing, entry: WishlistEntry) -> ListingEvaluation`
 
-**Given** `src/hardware_hunter/interfaces/scheduler.py`
+**Given** `src/salvager/interfaces/scheduler.py`
 **When** I import `Scheduler`
 **Then** the ABC declares `async def register(self, job_name: str, cadence_minutes: int, callable: Awaitable) -> None` and `async def shutdown(self) -> None`
 
-**Given** `src/hardware_hunter/interfaces/telegram_surface.py`
+**Given** `src/salvager/interfaces/telegram_surface.py`
 **When** I import `TelegramSurface`
 **Then** the ABC declares `async def send(self, rendered: RenderedAlert) -> int` (returns Telegram message_id), `async def edit_keyboard(self, message_id: int, keyboard: list[list[InlineButton]] | None) -> None`, `async def listen_callbacks(self, handler: Callable[[CallbackEvent], Awaitable]) -> None`
 
-**Given** `src/hardware_hunter/interfaces/store.py`
+**Given** `src/salvager/interfaces/store.py`
 **When** I import `Store`
 **Then** the ABC declares Phase 1 methods: `async def is_seen(self, listing_id: str, entry_key: tuple) -> bool`, `async def record_seen(self, listing: Listing, entry_key: tuple) -> None`, `async def record_alert_snapshot(self, snapshot: AlertSnapshot) -> int`, `async def record_callback(self, callback: CallbackAudit) -> None`, `async def get_snooze_until(self, entry_key: tuple) -> datetime | None`, `async def set_snooze(self, entry_key: tuple, until: datetime) -> None`, `async def get_alert_snapshot(self, audit_id: int) -> AlertSnapshot | None`
 **And** Phase 2 methods (`record_tap_event`, `record_transaction`, etc.) are declared in the ABC but documented as Phase 2 — concrete adapters raise `Phase2GuardrailTripped` if called at v0.x (AR24)
@@ -1015,17 +1015,17 @@ So that `orchestration/` composes interfaces, never concrete adapters; the adapt
 ### Story 3.3: Implement SQLite store with WAL mode + Phase 1 tables
 
 As an operator,
-I want a single `hardware_hunter.db` SQLite file with WAL mode and a tracked migration runner producing the Phase 1 tables (`wishlist_runtime_state`, `seen_listings`, `alert_snapshots`, `callbacks`, `_meta`),
+I want a single `salvager.db` SQLite file with WAL mode and a tracked migration runner producing the Phase 1 tables (`wishlist_runtime_state`, `seen_listings`, `alert_snapshots`, `callbacks`, `_meta`),
 So that AR8 / AR9 / AR10 are satisfied and concurrent CLI reads work while the daemon writes (NFR-R5).
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/adapters/sqlite_store/connection.py`
+**Given** `src/salvager/adapters/sqlite_store/connection.py`
 **When** the daemon opens its first connection
 **Then** the connection executes `PRAGMA journal_mode=WAL` and `PRAGMA synchronous=NORMAL`
-**And** the database file lives at `data_dir/hardware_hunter.db`
+**And** the database file lives at `data_dir/salvager.db`
 
-**Given** `src/hardware_hunter/migrations/`
+**Given** `src/salvager/migrations/`
 **When** I read the directory
 **Then** it contains `0001_phase1_schema.sql` defining: `_meta` (key/value with `schema_version`), `wishlist_runtime_state` (entry_key columns + `snooze_until` + last-seen timestamps), `seen_listings` (listing_id + url + perceptual_photo_hash + first_seen + last_seen + entry_key + match_fired), `alert_snapshots` (audit_id PK auto-increment + alert_id UUID + entry_key + listing JSON + evaluation JSON + phase + rendered_at), `callbacks` (audit_id PK + alert_id FK + verb + raw_payload + received_at)
 **And** every audit table (`alert_snapshots`, `callbacks`) has indexes on entry_key columns and timestamps for FR47 health queries
@@ -1037,9 +1037,9 @@ So that AR8 / AR9 / AR10 are satisfied and concurrent CLI reads work while the d
 **Given** the migration runner
 **When** `_meta.schema_version` is older than available migrations
 **Then** missing migrations run in order, each in a transaction; `_meta.schema_version` advances after each
-**And** `hardware-hunter validate-config` flags drift between code and DB
+**And** `salvager validate-config` flags drift between code and DB
 
-**Given** `Store` implementation `SqliteStore` in `src/hardware_hunter/adapters/sqlite_store/`
+**Given** `Store` implementation `SqliteStore` in `src/salvager/adapters/sqlite_store/`
 **When** I call `record_alert_snapshot(snapshot)`
 **Then** a row is inserted with `audit_id` returned
 **And** the table has NO `UPDATE` or `DELETE` triggers — the application layer is the only enforcement (NFR-S4)
@@ -1051,12 +1051,12 @@ So that AR8 / AR9 / AR10 are satisfied and concurrent CLI reads work while the d
 ### Story 3.4: Implement Wallapop unofficial-API adapter
 
 As ifuensan,
-I want a `PageFetcher` implementation in `src/hardware_hunter/adapters/wallapop_api/` that queries `api.wallapop.com/api/v3/general/search` via httpx with the operator's session cookie, validates the response schema, and returns `Listing` instances,
+I want a `PageFetcher` implementation in `src/salvager/adapters/wallapop_api/` that queries `api.wallapop.com/api/v3/general/search` via httpx with the operator's session cookie, validates the response schema, and returns `Listing` instances,
 So that FR6 (primary path) is satisfied; FR10 dedup is fed; NFR-I4 (schema drift surfaces as adapter failure) is enforced.
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/adapters/wallapop_api/fetcher.py`
+**Given** `src/salvager/adapters/wallapop_api/fetcher.py`
 **When** I import `WallapopApiFetcher`
 **Then** the class implements `PageFetcher.search()` and `.fetch()`
 **And** it loads the cookie from `wallapop_cookies.txt` via the cookie-jar helper (Netscape format)
@@ -1090,12 +1090,12 @@ So that FR6 (primary path) is satisfied; FR10 dedup is fed; NFR-I4 (schema drift
 ### Story 3.5: Implement Wallapop TinyFish fallback adapter
 
 As ifuensan,
-I want a second `PageFetcher` implementation in `src/hardware_hunter/adapters/wallapop_tinyfish/` that queries Wallapop via TinyFish's MCP Search and Fetch primitives (proxied through Hermes' MCP client), honoring TinyFish free-tier rate limits (5 req/min Search, 25 URLs/min Fetch),
+I want a second `PageFetcher` implementation in `src/salvager/adapters/wallapop_tinyfish/` that queries Wallapop via TinyFish's MCP Search and Fetch primitives (proxied through Hermes' MCP client), honoring TinyFish free-tier rate limits (5 req/min Search, 25 URLs/min Fetch),
 So that NFR-R2 (two-path Wallapop fallback within same poll cycle) is satisfied and FR6's fallback path is available when the unofficial API breaks.
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/adapters/wallapop_tinyfish/fetcher.py`
+**Given** `src/salvager/adapters/wallapop_tinyfish/fetcher.py`
 **When** I import `WallapopTinyfishFetcher`
 **Then** the class implements `PageFetcher.search()` and `.fetch()`
 **And** the constructor accepts a Hermes MCP client handle (configured at startup with TinyFish endpoint + API key)
@@ -1127,7 +1127,7 @@ So that NFR-R2 (two-path fallback) and FR12 (session-expiry alert + stop polling
 
 **Acceptance Criteria:**
 
-**Given** an orchestration helper `wallapop_two_path_fetch(query) -> list[Listing]` in `src/hardware_hunter/orchestration/wallapop_fallback.py`
+**Given** an orchestration helper `wallapop_two_path_fetch(query) -> list[Listing]` in `src/salvager/orchestration/wallapop_fallback.py`
 **When** the unofficial-API path succeeds
 **Then** the unofficial-API results are returned and the TinyFish path is NOT called
 **And** the result is annotated with `source="wallapop_api"` for diagnostic logging
@@ -1142,7 +1142,7 @@ So that NFR-R2 (two-path fallback) and FR12 (session-expiry alert + stop polling
 **When** the unofficial-API path raises `WallapopSessionExpired`
 **Then** the helper marks the API path as `unhealthy` in the `health` state
 **And** falls back to TinyFish for the current poll
-**And** stops attempting the unofficial-API path on subsequent polls until the operator runs `hardware-hunter login wallapop` (Story 2.9) again
+**And** stops attempting the unofficial-API path on subsequent polls until the operator runs `salvager login wallapop` (Story 2.9) again
 **And** emits a structured log entry `wallapop_session_expired` (Epic 4 wires the Telegram operational alert)
 
 **Given** the orchestration helper
@@ -1158,12 +1158,12 @@ So that NFR-R2 (two-path fallback) and FR12 (session-expiry alert + stop polling
 ### Story 3.7: Implement eBay.es official-API adapter
 
 As ifuensan,
-I want a `PageFetcher` implementation in `src/hardware_hunter/adapters/ebay_api/` that queries eBay's Finding/Search API using the OAuth tokens from `data_dir/auth/oauth_tokens.json`, auto-refreshes access tokens before expiry, tracks daily request budget, and degrades to reduced poll cadence on quota breach,
+I want a `PageFetcher` implementation in `src/salvager/adapters/ebay_api/` that queries eBay's Finding/Search API using the OAuth tokens from `data_dir/auth/oauth_tokens.json`, auto-refreshes access tokens before expiry, tracks daily request budget, and degrades to reduced poll cadence on quota breach,
 So that FR7 / NFR-I5 are satisfied and the eBay.es leg of the daemon runs independently of Wallapop (NFR-R1).
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/adapters/ebay_api/fetcher.py`
+**Given** `src/salvager/adapters/ebay_api/fetcher.py`
 **When** I import `EbayApiFetcher`
 **Then** the class implements `PageFetcher.search()` and `.fetch()` for `marketplace="ebay"`
 **And** it loads OAuth tokens from `oauth_tokens.json` at startup and refreshes access tokens via the eBay refresh endpoint when access token is within 5 minutes of expiry
@@ -1184,7 +1184,7 @@ So that FR7 / NFR-I5 are satisfied and the eBay.es leg of the daemon runs indepe
 **When** the refresh endpoint returns HTTP 401 (refresh token revoked)
 **Then** the fetcher raises `EbayAuthFailed`
 **And** the operational event `ebay_token_refresh_failed` fires
-**And** the daemon stops polling eBay until the operator runs `hardware-hunter login ebay` (Story 2.10) again
+**And** the daemon stops polling eBay until the operator runs `salvager login ebay` (Story 2.10) again
 
 **Given** an integration test using a recorded eBay fixture (`tests/fixtures/ebay_api/`)
 **When** the fetcher runs against the fixture
@@ -1193,12 +1193,12 @@ So that FR7 / NFR-I5 are satisfied and the eBay.es leg of the daemon runs indepe
 ### Story 3.8: Implement Hermes scheduler adapter + per-marketplace poll registration
 
 As the daemon orchestrator,
-I want a `Scheduler` implementation in `src/hardware_hunter/adapters/hermes_scheduler/` that wraps Hermes Agent's built-in scheduler primitives and registers per-marketplace poll jobs with cadences from `config.yaml`,
+I want a `Scheduler` implementation in `src/salvager/adapters/hermes_scheduler/` that wraps Hermes Agent's built-in scheduler primitives and registers per-marketplace poll jobs with cadences from `config.yaml`,
 So that FR8 / NFR-I1 are satisfied without depending on external cron and the per-marketplace cadence is operator-tunable.
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/adapters/hermes_scheduler/scheduler.py`
+**Given** `src/salvager/adapters/hermes_scheduler/scheduler.py`
 **When** I import `HermesScheduler`
 **Then** the class implements `Scheduler.register(job_name, cadence_minutes, callable)` by wrapping the Hermes scheduler primitive
 **And** the adapter is the only package in the project allowed to import `hermes_agent.*`
@@ -1222,12 +1222,12 @@ So that FR8 / NFR-I1 are satisfied without depending on external cron and the pe
 ### Story 3.9: Implement wishlist-anchored LLM evaluator with container detection
 
 As ifuensan,
-I want a `ListingEvaluator` implementation in `src/hardware_hunter/adapters/llm_gemini/` that takes a `Listing` + `WishlistEntry`, calls Gemini Flash with a wishlist-anchored prompt template (in `domain/prompts.py`), and returns a `ListingEvaluation` with `(low|medium|high)` confidence, a one-line take, and a container-detection signal,
+I want a `ListingEvaluator` implementation in `src/salvager/adapters/llm_gemini/` that takes a `Listing` + `WishlistEntry`, calls Gemini Flash with a wishlist-anchored prompt template (in `domain/prompts.py`), and returns a `ListingEvaluation` with `(low|medium|high)` confidence, a one-line take, and a container-detection signal,
 So that FR13 / FR14 / FR15 / FR17 are satisfied and the LLM has NO codepath to produce arbitrage scores (FR17's "no codepath" enforcement is structural — the prompt only asks the matching question).
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/domain/prompts.py`
+**Given** `src/salvager/domain/prompts.py`
 **When** I import `build_evaluation_prompt(listing, entry) -> str`
 **Then** the function returns a prompt template that includes:
   - The wishlist entry's `(manufacturer, model, ref)` + display name + keywords + container_keywords + price ceilings
@@ -1236,7 +1236,7 @@ So that FR13 / FR14 / FR15 / FR17 are satisfied and the LLM has NO codepath to p
   - A required output schema: `{confidence: low|medium|high, one_line_take: str, is_container: bool, wrapper_text: str|null, extracted_text: str|null}`
 **And** the prompt template contains NO request for resale value, margin, market price, or any arbitrage signal (FR17 enforced at the prompt layer)
 
-**Given** `src/hardware_hunter/adapters/llm_gemini/evaluator.py`
+**Given** `src/salvager/adapters/llm_gemini/evaluator.py`
 **When** I import `GeminiFlashEvaluator`
 **Then** the class implements `ListingEvaluator.evaluate(listing, entry)`
 **And** the implementation uses `google.genai` (per AR5) to call Gemini Flash with the prompt
@@ -1273,15 +1273,15 @@ So that FR13 / FR14 / FR15 / FR17 are satisfied and the LLM has NO codepath to p
 ### Story 3.10: Implement LLM evaluation cache via Hermes SQLite + FTS5
 
 As ifuensan,
-I want LLM evaluations cached per listing URL with configurable TTL (24h default, 1h for low-confidence) using Hermes Agent's built-in SQLite + FTS5 memory (separate from `hardware_hunter.db`),
+I want LLM evaluations cached per listing URL with configurable TTL (24h default, 1h for low-confidence) using Hermes Agent's built-in SQLite + FTS5 memory (separate from `salvager.db`),
 So that FR16 / NFR-C3 are satisfied — re-fetched listings within TTL skip Gemini Flash entirely, cutting cost and latency.
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/adapters/llm_gemini/cache.py`
+**Given** `src/salvager/adapters/llm_gemini/cache.py`
 **When** I import `LlmEvaluationCache`
 **Then** the class wraps Hermes' SQLite + FTS5 memory primitive (AR11)
-**And** the cache database lives separately from `hardware_hunter.db`, at `data_dir/hermes_memory.db`
+**And** the cache database lives separately from `salvager.db`, at `data_dir/hermes_memory.db`
 **And** keys are `(listing_url, prompt_version)` to invalidate cache on prompt changes
 **And** stored values are the serialized `ListingEvaluation` + the originating prompt (for `explain` debugging via FR44)
 
@@ -1311,12 +1311,12 @@ So that FR16 / NFR-C3 are satisfied — re-fetched listings within TTL skip Gemi
 ### Story 3.11: Implement Phase 1 alert renderer with Direction A + E hybrid
 
 As ifuensan reading alerts on a phone,
-I want `render_phase1_listing_alert(snapshot: AlertSnapshot) -> RenderedAlert` in `src/hardware_hunter/domain/alert.py` to produce the locked Direction A baseline anatomy plus the Direction E container-aware split when `snapshot.evaluation.is_container == True`, using the locked `SEVERITY_TOKENS` and `BUTTON_LABELS` constants and `escape_markdown_v2()` on all user-supplied content,
+I want `render_phase1_listing_alert(snapshot: AlertSnapshot) -> RenderedAlert` in `src/salvager/domain/alert.py` to produce the locked Direction A baseline anatomy plus the Direction E container-aware split when `snapshot.evaluation.is_container == True`, using the locked `SEVERITY_TOKENS` and `BUTTON_LABELS` constants and `escape_markdown_v2()` on all user-supplied content,
 So that FR18 / FR19 / FR22 / UX-DR1 / UX-DR3 / UX-DR4 / UX-DR5 / UX-DR6 / UX-DR8 are satisfied with format stability gated by snapshot tests.
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/domain/alert.py`
+**Given** `src/salvager/domain/alert.py`
 **When** I import `SEVERITY_TOKENS`, `BUTTON_LABELS`, `CALLBACK_DATA_FORMAT`
 **Then** the constants exactly match the UX-DR3/4/5 spec: `SEVERITY_TOKENS` has the 6 named entries (`operational_warn`, `operational_info`, `phase1_listing`, `phase2_listing`, `phase2_buy_success`, `phase2_buy_failure`); `BUTTON_LABELS` has the 5 named entries (`view`, `skip_phase1`, `snooze`, `buy`, `skip_phase2`); `CALLBACK_DATA_FORMAT` is the literal string `"<surface>:<verb>:<id>"` (max 64 bytes documented)
 **And** all three are `Final[dict[str, str]]` (or `Final[str]`) — runtime-immutable
@@ -1355,12 +1355,12 @@ So that FR18 / FR19 / FR22 / UX-DR1 / UX-DR3 / UX-DR4 / UX-DR5 / UX-DR6 / UX-DR8
 ### Story 3.12: Implement Telegram bot adapter with retry + chat-ID allowlist
 
 As ifuensan,
-I want a `TelegramSurface` implementation in `src/hardware_hunter/adapters/telegram_bot/` using `python-telegram-bot` that sends `RenderedAlert` instances, retries failed sends with exponential backoff (default 3 attempts over ~1 min), silently drops inbound messages from chat IDs other than `TELEGRAM_CHAT_ID`,
+I want a `TelegramSurface` implementation in `src/salvager/adapters/telegram_bot/` using `python-telegram-bot` that sends `RenderedAlert` instances, retries failed sends with exponential backoff (default 3 attempts over ~1 min), silently drops inbound messages from chat IDs other than `TELEGRAM_CHAT_ID`,
 So that FR18 dispatch / NFR-I6 retry / AR20 chat-ID allowlist are satisfied.
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/adapters/telegram_bot/surface.py`
+**Given** `src/salvager/adapters/telegram_bot/surface.py`
 **When** I import `TelegramBotSurface`
 **Then** the class implements `TelegramSurface.send(rendered)` and `.edit_keyboard(message_id, keyboard)` and `.listen_callbacks(handler)`
 **And** the constructor accepts `bot_token: SecretStr` and `recipient_chat_id: int` from `EnvSettings`
@@ -1394,7 +1394,7 @@ So that FR18 dispatch / NFR-I6 retry / AR20 chat-ID allowlist are satisfied.
 ### Story 3.13: Implement Phase 1 callback handler with acknowledgment-row keyboard edit
 
 As ifuensan tapping a Phase 1 button,
-I want the Telegram callback handler in `src/hardware_hunter/orchestration/callback_handler.py` to process `View`/`Skip`/`Snooze` callbacks, record the audit entry, mutate state where applicable (Snooze writes to `wishlist_runtime_state.snooze_until`), and replace the inline keyboard via `editMessageReplyMarkup` with the locked acknowledgment row (`✓ visto` / `✓ saltado` / `✓ pospuesto 24h`),
+I want the Telegram callback handler in `src/salvager/orchestration/callback_handler.py` to process `View`/`Skip`/`Snooze` callbacks, record the audit entry, mutate state where applicable (Snooze writes to `wishlist_runtime_state.snooze_until`), and replace the inline keyboard via `editMessageReplyMarkup` with the locked acknowledgment row (`✓ visto` / `✓ saltado` / `✓ pospuesto 24h`),
 So that FR19 / FR20 / UX-DR12 are satisfied with end-to-end Phase 1 tap → state → visible ack in ≤ 1 second.
 
 **Acceptance Criteria:**
@@ -1432,7 +1432,7 @@ So that FR19 / FR20 / UX-DR12 are satisfied with end-to-end Phase 1 tap → stat
 ### Story 3.14: Implement poll loop orchestrator (synchronous pipeline)
 
 As ifuensan,
-I want `src/hardware_hunter/orchestration/poll_loop.py` to compose `PageFetcher → dedup_filter → snooze_filter → ListingEvaluator → record_seen → TelegramSurface.send` as a synchronous pipeline within the async runtime (using Hermes subagents up to 8 concurrent for the LLM eval step),
+I want `src/salvager/orchestration/poll_loop.py` to compose `PageFetcher → dedup_filter → snooze_filter → ListingEvaluator → record_seen → TelegramSurface.send` as a synchronous pipeline within the async runtime (using Hermes subagents up to 8 concurrent for the LLM eval step),
 So that AR15 / AR16 are satisfied and FR6–FR22 (the daily Phase 1 case) is delivered end-to-end.
 
 **Acceptance Criteria:**
@@ -1448,7 +1448,7 @@ So that AR15 / AR16 are satisfied and FR6–FR22 (the daily Phase 1 case) is del
   6. For listings dropped below threshold, call `store.record_seen(listing, entry_key)` AND log `listing_dropped_below_threshold` (still seen — won't re-fire — but auditable via `--include-dropped`)
 
 **Given** the poll loop registered with the scheduler
-**When** the daemon starts via `hardware-hunter` (no subcommand)
+**When** the daemon starts via `salvager` (no subcommand)
 **Then** the daemon initializes the scheduler, registers Wallapop + eBay.es poll jobs, and runs indefinitely
 **And** at startup, it emits `daemon_started` operational event (Epic 4 renders the Telegram informational alert; Story 3 just logs)
 
@@ -1510,12 +1510,12 @@ So that UX-DR29 / UX-DR30 / NFR-S4 / FR22 are mechanically enforced and regressi
 ### Story 4.1: Implement operational alert renderer with EventName enum
 
 As ifuensan getting a Telegram notification while away from my laptop,
-I want `render_operational_alert(severity, event, ctx) -> RenderedAlert` in `src/hardware_hunter/domain/alert.py` covering every Phase 1 `EventName` variant with locked anatomy (`⚠️` warn: bold headline + numbered next-steps; `ℹ️` info: plain headline + optional CLI hint),
+I want `render_operational_alert(severity, event, ctx) -> RenderedAlert` in `src/salvager/domain/alert.py` covering every Phase 1 `EventName` variant with locked anatomy (`⚠️` warn: bold headline + numbered next-steps; `ℹ️` info: plain headline + optional CLI hint),
 So that FR21 / UX-DR13 / UX-DR14 / UX-DR15 are satisfied and every operational alert is calm-instructional with cause + next CLI command in one read.
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/domain/alert.py`
+**Given** `src/salvager/domain/alert.py`
 **When** I import `EventName`
 **Then** the enum lists every Phase 1 variant: `daemon_started`, `daemon_stopped`, `wallapop_session_expired`, `wallapop_session_renewed`, `wallapop_api_degraded`, `wallapop_both_paths_down`, `tinyfish_fallback_active`, `tinyfish_fallback_recovered`, `ebay_token_refresh_failed`, `ebay_quota_breach`, `llm_provider_rate_limited`, `entry_snoozed`, `poll_cycle_error`
 **And** the enum is `Final` — adding a variant requires a PRD amendment per UX-DR13's "variant pool is finite" rule
@@ -1540,7 +1540,7 @@ So that FR21 / UX-DR13 / UX-DR14 / UX-DR15 are satisfied and every operational a
 **Given** the renderer with `event=EventName.wallapop_both_paths_down`
 **When** the renderer runs
 **Then** the message body includes specific values from `ctx` (consecutive failure count, last error class)
-**And** the next-step list names: (1) `hardware-hunter audit show --last 5`, (2) inspection / patch action, (3) `docker-compose restart hardware-hunter` (or equivalent re-enable)
+**And** the next-step list names: (1) `salvager audit show --last 5`, (2) inspection / patch action, (3) `docker-compose restart salvager` (or equivalent re-enable)
 
 **Given** a snapshot test in `tests/unit/test_operational_alert_renderer.py`
 **When** the test renders one fixture per `EventName` variant
@@ -1556,12 +1556,12 @@ So that FR21 / UX-DR13 / UX-DR14 / UX-DR15 are satisfied and every operational a
 ### Story 4.2: Implement degradation_reporter (log + Telegram + health-state)
 
 As any subsystem detecting a degraded condition,
-I want a single `DegradationReporter` in `src/hardware_hunter/orchestration/degradation_reporter.py` exposing `report(severity, event, ctx)` that fans out to: (1) the structured logger, (2) the Telegram surface (operational alert via `render_operational_alert`), (3) the `health` state cache,
+I want a single `DegradationReporter` in `src/salvager/orchestration/degradation_reporter.py` exposing `report(severity, event, ctx)` that fans out to: (1) the structured logger, (2) the Telegram surface (operational alert via `render_operational_alert`), (3) the `health` state cache,
 So that NFR-R3 ("no silent failure") is structurally impossible — three independent surfaces see every degradation, with NFR-O4 (diagnostic completeness) preserved on each.
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/orchestration/degradation_reporter.py`
+**Given** `src/salvager/orchestration/degradation_reporter.py`
 **When** I import `DegradationReporter`
 **Then** the class constructor accepts `logger`, `telegram_surface`, `health_state` dependencies (injected by the daemon entry point)
 **And** `report(severity: Severity, event: EventName, ctx: dict) -> None` is the single public method
@@ -1590,7 +1590,7 @@ So that NFR-R3 ("no silent failure") is structurally impossible — three indepe
 ### Story 4.3: Wire Wallapop session-expiry through to operational alert + recovery
 
 As ifuensan receiving a `ℹ️` alert that my Wallapop session expired,
-I want the Wallapop two-path fallback orchestration (Story 3.6) to invoke `DegradationReporter.report()` with `EventName.wallapop_session_expired`, mark the API path as `unhealthy`, continue serving alerts via the TinyFish fallback, and emit `wallapop_session_renewed` when I re-run `hardware-hunter login wallapop`,
+I want the Wallapop two-path fallback orchestration (Story 3.6) to invoke `DegradationReporter.report()` with `EventName.wallapop_session_expired`, mark the API path as `unhealthy`, continue serving alerts via the TinyFish fallback, and emit `wallapop_session_renewed` when I re-run `salvager login wallapop`,
 So that FR12 / NFR-R3 / NFR-R4 / UX-DR15 are end-to-end satisfied across Epic 3 detection + Epic 4 reporting + the operator's manual recovery.
 
 **Acceptance Criteria:**
@@ -1598,12 +1598,12 @@ So that FR12 / NFR-R3 / NFR-R4 / UX-DR15 are end-to-end satisfied across Epic 3 
 **Given** the daemon running with a valid Wallapop cookie
 **When** the unofficial-API path returns 401
 **Then** the Wallapop fallback helper (Story 3.6) catches `WallapopSessionExpired` and invokes `DegradationReporter.report(severity="info", event=EventName.wallapop_session_expired, ctx={"adapter": "wallapop_api", "fallback_path_status": "active"})`
-**And** the operator receives the `ℹ️ Sesión Wallapop expirada` alert with the `cuando puedas` recovery hint (`hardware-hunter login wallapop`)
+**And** the operator receives the `ℹ️ Sesión Wallapop expirada` alert with the `cuando puedas` recovery hint (`salvager login wallapop`)
 **And** the API path is marked `unhealthy` in `health` state
 **And** subsequent polls use ONLY the TinyFish path until recovery
 
 **Given** the daemon with the API path marked unhealthy
-**When** the operator runs `hardware-hunter login wallapop` and the cookie is updated
+**When** the operator runs `salvager login wallapop` and the cookie is updated
 **Then** the daemon detects the new cookie at the start of the next poll cycle (via cookie file mtime check or explicit re-load)
 **And** the API path is re-attempted on the next Wallapop poll
 **And** on success, `DegradationReporter.report(severity="info", event=EventName.wallapop_session_renewed, ctx={...})` fires
@@ -1620,84 +1620,84 @@ So that FR12 / NFR-R3 / NFR-R4 / UX-DR15 are end-to-end satisfied across Epic 3 
 **Then** exactly two operational alerts are sent (`session_expired` then `session_renewed`)
 **And** no listing alerts are lost during the fallback window (TinyFish-path alerts deliver as normal)
 
-### Story 4.4: Implement `hardware-hunter health` CLI command
+### Story 4.4: Implement `salvager health` CLI command
 
 As ifuensan diagnosing a daemon problem,
-I want `hardware-hunter health` to surface adapter status, scheduler status, last-poll timestamps per marketplace, last-alert timestamp, current Phase 2 state, AND distinguishably report "watching, no matches in 24h" vs "stuck poller,"
+I want `salvager health` to surface adapter status, scheduler status, last-poll timestamps per marketplace, last-alert timestamp, current Phase 2 state, AND distinguishably report "watching, no matches in 24h" vs "stuck poller,"
 So that FR47 / NFR-O2 / UX-DR25 are satisfied — the operator never has to ask "is the bot working?".
 
 **Acceptance Criteria:**
 
 **Given** the daemon running with healthy adapters and no recent matches
-**When** I run `hardware-hunter health`
+**When** I run `salvager health`
 **Then** the output uses `render_table` to display an adapter status table with columns `Adapter`, `Status` (`healthy` / `degraded` / `down`), `Last Activity` (ISO 8601 Z timestamp)
 **And** a header block (using `render_prose` or a `rich.panel.Panel`) shows: daemon version, daemon uptime, PID
 **And** a footer block names: `Recent matches: <N> in last 24h (watching)` (UX-DR25 disambiguation), `Last poll: <ISO timestamp> (<wallapop|ebay>)`, `Phase 2: <enabled count> entries enabled (<globally disabled? yes|no>; circuit breaker <closed|open N/M>)`
 
-**Given** `hardware-hunter health --format json`
+**Given** `salvager health --format json`
 **When** the command runs
 **Then** stdout emits a single JSON object: `{"version": ..., "uptime_seconds": ..., "pid": ..., "adapters": [{"name": ..., "status": ..., "last_activity": ...}, ...], "recent_match_count_24h": ..., "last_poll": {"wallapop": "<ts>", "ebay": "<ts>"}, "phase2": {"enabled_count": ..., "globally_disabled": ..., "circuit_breaker": {"state": ..., "consecutive_failures": ..., "threshold": ...}}}`
 **And** ISO 8601 timestamps + snake_case fields per UX-DR20
 
 **Given** the daemon with the Wallapop API path unhealthy (session expired) but TinyFish path healthy
-**When** I run `hardware-hunter health`
+**When** I run `salvager health`
 **Then** the table shows two rows for Wallapop: `wallapop_api` as `degraded` and `wallapop_tinyfish` as `healthy`
 **And** the operator can see at a glance which path is broken
 
 **Given** the daemon down (no process)
-**When** I run `hardware-hunter health`
+**When** I run `salvager health`
 **Then** the command does NOT require the daemon to be running — it reads from SQLite + filesystem state directly (AR14)
 **And** the output shows `Daemon: not running` and reads `last_poll` from the most recent record in `_meta` or `seen_listings`
 **And** the exit code is 0 (not an error condition — the daemon may be intentionally stopped)
 
 **Given** a stuck poller (last_poll older than 2× expected cadence)
-**When** I run `hardware-hunter health`
+**When** I run `salvager health`
 **Then** the row shows `Status: degraded`
 **And** the footer line surfaces `Last poll: <timestamp> (5 hours ago, expected every 15 min)` for stale detection
 **And** the exit code is 0; `--exit-on-degraded` flag (post-launch OQ) would change this
 
 **Given** the test suite
-**When** the test runs `hardware-hunter health` against a fixture daemon state
+**When** the test runs `salvager health` against a fixture daemon state
 **Then** golden snapshot tests verify rendering at terminal widths 60, 80, 100, 120 (UX-DR31)
 
 ### Story 4.5: Implement `audit show` and `audit export` CLI commands
 
 As ifuensan reviewing what the agent did,
-I want `hardware-hunter audit show [--last N] [--id N] [--type EVENT] [--since ISO] [--include-dropped] [--format json]` and `hardware-hunter audit export [--format json] [--since ISO]`,
+I want `salvager audit show [--last N] [--id N] [--type EVENT] [--since ISO] [--include-dropped] [--format json]` and `salvager audit export [--format json] [--since ISO]`,
 So that FR37 / NFR-O3 / UX-DR20 / UX-DR28 are satisfied and every Phase 1 event (alerts + callbacks + dropped listings + operational events) is queryable from the CLI.
 
 **Acceptance Criteria:**
 
 **Given** the audit log with 100+ Phase 1 records
-**When** I run `hardware-hunter audit show`
+**When** I run `salvager audit show`
 **Then** the default behavior returns the 10 most recent records via `render_table` (columns: `ID`, `Type`, `Timestamp`, `Summary`)
 **And** the table border is `MINIMAL`, no row separators, 80-col default
 
 **Given** the audit log
-**When** I run `hardware-hunter audit show --last 50`
+**When** I run `salvager audit show --last 50`
 **Then** the 50 most recent records are returned
 **And** `--last 0` produces no output (matches the empty-state pattern from UX-DR's spec)
 
 **Given** the audit log
-**When** I run `hardware-hunter audit show --id 142`
+**When** I run `salvager audit show --id 142`
 **Then** the single record with `audit_id = 142` is returned with FULL detail (not just the summary): the full `alert_snapshot` JSON / `callback` record, plus rendered Telegram text (for alerts) and audit pointer
-**And** if the ID doesn't exist, output is `error: audit id 142 not found` + `hint: hardware-hunter audit show --last 5` and exit code 1
+**And** if the ID doesn't exist, output is `error: audit id 142 not found` + `hint: salvager audit show --last 5` and exit code 1
 
 **Given** the audit log
-**When** I run `hardware-hunter audit show --type callback --since 2026-05-01`
+**When** I run `salvager audit show --type callback --since 2026-05-01`
 **Then** only callback events at or after the given ISO timestamp are returned
 
 **Given** dropped-listing log entries (listings below confidence threshold; recorded by Story 3.14)
-**When** I run `hardware-hunter audit show --include-dropped --last 10`
+**When** I run `salvager audit show --include-dropped --last 10`
 **Then** the most recent 10 records INCLUDING dropped-below-threshold events are returned
 
-**Given** `hardware-hunter audit show --format json`
+**Given** `salvager audit show --format json`
 **When** the command runs
 **Then** stdout emits a flat JSON array (no envelope) of audit records
 **And** each record is `json.loads`-parseable individually
 **And** ISO 8601 timestamps with `Z` suffix per UX-DR20
 
-**Given** `hardware-hunter audit export`
+**Given** `salvager audit export`
 **When** the command runs
 **Then** stdout emits JSONL (one JSON object per line), one record per audit row
 **And** the format is suitable for `jq` filtering or downstream analysis
@@ -1707,23 +1707,23 @@ So that FR37 / NFR-O3 / UX-DR20 / UX-DR28 are satisfied and every Phase 1 event 
 **When** the test inserts known Phase 1 records and runs `audit show --format json --last 3`
 **Then** the JSON output matches a tracked golden file
 
-### Story 4.6: Implement `hardware-hunter test-search` CLI command
+### Story 4.6: Implement `salvager test-search` CLI command
 
 As ifuensan tuning a new wishlist entry,
-I want `hardware-hunter test-search <entry-id|query>` to perform a dry-run search against a marketplace without sending Telegram alerts, mutating SQLite state, or counting beyond actual rate-limit usage,
+I want `salvager test-search <entry-id|query>` to perform a dry-run search against a marketplace without sending Telegram alerts, mutating SQLite state, or counting beyond actual rate-limit usage,
 So that FR43 is satisfied — I can sanity-check what listings the agent would surface without polluting my audit log or chat.
 
 **Acceptance Criteria:**
 
 **Given** a wishlist entry `WD40EFPX`
-**When** I run `hardware-hunter test-search WD40EFPX`
+**When** I run `salvager test-search WD40EFPX`
 **Then** the command builds the search query for both Wallapop and eBay.es (same logic as Story 3.14)
 **And** executes the searches
 **And** renders results in a `render_table` showing columns `Marketplace`, `Listing ID`, `Title`, `Price`, `Match Probability` (a quick heuristic, not the full LLM eval)
 **And** does NOT send any Telegram alert
 **And** does NOT write to `seen_listings`, `alert_snapshots`, or any audit table
 
-**Given** `hardware-hunter test-search "WD Red 4TB"` (arbitrary query, not a wishlist entry)
+**Given** `salvager test-search "WD Red 4TB"` (arbitrary query, not a wishlist entry)
 **When** the command runs
 **Then** the query is passed verbatim to both marketplaces
 **And** the output table includes a column noting "no LLM evaluation (dry-run heuristic only)"
@@ -1746,16 +1746,16 @@ So that FR43 is satisfied — I can sanity-check what listings the agent would s
 **When** `--format json` is passed
 **Then** stdout emits a JSON array of `Listing` objects with the heuristic match info per UX-DR20
 
-### Story 4.7: Implement `hardware-hunter explain <url>` CLI command
+### Story 4.7: Implement `salvager explain <url>` CLI command
 
 As ifuensan investigating why an alert fired (or didn't),
-I want `hardware-hunter explain <listing-url>` to fetch the listing, run the full LLM evaluation against every plausible wishlist entry, and print the prompt + response + confidence + would-be-alert-body,
+I want `salvager explain <listing-url>` to fetch the listing, run the full LLM evaluation against every plausible wishlist entry, and print the prompt + response + confidence + would-be-alert-body,
 So that FR44 is satisfied — I can debug LLM behavior without enabling debug logging or re-running the daemon.
 
 **Acceptance Criteria:**
 
 **Given** a Wallapop listing URL
-**When** I run `hardware-hunter explain https://es.wallapop.com/item/wd-red-4tb-...`
+**When** I run `salvager explain https://es.wallapop.com/item/wd-red-4tb-...`
 **Then** the command:
   1. Fetches the listing via the marketplace adapter (uses cache where present)
   2. Identifies plausible matching wishlist entries (keyword overlap)
@@ -1792,7 +1792,7 @@ So that FR50 is satisfied and no audit-log gaps or dropped alerts occur on routi
 
 **Acceptance Criteria:**
 
-**Given** the daemon entry point in `src/hardware_hunter/cli/daemon_cmd.py`
+**Given** the daemon entry point in `src/salvager/cli/daemon_cmd.py`
 **When** the daemon is running and receives SIGTERM
 **Then** the signal handler sets a global "shutdown initiated" flag
 **And** the scheduler stops accepting new polls
@@ -1854,12 +1854,12 @@ So that NFR-R5 is mechanically asserted and the docker-compose `restart: on-fail
 ### Story 5.1: Schema extension — Phase 2 SQLite tables + append-only audit writer
 
 As a developer wiring the Phase 2 audit log,
-I want migration `0002_phase2_schema.sql` to add the Phase 2 tables (`tap_events`, `transactions`, `phase2_smoke_tests`, `phase2_state`), and an append-only `audit_writer.py` in `src/hardware_hunter/adapters/sqlite_store/` exposing only `record_*` methods plus a property test asserting no mutation methods exist,
+I want migration `0002_phase2_schema.sql` to add the Phase 2 tables (`tap_events`, `transactions`, `phase2_smoke_tests`, `phase2_state`), and an append-only `audit_writer.py` in `src/salvager/adapters/sqlite_store/` exposing only `record_*` methods plus a property test asserting no mutation methods exist,
 So that AR8 / AR9 (append-only at application layer) / AR13 (Phase 2 lockout persistence) / NFR-S4 are satisfied — corrections to past audit rows are impossible by API.
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/migrations/0002_phase2_schema.sql`
+**Given** `src/salvager/migrations/0002_phase2_schema.sql`
 **When** the migration runs against a Phase 1 database
 **Then** the following tables are created:
   - `tap_events` (audit_id PK auto-increment + alert_id FK + verb + raw_payload JSON + tapped_at + ip_or_chat_id; indexed on alert_id + tapped_at)
@@ -1869,7 +1869,7 @@ So that AR8 / AR9 (append-only at application layer) / AR13 (Phase 2 lockout per
 **And** the migration is idempotent (running twice has no effect after the first)
 **And** `_meta.schema_version` advances to 2
 
-**Given** `src/hardware_hunter/adapters/sqlite_store/audit_writer.py`
+**Given** `src/salvager/adapters/sqlite_store/audit_writer.py`
 **When** I import `Phase2AuditWriter`
 **Then** the class implements only `record_tap_event(tap)`, `record_transaction(txn)`, `record_smoke_test(result)`, `set_global_disable(reason)`, `clear_global_disable(entry_key)`, `increment_failure_counter()`, `reset_failure_counter()`
 **And** NO method named `update_*` or `delete_*` exists on this class (verified by a property test that introspects the class via `inspect`)
@@ -1892,7 +1892,7 @@ So that FR23 / FR24 / UX-DR7 are satisfied AND any pre-flight failure silently d
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/domain/alert.py`
+**Given** `src/salvager/domain/alert.py`
 **When** I import `render_phase2_listing_alert(snapshot, phase2_max_price_eur)`
 **Then** the rendered text exactly matches the Phase 1 baseline anatomy (Story 3.11) with three substitutions:
   - Severity prefix `📦` → `🟢`
@@ -1923,12 +1923,12 @@ So that FR23 / FR24 / UX-DR7 are satisfied AND any pre-flight failure silently d
 ### Story 5.3: Implement TinyFish browser adapter for Wallapop Pay + eBay.es checkout
 
 As the buy orchestrator,
-I want a `BrowserSession` adapter in `src/hardware_hunter/adapters/tinyfish_browser/` with two flow implementations (`wallapop_pay.py` + `ebay_checkout.py`) that drive the marketplace's own UI to complete a purchase via Wallapop Pay or eBay.es checkout, scoped exclusively to the protected payment rails,
+I want a `BrowserSession` adapter in `src/salvager/adapters/tinyfish_browser/` with two flow implementations (`wallapop_pay.py` + `ebay_checkout.py`) that drive the marketplace's own UI to complete a purchase via Wallapop Pay or eBay.es checkout, scoped exclusively to the protected payment rails,
 So that FR25 / FR30 / NFR-S5 are satisfied — the agent has no codepath to use Bizum or transferencia (verified structurally by Story 5.14's CI lint).
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/interfaces/browser_session.py`
+**Given** `src/salvager/interfaces/browser_session.py`
 **When** I import `BrowserSession`
 **Then** the ABC declares `async def execute_buy(listing: Listing, max_price_eur: Decimal) -> BuyResult`
 **And** `BuyResult` is a tagged union: `BuySuccess(price_paid_eur, payment_method, receipt_id, screenshot_url, total_seconds)` OR `BuyFailure(reason: BuyFailureReason, ctx: dict)`
@@ -1938,7 +1938,7 @@ So that FR25 / FR30 / NFR-S5 are satisfied — the agent has no codepath to use 
 **Then** it lists: `reconciliation_tripped`, `ui_check_failed`, `circuit_open`, `missing_element`, `marketplace_error`, `timeout`, `screenshot_missing`, `payment_rail_unavailable`
 **And** the enum is `Final`
 
-**Given** `src/hardware_hunter/adapters/tinyfish_browser/wallapop_pay.py`
+**Given** `src/salvager/adapters/tinyfish_browser/wallapop_pay.py`
 **When** I import `WallapopPayFlow`
 **Then** the class implements `BrowserSession.execute_buy()` for Wallapop listings
 **And** the flow uses TinyFish Browser via Hermes MCP (NFR-I2)
@@ -1953,7 +1953,7 @@ So that FR25 / FR30 / NFR-S5 are satisfied — the agent has no codepath to use 
   8. If the screenshot capture fails, returns `BuyFailure(reason=screenshot_missing, ctx={...})` even though the buy may have succeeded (per UX-DR9)
   9. Returns `BuySuccess(...)` with the captured data
 
-**Given** `src/hardware_hunter/adapters/tinyfish_browser/ebay_checkout.py`
+**Given** `src/salvager/adapters/tinyfish_browser/ebay_checkout.py`
 **When** I import `EbayCheckoutFlow`
 **Then** the class follows the same shape with eBay.es checkout (not Bizum, not bank transfer — verified by inspecting the navigated URLs and element selectors in the flow code)
 
@@ -1970,18 +1970,18 @@ So that FR25 / FR30 / NFR-S5 are satisfied — the agent has no codepath to use 
 ### Story 5.4: Implement cross-source price reconciliation + receipt-vs-alert reconciliation
 
 As ifuensan,
-I want a `Reconciler` in `src/hardware_hunter/orchestration/reconciler.py` exposing `reconcile_cross_source(listing)` (re-fetches the listing via the alternate marketplace path and compares prices against a configurable tolerance) AND `reconcile_receipt_vs_alert(alert_snapshot, transaction)` (compares alert-time price vs receipt price), with domain math in pure `domain/reconciliation.py`,
+I want a `Reconciler` in `src/salvager/orchestration/reconciler.py` exposing `reconcile_cross_source(listing)` (re-fetches the listing via the alternate marketplace path and compares prices against a configurable tolerance) AND `reconcile_receipt_vs_alert(alert_snapshot, transaction)` (compares alert-time price vs receipt price), with domain math in pure `domain/reconciliation.py`,
 So that FR31 / FR32 are satisfied — the Q9 silent-failure scenario (malformed HTML price) is caught BEFORE checkout, and any post-checkout price discrepancy is caught immediately.
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/domain/reconciliation.py`
+**Given** `src/salvager/domain/reconciliation.py`
 **When** I import `ReconciliationResult` and `compute_tolerance(price_a, price_b, tolerance_eur, tolerance_pct)`
 **Then** the function returns a pure `ReconciliationResult(passed: bool, delta_eur: Decimal, delta_pct: Decimal, tolerance_used: Literal["eur", "pct"])`
 **And** the tolerance used is `max(tolerance_eur, price_a * tolerance_pct / 100)` per PRD FR31 ("€ floor + percentage, whichever is greater")
 **And** the module has zero IO imports (pure decimal math)
 
-**Given** `src/hardware_hunter/orchestration/reconciler.py`
+**Given** `src/salvager/orchestration/reconciler.py`
 **When** I call `await reconciler.reconcile_cross_source(listing)` for a Wallapop listing where the API price is 53.00 €
 **Then** the reconciler invokes the TinyFish fallback path to re-fetch the same listing (or vice-versa if the listing was sourced from TinyFish)
 **And** parses the alternate-source price
@@ -2007,17 +2007,17 @@ So that FR31 / FR32 are satisfied — the Q9 silent-failure scenario (malformed 
 ### Story 5.5: Implement per-purchase circuit breaker + Phase 2 auto-disable lockout
 
 As ifuensan,
-I want a circuit breaker in `src/hardware_hunter/orchestration/circuit_breaker.py` (with pure domain math in `domain/circuit.py`) that tracks consecutive Phase 2 failures, opens after N failures (default 3, configurable), and writes the global lockout row to `phase2_state` table that survives daemon restarts,
+I want a circuit breaker in `src/salvager/orchestration/circuit_breaker.py` (with pure domain math in `domain/circuit.py`) that tracks consecutive Phase 2 failures, opens after N failures (default 3, configurable), and writes the global lockout row to `phase2_state` table that survives daemon restarts,
 So that FR34 / FR35 / AR13 / NFR-R4 are satisfied — Phase 2 auto-disable is durable and only an explicit operator action can re-enable.
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/domain/circuit.py`
+**Given** `src/salvager/domain/circuit.py`
 **When** I import `CircuitState` and `compute_next_state(current_state, outcome, threshold)`
 **Then** the pure function transitions: `(closed, success) → closed (counter reset)`, `(closed, failure) → closed (counter +1) OR open (when counter+1 >= threshold)`, `(open, *) → open (until manual reset)`
 **And** the module has zero IO imports
 
-**Given** `src/hardware_hunter/orchestration/circuit_breaker.py`
+**Given** `src/salvager/orchestration/circuit_breaker.py`
 **When** I import `CircuitBreaker`
 **Then** the class wraps the pure domain function with persistence: it reads `phase2_state.consecutive_failures` at startup, increments/resets on each Phase 2 outcome, persists state changes immediately via `Phase2AuditWriter.increment_failure_counter()` / `reset_failure_counter()`
 **And** when the counter reaches the threshold, calls `Phase2AuditWriter.set_global_disable(reason="circuit_breaker_open")`
@@ -2041,12 +2041,12 @@ So that FR34 / FR35 / AR13 / NFR-R4 are satisfied — Phase 2 auto-disable is du
 ### Story 5.6: Implement daily synthetic smoke test + regression fixture set
 
 As ifuensan,
-I want `src/hardware_hunter/orchestration/smoke_test.py` to run daily (default 06:00 UTC) against a known-price fixture, compare the parsed price to an independent reference value, and auto-disable Phase 2 globally if drift exceeds tolerance, with a growing fixture set in `tests/fixtures/price_parsers/`,
+I want `src/salvager/orchestration/smoke_test.py` to run daily (default 06:00 UTC) against a known-price fixture, compare the parsed price to an independent reference value, and auto-disable Phase 2 globally if drift exceeds tolerance, with a growing fixture set in `tests/fixtures/price_parsers/`,
 So that FR33 / NFR-M3 are satisfied — the Q9 scenario (marketplace HTML parser drift) is caught BEFORE a real buy attempt.
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/orchestration/smoke_test.py`
+**Given** `src/salvager/orchestration/smoke_test.py`
 **When** I import `run_smoke_test()`
 **Then** the function:
   1. Loads the smoke-test fixtures from `tests/fixtures/price_parsers/active/` (each fixture: a recorded marketplace response + an `expected_price.json` with the independently-verified price)
@@ -2070,7 +2070,7 @@ So that FR33 / NFR-M3 are satisfied — the Q9 scenario (marketplace HTML parser
 **When** the operator encounters a real-world parser surprise (NFR-M3)
 **Then** the documented workflow is: capture the response + verify the price independently → add `tests/fixtures/price_parsers/active/<descriptive-name>.<ext>` + `expected_price.json` → next CI run includes the fixture in smoke + regression suites
 
-**Given** the manual trigger `hardware-hunter phase2 smoke-test` (Story 5.13)
+**Given** the manual trigger `salvager phase2 smoke-test` (Story 5.13)
 **When** I run it on demand
 **Then** `run_smoke_test()` executes and prints a table of per-fixture results (PASS/FAIL/delta) via `render_table`
 **And** the exit code is 0 if all pass, 5 (Phase 2 guardrail) if any fail
@@ -2078,12 +2078,12 @@ So that FR33 / NFR-M3 are satisfied — the Q9 scenario (marketplace HTML parser
 ### Story 5.7: Implement buy orchestrator composing pre-flight + reconcile + UI check + buy + screenshot + audit-write
 
 As ifuensan tapping Comprar,
-I want `src/hardware_hunter/orchestration/buy_orchestrator.py` to compose `Phase2Preflight + Reconciler + BrowserSession + Phase2AuditWriter + TelegramSurface + CircuitBreaker` into the single end-to-end flow: pre-flight → cross-source reconciliation → UI check (delegated to BrowserSession) → execute_buy → capture screenshot → audit-write → receipt-vs-alert reconciliation → final outcome dispatch,
+I want `src/salvager/orchestration/buy_orchestrator.py` to compose `Phase2Preflight + Reconciler + BrowserSession + Phase2AuditWriter + TelegramSurface + CircuitBreaker` into the single end-to-end flow: pre-flight → cross-source reconciliation → UI check (delegated to BrowserSession) → execute_buy → capture screenshot → audit-write → receipt-vs-alert reconciliation → final outcome dispatch,
 So that FR24 / FR25 / FR26 / FR27 / FR28 / FR29 / FR30 are satisfied end-to-end and the buy critical path has ≥ 90% line coverage (NFR-M2).
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/orchestration/buy_orchestrator.py`
+**Given** `src/salvager/orchestration/buy_orchestrator.py`
 **When** I import `BuyOrchestrator`
 **Then** the class constructor accepts `preflight`, `reconciler`, `browser`, `circuit_breaker`, `audit_writer`, `telegram_surface`, `store` dependencies
 **And** the single public method `async def execute_buy_from_callback(callback_event: CallbackEvent) -> BuyOutcome` orchestrates the full flow
@@ -2124,7 +2124,7 @@ So that FR36 / UX-DR9 are satisfied — the receipt is sacred; a transaction wit
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/domain/alert.py`
+**Given** `src/salvager/domain/alert.py`
 **When** I import `render_phase2_buy_success(transaction)`
 **Then** the rendered text matches the locked anatomy:
   - Photo: the captured receipt screenshot (uploaded to Telegram via the bot adapter)
@@ -2132,7 +2132,7 @@ So that FR36 / UX-DR9 are satisfied — the receipt is sacred; a transaction wit
   - Row 2: `Receipt: \`<receipt_id>\``
   - Row 3: `Listing: <entry_display_name>`
   - Row 4: `Tiempo total: <total_seconds> s`
-  - Row 5: `` `hardware-hunter audit show --id <audit_id>` for full event trail. ``
+  - Row 5: `` `salvager audit show --id <audit_id>` for full event trail. ``
 **And** `RenderedAlert.inline_keyboard` is `None` (receipts carry no buttons)
 
 **Given** the orchestrator preparing the success message
@@ -2158,7 +2158,7 @@ So that FR28 / UX-DR10 / UX-DR14 are satisfied — the user can answer "did the 
 
 **Acceptance Criteria:**
 
-**Given** `src/hardware_hunter/domain/alert.py`
+**Given** `src/salvager/domain/alert.py`
 **When** I import `render_phase2_buy_failure(reason, ctx)`
 **Then** the rendered text follows the locked anatomy:
   - Row 1: `🚫 *Compra abortada* · <entry_display_name>`
@@ -2176,7 +2176,7 @@ So that FR28 / UX-DR10 / UX-DR14 are satisfied — the user can answer "did the 
 **Given** `BuyFailureReason.screenshot_missing` (the UX-DR9 special case)
 **When** the renderer runs
 **Then** the message acknowledges that the transaction may have succeeded: "La compra puede haberse completado, pero no se capturó el recibo." instead of the standard reassurance line
-**And** the next-step CLI command is `hardware-hunter audit show --id <transaction_id>` and `hardware-hunter phase2 reconcile <receipt_id>` (when a receipt_id was captured)
+**And** the next-step CLI command is `salvager audit show --id <transaction_id>` and `salvager phase2 reconcile <receipt_id>` (when a receipt_id was captured)
 **And** the property test in Story 5.16 has an explicit exception for this variant
 
 **Given** the renderer for `BuyFailureReason.reconciliation_tripped` with `ctx={"api_price": 53.00, "html_price": 0.53, "tolerance_eur": 1.00}`
@@ -2185,12 +2185,12 @@ So that FR28 / UX-DR10 / UX-DR14 are satisfied — the user can answer "did the 
   - `- Wallapop API: 53,00 €`
   - `- Wallapop HTML: 0,53 €`
   - `- Tolerancia: 1,00 €`
-**And** the final next-step block names `hardware-hunter audit show --last 1` and "Revisa el parser HTML antes de reactivar Fase 2 con `hardware-hunter phase2 enable <entry>`"
+**And** the final next-step block names `salvager audit show --last 1` and "Revisa el parser HTML antes de reactivar Fase 2 con `salvager phase2 enable <entry>`"
 
 **Given** the renderer for `BuyFailureReason.circuit_open`
 **When** the renderer runs
 **Then** the message names the consecutive-failure count and the threshold (e.g., "3 fallos consecutivos · circuito abierto")
-**And** the next-step block names `hardware-hunter audit show --last 5` then `hardware-hunter phase2 enable <entry>`
+**And** the next-step block names `salvager audit show --last 5` then `salvager phase2 enable <entry>`
 
 ### Story 5.10: Implement `🟡 Comprando…` in-flight keyboard edit + Buy callback handler
 
@@ -2250,7 +2250,7 @@ So that FR21 / UX-DR13 are extended to Phase 2 and every Phase 2 lifecycle trans
 **Given** `render_operational_alert` for `EventName.smoke_test_failed`
 **When** the renderer runs
 **Then** the message includes the failing fixture name + parsed value + expected value + delta
-**And** the next-step list names `hardware-hunter phase2 smoke-test` (manual re-trigger) and `hardware-hunter audit show --type phase2_smoke_test --last 3`
+**And** the next-step list names `salvager phase2 smoke-test` (manual re-trigger) and `salvager audit show --type phase2_smoke_test --last 3`
 
 **Given** snapshot tests
 **When** the test renders one fixture per new variant
@@ -2259,12 +2259,12 @@ So that FR21 / UX-DR13 are extended to Phase 2 and every Phase 2 lifecycle trans
 ### Story 5.12: Implement `phase2 enable/disable/status` CLI commands
 
 As ifuensan managing Phase 2 entries,
-I want `hardware-hunter phase2 enable <entry>`, `hardware-hunter phase2 disable <entry|--all>`, and `hardware-hunter phase2 status`,
+I want `salvager phase2 enable <entry>`, `salvager phase2 disable <entry|--all>`, and `salvager phase2 status`,
 So that FR45 / AR12 (wishlist canonical) / UX-DR23 (--all destructive confirm) are satisfied — Phase 2 enable/disable rewrites `wishlist.yaml` via ruamel and respects manual-recovery boundaries.
 
 **Acceptance Criteria:**
 
-**Given** `hardware-hunter phase2 enable WD40EFPX`
+**Given** `salvager phase2 enable WD40EFPX`
 **When** the command runs
 **Then** the command:
   1. Loads `wishlist.yaml` via the ruamel loader (Story 2.3)
@@ -2277,13 +2277,13 @@ So that FR45 / AR12 (wishlist canonical) / UX-DR23 (--all destructive confirm) a
   8. Prints `✓ Phase 2 enabled for WD Red Plus 4TB / WD40EFPX (max: 60,00 €; threshold: high; circuit reset)`
 **And** the exit code is 0
 
-**Given** `hardware-hunter phase2 disable WD40EFPX`
+**Given** `salvager phase2 disable WD40EFPX`
 **When** the command runs
 **Then** the command sets `entry.phase2.enabled = false` in `wishlist.yaml`
 **And** does NOT touch the global lockout state (per-entry disable is independent)
 **And** prints `✓ Phase 2 disabled for WD Red Plus 4TB / WD40EFPX`
 
-**Given** `hardware-hunter phase2 disable --all`
+**Given** `salvager phase2 disable --all`
 **When** the command runs in a TTY
 **Then** the command counts currently-enabled entries (e.g., 5)
 **And** prompts `Type the number 5 to confirm:` per UX-DR23 (typing-a-token, never y/n)
@@ -2291,11 +2291,11 @@ So that FR45 / AR12 (wishlist canonical) / UX-DR23 (--all destructive confirm) a
 **And** if the operator types `5`, all 5 entries are disabled and the global Phase 2 kill-switch is also activated (extra safety) with reason `operator_disable_all`
 **And** the operational event `phase2_disabled` fires
 
-**Given** `hardware-hunter phase2 disable --all` in a non-TTY context
+**Given** `salvager phase2 disable --all` in a non-TTY context
 **When** the command runs
 **Then** the command fails with `error: --all requires an interactive terminal` and exit code 1
 
-**Given** `hardware-hunter phase2 status`
+**Given** `salvager phase2 status`
 **When** the command runs
 **Then** the output uses `render_table` showing columns `Entry`, `Phase 2 Enabled?`, `Max Price`, `Confidence Threshold`, `Last Buy Attempt`, `Outcome`
 **And** a footer line shows global state: `Globally disabled: <yes|no> · Circuit: <closed|open N/M> · Last smoke: <pass|fail at timestamp>`
@@ -2303,25 +2303,25 @@ So that FR45 / AR12 (wishlist canonical) / UX-DR23 (--all destructive confirm) a
 
 **Given** any of the three commands
 **When** the entry-id argument doesn't match any wishlist entry
-**Then** the output is `error: entry '<id>' not found in wishlist.yaml` + `hint: hardware-hunter wishlist list to see valid entry IDs`
+**Then** the output is `error: entry '<id>' not found in wishlist.yaml` + `hint: salvager wishlist list to see valid entry IDs`
 **And** the exit code is 2 (usage error)
 
 ### Story 5.13: Implement `phase2 smoke-test` + `phase2 reconcile` CLI commands
 
 As ifuensan diagnosing Phase 2 issues,
-I want `hardware-hunter phase2 smoke-test` (manual smoke-test trigger) and `hardware-hunter phase2 reconcile <receipt-id>` (re-run reconciliation on a past receipt),
+I want `salvager phase2 smoke-test` (manual smoke-test trigger) and `salvager phase2 reconcile <receipt-id>` (re-run reconciliation on a past receipt),
 So that FR46 is satisfied — I can manually verify safety stack health and audit historical buys.
 
 **Acceptance Criteria:**
 
-**Given** `hardware-hunter phase2 smoke-test`
+**Given** `salvager phase2 smoke-test`
 **When** the command runs
 **Then** `run_smoke_test()` (Story 5.6) is invoked immediately (regardless of the daily schedule)
 **And** the output uses `render_table` showing one row per fixture with columns `Fixture`, `Parsed Price`, `Expected Price`, `Delta`, `Result`
 **And** a footer line shows `Overall: <pass|fail> · Smoke test completed in <N>s`
 **And** if any fixture fails, the exit code is 5 (Phase 2 guardrail) and Phase 2 auto-disable fires per Story 5.6
 
-**Given** `hardware-hunter phase2 reconcile <receipt-id>`
+**Given** `salvager phase2 reconcile <receipt-id>`
 **When** the command runs
 **Then** the command:
   1. Loads the `transactions` row matching `receipt_id` (or matching `audit_id` if the operator passed an audit-id-shaped argument)
@@ -2332,7 +2332,7 @@ So that FR46 is satisfied — I can manually verify safety stack health and audi
 **And** the exit code is 0 if reconciled, 5 if mismatch detected
 **And** `--format json` emits the full `ReconciliationResult` per UX-DR20
 
-**Given** `hardware-hunter phase2 reconcile <unknown-id>`
+**Given** `salvager phase2 reconcile <unknown-id>`
 **When** the receipt ID doesn't exist in `transactions`
 **Then** the output is `error: receipt id <id> not found in audit log`
 **And** the exit code is 1
@@ -2347,7 +2347,7 @@ So that FR25 / NFR-S5 are mechanically enforced — alternate-rail introductions
 
 **Given** `scripts/payment_rail_lint.py`
 **When** the script runs
-**Then** it walks `src/hardware_hunter/adapters/tinyfish_browser/**` files
+**Then** it walks `src/salvager/adapters/tinyfish_browser/**` files
 **And** searches (case-insensitive AST + string match) for any of: `bizum`, `transferencia`, `paypal`, `revolut`, `bank_transfer`, `tarjeta_propia` (a configurable deny-list)
 **And** fails (exit 1) with a precise line-numbered report if any match is found
 
@@ -2375,7 +2375,7 @@ So that NFR-M2 is mechanically enforced and the Phase 2 critical path can never 
 **Acceptance Criteria:**
 
 **Given** the CI workflow extended with a Phase 2 coverage step
-**When** `pytest --cov=src/hardware_hunter/orchestration/buy_orchestrator --cov=src/hardware_hunter/orchestration/reconciler --cov=src/hardware_hunter/orchestration/circuit_breaker --cov=src/hardware_hunter/orchestration/smoke_test --cov=src/hardware_hunter/adapters/sqlite_store/audit_writer --cov-fail-under=90` runs
+**When** `pytest --cov=src/salvager/orchestration/buy_orchestrator --cov=src/salvager/orchestration/reconciler --cov=src/salvager/orchestration/circuit_breaker --cov=src/salvager/orchestration/smoke_test --cov=src/salvager/adapters/sqlite_store/audit_writer --cov-fail-under=90` runs
 **Then** any individual module below 90% line coverage fails the build
 **And** the failure output names the module and its actual coverage
 
@@ -2440,7 +2440,7 @@ So that UX-DR32 / UX-DR33 are satisfied — the bilingual asymmetry + emoji rend
 **And** the `🚫` red and `⚠️` yellow distinction holds in deuteranopia (verified by visual inspection)
 
 **Given** the VoiceOver audit
-**When** I run `hardware-hunter health`, `audit show --last 5`, `phase2 status` on macOS Terminal with VoiceOver
+**When** I run `salvager health`, `audit show --last 5`, `phase2 status` on macOS Terminal with VoiceOver
 **Then** the output reads in logical sequence without box-drawing-character interference (UX-DR23)
 **And** the test report names any line-reading anomalies (and either patches the renderer or documents the limitation in `docs/accessibility.md`)
 
@@ -2457,7 +2457,7 @@ So that UX-DR32 / UX-DR33 are satisfied — the bilingual asymmetry + emoji rend
 ### Story 5.18: v1.0 release — tag, GHCR push, README v1.0 update
 
 As ifuensan completing v1.0,
-I want a final release story that bumps the version to `1.0.0`, runs the full CI gate (including the Phase 2 critical-path coverage threshold from Story 5.15), pushes the `v1.0.0` tag, verifies GHCR publishes `ghcr.io/ifuensan/hardware-hunter:v1.0.0` and `:latest`, updates the README to reflect v1.0 stability,
+I want a final release story that bumps the version to `1.0.0`, runs the full CI gate (including the Phase 2 critical-path coverage threshold from Story 5.15), pushes the `v1.0.0` tag, verifies GHCR publishes `ghcr.io/ifuensan/salvager:v1.0.0` and `:latest`, updates the README to reflect v1.0 stability,
 So that NFR-M4 (semver discipline) is honored, FR51 / AR18 are satisfied at release, and the v1.0 image is the canonical install path.
 
 **Acceptance Criteria:**
@@ -2470,11 +2470,11 @@ So that NFR-M4 (semver discipline) is honored, FR51 / AR18 are satisfied at rele
 **Given** the release workflow on `v1.0.0` tag
 **When** CI runs
 **Then** all gates pass: ruff, ty/mypy, pytest (with all coverage thresholds including the 90% Phase 2 gate from Story 5.15), adapter discipline lint, payment-rail lint, dependency footprint (≤ 30 direct deps)
-**And** the Docker image is built and pushed to `ghcr.io/ifuensan/hardware-hunter:v1.0.0` AND `ghcr.io/ifuensan/hardware-hunter:latest`
+**And** the Docker image is built and pushed to `ghcr.io/ifuensan/salvager:v1.0.0` AND `ghcr.io/ifuensan/salvager:latest`
 **And** the image is publicly pullable without authentication
 
 **Given** a fork user
-**When** they run `docker pull ghcr.io/ifuensan/hardware-hunter:v1.0.0 && docker run --rm ghcr.io/ifuensan/hardware-hunter:v1.0.0 --version`
+**When** they run `docker pull ghcr.io/ifuensan/salvager:v1.0.0 && docker run --rm ghcr.io/ifuensan/salvager:v1.0.0 --version`
 **Then** the output is `1.0.0` and exit code is 0
 
 **Given** the README update
@@ -2483,7 +2483,7 @@ So that NFR-M4 (semver discipline) is honored, FR51 / AR18 are satisfied at rele
 **And** the changelog section is updated with the v1.0.0 release notes (highlighting Phase 2 enabled, safety stack documented, ifuensan's first successful Phase 2 purchase if it occurred during the gate window)
 
 **Given** the v1.0.0 release published
-**When** the operator runs `hardware-hunter version`
+**When** the operator runs `salvager version`
 **Then** the output is `1.0.0 (commit <sha>)`
 
 **Given** the audit log requirements for v1.0

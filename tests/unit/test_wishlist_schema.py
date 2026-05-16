@@ -8,7 +8,7 @@ from decimal import Decimal
 import pytest
 from pydantic import ValidationError
 
-from hardware_hunter.domain.wishlist import (
+from salvager.domain.wishlist import (
     SOFT_ENTRY_CAP,
     Phase2Settings,
     Wishlist,

@@ -20,13 +20,13 @@ from decimal import Decimal
 
 import pytest
 
-from hardware_hunter.domain.alert import (
+from salvager.domain.alert import (
     REASSURANCE_LINE,
     SCREENSHOT_MISSING_REASSURANCE,
     escape_markdown_v2,
     render_phase2_buy_failure,
 )
-from hardware_hunter.domain.errors import BuyFailureReason
+from salvager.domain.errors import BuyFailureReason
 
 _GENERIC_CTX: dict[str, object] = {
     "api_price": Decimal("53.00"),

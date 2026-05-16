@@ -11,14 +11,14 @@ from typing import Any
 import httpx
 import pytest
 
-from hardware_hunter.adapters.wallapop_api import WallapopApiFetcher, load_cookies
-from hardware_hunter.adapters.wallapop_api.cookies import WallapopCookiesError
-from hardware_hunter.domain.errors import (
+from salvager.adapters.wallapop_api import WallapopApiFetcher, load_cookies
+from salvager.adapters.wallapop_api.cookies import WallapopCookiesError
+from salvager.domain.errors import (
     WallapopApiError,
     WallapopSchemaDrift,
     WallapopSessionExpired,
 )
-from hardware_hunter.domain.listing import SearchQuery
+from salvager.domain.listing import SearchQuery
 
 # ─────────────────────────────────────────────────────────────────────────
 # Cookies helper
@@ -336,7 +336,7 @@ def test_fetcher_module_never_disables_tls_verification() -> None:
     src_path = (
         Path(__file__).resolve().parents[2]
         / "src"
-        / "hardware_hunter"
+        / "salvager"
         / "adapters"
         / "wallapop_api"
         / "fetcher.py"

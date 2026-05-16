@@ -1,6 +1,6 @@
 ---
 date: 2026-05-10
-project: hardware-hunter
+project: salvager
 stepsCompleted:
   - step-01-document-discovery
 documentsAssessed:
@@ -9,16 +9,16 @@ documentsAssessed:
   epics: null
   ux: null
 prdInputs:
-  - _bmad-output/planning-artifacts/prfaq-hardware-hunter.md
-  - _bmad-output/planning-artifacts/prfaq-hardware-hunter-distillate.md
-  - hardware-hunter-bmad-prompt.md
+  - _bmad-output/planning-artifacts/prfaq-salvager.md
+  - _bmad-output/planning-artifacts/prfaq-salvager-distillate.md
+  - salvager-bmad-prompt.md
 assessmentScope: prd-only
 ---
 
 # Implementation Readiness Assessment Report
 
 **Date:** 2026-05-10
-**Project:** hardware-hunter
+**Project:** salvager
 
 ## Document Discovery
 
@@ -33,9 +33,9 @@ assessmentScope: prd-only
 
 ### Supporting Inputs (used by PRD authoring, not assessed here)
 
-- `_bmad-output/planning-artifacts/prfaq-hardware-hunter.md` (56 KB) — Working Backwards PRFAQ, 5 stages
-- `_bmad-output/planning-artifacts/prfaq-hardware-hunter-distillate.md` (18 KB) — LLM-optimized distillate
-- `hardware-hunter-bmad-prompt.md` (12 KB) — BMAD session kickoff with stack, architecture phases, YAML schema, legal analysis, open questions
+- `_bmad-output/planning-artifacts/prfaq-salvager.md` (56 KB) — Working Backwards PRFAQ, 5 stages
+- `_bmad-output/planning-artifacts/prfaq-salvager-distillate.md` (18 KB) — LLM-optimized distillate
+- `salvager-bmad-prompt.md` (12 KB) — BMAD session kickoff with stack, architecture phases, YAML schema, legal analysis, open questions
 
 ### Derived Artifacts (not assessed)
 

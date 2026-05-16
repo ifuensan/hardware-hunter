@@ -27,7 +27,7 @@ from typing import Any
 import pytest
 from typer.testing import CliRunner
 
-from hardware_hunter.cli.app import app
+from salvager.cli.app import app
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 EXAMPLE_WISHLIST = REPO_ROOT / "wishlist.example.yaml"

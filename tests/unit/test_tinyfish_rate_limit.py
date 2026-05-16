@@ -11,7 +11,7 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from hardware_hunter.adapters.wallapop_tinyfish.rate_limit import (
+from salvager.adapters.wallapop_tinyfish.rate_limit import (
     SlidingWindowRateLimiter,
 )
 

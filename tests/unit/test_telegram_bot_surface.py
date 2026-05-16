@@ -7,12 +7,12 @@ from typing import Any
 import pytest
 from pydantic import SecretStr
 
-from hardware_hunter.adapters.telegram_bot.surface import (
+from salvager.adapters.telegram_bot.surface import (
     DEFAULT_RETRY_DELAYS,
     TelegramBotSurface,
 )
-from hardware_hunter.domain.alert import InlineButton, RenderedAlert
-from hardware_hunter.domain.errors import (
+from salvager.domain.alert import InlineButton, RenderedAlert
+from salvager.domain.errors import (
     TelegramConfigError,
     TelegramDeliveryFailed,
 )
@@ -365,7 +365,7 @@ def test_no_other_package_imports_telegram() -> None:
     from pathlib import Path
 
     repo_root = Path(__file__).resolve().parents[2]
-    src_dir = repo_root / "src" / "hardware_hunter"
+    src_dir = repo_root / "src" / "salvager"
     for path in src_dir.rglob("*.py"):
         if "telegram_bot" in path.parts:
             continue

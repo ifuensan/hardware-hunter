@@ -16,7 +16,7 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from hardware_hunter.domain.reconciliation import (
+from salvager.domain.reconciliation import (
     ReconciliationResult,
     compute_tolerance,
 )

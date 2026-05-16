@@ -16,11 +16,11 @@ from pathlib import Path
 
 import pytest
 
-from hardware_hunter.domain.alert import EventName, InlineButton, RenderedAlert
-from hardware_hunter.domain.errors import TelegramDeliveryFailed
-from hardware_hunter.interfaces.telegram_surface import CallbackHandler, TelegramSurface
-from hardware_hunter.orchestration.degradation_reporter import DegradationReporter
-from hardware_hunter.orchestration.health_state import HealthState
+from salvager.domain.alert import EventName, InlineButton, RenderedAlert
+from salvager.domain.errors import TelegramDeliveryFailed
+from salvager.interfaces.telegram_surface import CallbackHandler, TelegramSurface
+from salvager.orchestration.degradation_reporter import DegradationReporter
+from salvager.orchestration.health_state import HealthState
 
 _T0 = datetime(2026, 5, 14, 12, 0, 0, tzinfo=UTC)
 
@@ -264,7 +264,7 @@ def test_render_operational_alert_has_a_single_caller() -> None:
     (``render_operational_alert(``) outside the reporter would mean a
     second codepath can dispatch operational alerts, breaking NFR-R3.
     """
-    src_root = Path(__file__).resolve().parents[2] / "src" / "hardware_hunter"
+    src_root = Path(__file__).resolve().parents[2] / "src" / "salvager"
     allowed = {
         src_root / "domain" / "alert.py",  # the definition
         src_root / "orchestration" / "degradation_reporter.py",  # the one caller

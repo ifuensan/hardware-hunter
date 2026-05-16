@@ -24,14 +24,14 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
 
-from hardware_hunter.domain.alert import InlineButton, RenderedAlert
-from hardware_hunter.domain.errors import WallapopSessionExpired
-from hardware_hunter.domain.listing import Listing, SearchQuery
-from hardware_hunter.interfaces.page_fetcher import PageFetcher
-from hardware_hunter.interfaces.telegram_surface import CallbackHandler, TelegramSurface
-from hardware_hunter.orchestration.degradation_reporter import DegradationReporter
-from hardware_hunter.orchestration.health_state import HealthState
-from hardware_hunter.orchestration.wallapop_fallback import WallapopFallbackFetcher
+from salvager.domain.alert import InlineButton, RenderedAlert
+from salvager.domain.errors import WallapopSessionExpired
+from salvager.domain.listing import Listing, SearchQuery
+from salvager.interfaces.page_fetcher import PageFetcher
+from salvager.interfaces.telegram_surface import CallbackHandler, TelegramSurface
+from salvager.orchestration.degradation_reporter import DegradationReporter
+from salvager.orchestration.health_state import HealthState
+from salvager.orchestration.wallapop_fallback import WallapopFallbackFetcher
 
 _T0 = datetime(2026, 5, 14, 12, 0, 0, tzinfo=UTC)
 

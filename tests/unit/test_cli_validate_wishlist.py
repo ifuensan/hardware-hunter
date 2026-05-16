@@ -1,4 +1,4 @@
-"""Tests for ``hardware-hunter validate-wishlist`` — Story 2.4."""
+"""Tests for ``salvager validate-wishlist`` — Story 2.4."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from hardware_hunter.cli.app import app
+from salvager.cli.app import app
 
 # Shared fixture
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -110,7 +110,7 @@ entries:
     assert "forbidden field 'expected_resale_value'" in err
     assert "Red Plus 4TB" in err  # entry name resolved
     assert "(c3) scope contract" in err
-    assert "github.com/ifuensan/hardware-hunter-research" in err
+    assert "github.com/ifuensan/salvager-research" in err
     # Line number from ruamel
     assert ":9:" in err or ":9 " in err or "line 9" in err
 
@@ -188,7 +188,7 @@ def test_missing_file_exits_with_code_1(runner: CliRunner, tmp_path: Path) -> No
     assert result.exit_code == 1
     err = result.stderr
     assert "not found" in err
-    assert "hardware-hunter init" in err
+    assert "salvager init" in err
 
 
 def test_missing_file_json_envelope(runner: CliRunner, tmp_path: Path) -> None:

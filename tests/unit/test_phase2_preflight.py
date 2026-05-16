@@ -11,11 +11,11 @@ from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
-from hardware_hunter.domain.evaluation import ListingEvaluation
-from hardware_hunter.domain.listing import Listing
-from hardware_hunter.domain.phase2_audit import Phase2StateSnapshot
-from hardware_hunter.domain.wishlist import Phase2Settings, WishlistEntry
-from hardware_hunter.orchestration.phase2_preflight import (
+from salvager.domain.evaluation import ListingEvaluation
+from salvager.domain.listing import Listing
+from salvager.domain.phase2_audit import Phase2StateSnapshot
+from salvager.domain.wishlist import Phase2Settings, WishlistEntry
+from salvager.orchestration.phase2_preflight import (
     Phase2EligibilityResult,
     Phase2Preflight,
 )

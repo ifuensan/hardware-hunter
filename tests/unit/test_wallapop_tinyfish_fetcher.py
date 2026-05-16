@@ -24,18 +24,18 @@ from tinyfish import (
     RunStatus,
 )
 
-from hardware_hunter.adapters.wallapop_tinyfish import WallapopTinyfishFetcher
-from hardware_hunter.adapters.wallapop_tinyfish.fetcher import SEARCH_GOAL_TEMPLATE
-from hardware_hunter.adapters.wallapop_tinyfish.rate_limit import (
+from salvager.adapters.wallapop_tinyfish import WallapopTinyfishFetcher
+from salvager.adapters.wallapop_tinyfish.fetcher import SEARCH_GOAL_TEMPLATE
+from salvager.adapters.wallapop_tinyfish.rate_limit import (
     SlidingWindowRateLimiter,
 )
-from hardware_hunter.domain.errors import (
+from salvager.domain.errors import (
     TinyFishAuthFailed,
     TinyFishRateLimited,
     TinyFishUnavailable,
     WallapopSchemaDrift,
 )
-from hardware_hunter.domain.listing import SearchQuery
+from salvager.domain.listing import SearchQuery
 
 
 def _fake_response(status_code: int, json_body: dict[str, Any] | None = None) -> httpx.Response:
@@ -147,7 +147,7 @@ class _RaisingRealClient:
 @pytest.fixture(autouse=True)
 def _block_real_client(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
-        "hardware_hunter.adapters.wallapop_tinyfish.fetcher.AsyncTinyFish",
+        "salvager.adapters.wallapop_tinyfish.fetcher.AsyncTinyFish",
         _RaisingRealClient,
     )
 
@@ -413,7 +413,7 @@ def test_only_tinyfish_adapters_import_tinyfish() -> None:
     import ast
     from pathlib import Path
 
-    src_root = Path(__file__).resolve().parents[2] / "src" / "hardware_hunter"
+    src_root = Path(__file__).resolve().parents[2] / "src" / "salvager"
     allowed_pkgs = (
         src_root / "adapters" / "wallapop_tinyfish",
         src_root / "adapters" / "tinyfish_browser",

@@ -26,23 +26,23 @@ from uuid import UUID
 
 import pytest
 
-from hardware_hunter.adapters.sqlite_store import (
+from salvager.adapters.sqlite_store import (
     MigrationRunner,
     SqliteStore,
     open_connection,
 )
-from hardware_hunter.adapters.sqlite_store.migrations import db_path_under
-from hardware_hunter.domain.alert import InlineButton, RenderedAlert
-from hardware_hunter.domain.evaluation import ListingEvaluation
-from hardware_hunter.domain.listing import Listing, SearchQuery
-from hardware_hunter.domain.wishlist import Wishlist, WishlistEntry
-from hardware_hunter.interfaces.listing_evaluator import ListingEvaluator
-from hardware_hunter.interfaces.page_fetcher import PageFetcher
-from hardware_hunter.interfaces.telegram_surface import (
+from salvager.adapters.sqlite_store.migrations import db_path_under
+from salvager.domain.alert import InlineButton, RenderedAlert
+from salvager.domain.evaluation import ListingEvaluation
+from salvager.domain.listing import Listing, SearchQuery
+from salvager.domain.wishlist import Wishlist, WishlistEntry
+from salvager.interfaces.listing_evaluator import ListingEvaluator
+from salvager.interfaces.page_fetcher import PageFetcher
+from salvager.interfaces.telegram_surface import (
     CallbackHandler,
     TelegramSurface,
 )
-from hardware_hunter.orchestration.poll_loop import run_poll_cycle
+from salvager.orchestration.poll_loop import run_poll_cycle
 
 _T0 = datetime(2026, 5, 13, 12, 0, 0, tzinfo=UTC)
 

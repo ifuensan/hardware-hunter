@@ -5,5 +5,5 @@ Recibo: `WP-2026-0001`
 La compra puede haberse completado, pero no se capturó el recibo\.
 
 Próximo paso:
-1\. `hardware-hunter audit show --id 42`
-2\. `hardware-hunter phase2 reconcile WP-2026-0001`
+1\. `salvager audit show --id 42`
+2\. `salvager phase2 reconcile WP-2026-0001`

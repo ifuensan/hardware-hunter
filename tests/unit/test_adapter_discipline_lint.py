@@ -38,7 +38,7 @@ def test_lint_passes_on_clean_tree() -> None:
 
 def test_lint_fails_on_httpx_import_in_domain(tmp_path: Path) -> None:
     """Synthetic violation: ``import httpx`` inside ``domain/listing.py``."""
-    violating = REPO_ROOT / "src" / "hardware_hunter" / "domain" / "_test_violation.py"
+    violating = REPO_ROOT / "src" / "salvager" / "domain" / "_test_violation.py"
     try:
         violating.write_text("import httpx  # pragma: violation\n", encoding="utf-8")
         result = _run_lint()
@@ -56,7 +56,7 @@ def test_lint_fails_on_httpx_import_in_domain(tmp_path: Path) -> None:
 
 def test_lint_allows_denied_import_inside_adapters(tmp_path: Path) -> None:
     """Same import is allowed inside ``adapters/``."""
-    target_dir = REPO_ROOT / "src" / "hardware_hunter" / "adapters" / "_test_allowed"
+    target_dir = REPO_ROOT / "src" / "salvager" / "adapters" / "_test_allowed"
     target_file = target_dir / "ok.py"
     try:
         target_dir.mkdir(parents=True, exist_ok=True)
@@ -78,7 +78,7 @@ def test_lint_allows_denied_import_inside_adapters(tmp_path: Path) -> None:
 
 def test_lint_detects_from_import() -> None:
     """``from telegram import Bot`` form is also caught."""
-    violating = REPO_ROOT / "src" / "hardware_hunter" / "cli" / "_test_violation.py"
+    violating = REPO_ROOT / "src" / "salvager" / "cli" / "_test_violation.py"
     try:
         violating.write_text("from telegram import Bot\n", encoding="utf-8")
         result = _run_lint()

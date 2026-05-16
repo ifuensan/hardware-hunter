@@ -21,7 +21,7 @@ from typing import Any
 import pytest
 from syrupy.assertion import SnapshotAssertion
 
-from hardware_hunter.domain.alert import (
+from salvager.domain.alert import (
     EventName,
     RenderedAlert,
     Severity,
@@ -203,9 +203,9 @@ def test_wallapop_both_paths_down_carries_ctx_values_and_three_next_steps() -> N
     assert "7 fallos consecutivos" in text
     assert "TinyFishUnavailable" in text
     # The three AC-named next-steps, in order.
-    assert "1\\. `hardware-hunter audit show --last 5`" in text
+    assert "1\\. `salvager audit show --last 5`" in text
     assert "2\\. revisa la conexión o parchea el adaptador si persiste" in text
-    assert "3\\. `docker-compose restart hardware-hunter`" in text
+    assert "3\\. `docker-compose restart salvager`" in text
 
 
 def test_warn_headline_is_bold_info_headline_is_plain() -> None:

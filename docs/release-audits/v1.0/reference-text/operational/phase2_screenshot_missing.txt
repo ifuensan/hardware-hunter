@@ -4,5 +4,5 @@ Recibo: WP\-2026\-0001 · listing: abc123
 Estado: la compra puede haberse completado, pero no se capturó el recibo
 
 Próximo paso:
-1\. `hardware-hunter audit show --last 5`
+1\. `salvager audit show --last 5`
 2\. revisa el marketplace manualmente para confirmar la transacción

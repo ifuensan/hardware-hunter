@@ -14,12 +14,12 @@ from uuid import UUID
 
 import pytest
 
-from hardware_hunter.domain.alert import AlertSnapshot
-from hardware_hunter.domain.evaluation import ListingEvaluation
-from hardware_hunter.domain.listing import Listing, SearchQuery
-from hardware_hunter.domain.phase2_audit import TransactionRecord
-from hardware_hunter.interfaces.page_fetcher import PageFetcher
-from hardware_hunter.orchestration.reconciler import Reconciler
+from salvager.domain.alert import AlertSnapshot
+from salvager.domain.evaluation import ListingEvaluation
+from salvager.domain.listing import Listing, SearchQuery
+from salvager.domain.phase2_audit import TransactionRecord
+from salvager.interfaces.page_fetcher import PageFetcher
+from salvager.orchestration.reconciler import Reconciler
 
 _T0 = datetime(2026, 5, 15, 12, 0, 0, tzinfo=UTC)
 _ENTRY_KEY = ("Western Digital", "WD Red Plus 4TB", "WD40EFPX")

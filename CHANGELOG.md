@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to **hardware-hunter** land here. The format follows
+All notable changes to **salvager** land here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project
 honours [Semantic Versioning](https://semver.org/spec/v2.0.0.html) per
 NFR-M4.
@@ -40,7 +40,7 @@ a sustained period. v0.2.0 is published so the operator can start
 that burn-in window on their own homelab and surface issues that
 synthetic tests cannot reach.
 
-Tag: `v0.2.0` → GHCR `ghcr.io/ifuensan/hardware-hunter:0.2.0`,
+Tag: `v0.2.0` → GHCR `ghcr.io/ifuensan/salvager:0.2.0`,
 `:0.2`, `:latest` (semver auto-tagging from
 `.github/workflows/release.yml`).
 
@@ -83,9 +83,9 @@ pinning to `:0.2.0` exactly are protected from those.
     (`phase2_disabled`, `phase2_re_enabled`,
     `phase2_buy_callback_received`, `phase2_screenshot_missing`,
     `phase2_buy_completion_slow`, `buy_orchestrator_error` — Story 5.11).
-  - `hardware-hunter phase2 enable / disable / status` CLI commands
+  - `salvager phase2 enable / disable / status` CLI commands
     with TTY-gated typing-a-number confirm on `--all` (Story 5.12).
-  - `hardware-hunter phase2 smoke-test` + `phase2 reconcile` CLI
+  - `salvager phase2 smoke-test` + `phase2 reconcile` CLI
     commands for operator-driven safety-stack triage (Story 5.13).
 
 - **Release-blocking CI gates**:
@@ -104,7 +104,7 @@ pinning to `:0.2.0` exactly are protected from those.
     5.16, UX-DR10).
 
 - **Release-audit tooling** (Story 5.17):
-  - `hardware-hunter dev emit-alert <variant>` fires any of the 37
+  - `salvager dev emit-alert <variant>` fires any of the 37
     locked alert variants against the configured Telegram chat
     (--dry-run prints rendered MarkdownV2 to stdout for inspection).
   - `scripts/dump_audit_snapshots.py` writes one reference `.txt`
@@ -120,7 +120,7 @@ pinning to `:0.2.0` exactly are protected from those.
 ### Changed
 
 - `version` in `pyproject.toml` bumped `0.1.0` → `0.2.0`. The
-  `hardware-hunter version` CLI command surfaces the new value alongside
+  `salvager version` CLI command surfaces the new value alongside
   the git short SHA.
 - README status block reframed: the project is now a "Phase 1 + Phase 2
   feature-complete preview, pending production burn-in" rather than a
@@ -165,7 +165,7 @@ pinning to `:0.2.0` exactly are protected from those.
 ## [0.1.0] — 2026-04-XX
 
 Foundation release. Installable skeleton + OSS posture; no marketplace
-polling yet. Published to GHCR as `ghcr.io/ifuensan/hardware-hunter:0.1.0`.
+polling yet. Published to GHCR as `ghcr.io/ifuensan/salvager:0.1.0`.
 
 ### Added
 
@@ -182,12 +182,12 @@ polling yet. Published to GHCR as `ghcr.io/ifuensan/hardware-hunter:0.1.0`.
 - OSS posture documentation (README, CONTRIBUTING, ROADMAP, LICENSE).
 - Structured JSON Lines logging foundation (NFR-O1 / NFR-R5).
 - rich-based CLI rendering helpers + locked theme tokens (UX-DR16).
-- typer CLI skeleton with the `hardware-hunter version` subcommand
+- typer CLI skeleton with the `salvager version` subcommand
   (FR39 / FR48).
 
 ---
 
-[Unreleased]: https://github.com/ifuensan/hardware-hunter/compare/v0.2.0...HEAD
-[1.0.0]: https://github.com/ifuensan/hardware-hunter/releases/tag/v1.0.0
-[0.2.0]: https://github.com/ifuensan/hardware-hunter/releases/tag/v0.2.0
-[0.1.0]: https://github.com/ifuensan/hardware-hunter/releases/tag/v0.1.0
+[Unreleased]: https://github.com/ifuensan/salvager/compare/v0.2.0...HEAD
+[1.0.0]: https://github.com/ifuensan/salvager/releases/tag/v1.0.0
+[0.2.0]: https://github.com/ifuensan/salvager/releases/tag/v0.2.0
+[0.1.0]: https://github.com/ifuensan/salvager/releases/tag/v0.1.0

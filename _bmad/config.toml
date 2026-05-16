@@ -11,7 +11,7 @@
 # ─────────────────────────────────────────────────────────────────
 
 [core]
-project_name = "hardware-hunter"
+project_name = "salvager"
 document_output_language = "English"
 output_folder = "{project-root}/_bmad-output"
 

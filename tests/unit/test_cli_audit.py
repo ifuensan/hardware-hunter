@@ -1,4 +1,4 @@
-"""Tests for ``hardware-hunter audit show`` / ``audit export`` — Story 4.5.
+"""Tests for ``salvager audit show`` / ``audit export`` — Story 4.5.
 
 Fixtures seed a migrated DB with known ``alert_snapshots`` / ``callbacks``
 / ``seen_listings`` rows; the tests assert on the rendered table, the
@@ -15,11 +15,11 @@ from pathlib import Path
 import pytest
 from syrupy.assertion import SnapshotAssertion
 
-from hardware_hunter.adapters.sqlite_store.connection import open_connection
-from hardware_hunter.adapters.sqlite_store.migrations import MigrationRunner, db_path_under
-from hardware_hunter.cli.commands.audit_cmd import run_export, run_show
-from hardware_hunter.domain.evaluation import ListingEvaluation
-from hardware_hunter.domain.listing import Listing
+from salvager.adapters.sqlite_store.connection import open_connection
+from salvager.adapters.sqlite_store.migrations import MigrationRunner, db_path_under
+from salvager.cli.commands.audit_cmd import run_export, run_show
+from salvager.domain.evaluation import ListingEvaluation
+from salvager.domain.listing import Listing
 
 _T0 = datetime(2026, 5, 14, 12, 0, 0, tzinfo=UTC)
 

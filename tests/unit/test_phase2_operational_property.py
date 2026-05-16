@@ -23,7 +23,7 @@ from typing import Any
 
 import pytest
 
-from hardware_hunter.domain.alert import (
+from salvager.domain.alert import (
     EventName,
     Severity,
     escape_markdown_v2,

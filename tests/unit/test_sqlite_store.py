@@ -9,22 +9,22 @@ from uuid import uuid4
 
 import pytest
 
-from hardware_hunter.adapters.sqlite_store import (
+from salvager.adapters.sqlite_store import (
     MigrationRunner,
     SchemaDriftError,
     SqliteStore,
     open_connection,
 )
-from hardware_hunter.adapters.sqlite_store.migrations import db_path_under
-from hardware_hunter.domain.alert import AlertSnapshot
-from hardware_hunter.domain.audit import (
+from salvager.adapters.sqlite_store.migrations import db_path_under
+from salvager.domain.alert import AlertSnapshot
+from salvager.domain.audit import (
     CallbackAudit,
     Phase2GuardrailTripped,
     TapEventAudit,
     TransactionAudit,
 )
-from hardware_hunter.domain.evaluation import ListingEvaluation
-from hardware_hunter.domain.listing import Listing
+from salvager.domain.evaluation import ListingEvaluation
+from salvager.domain.listing import Listing
 
 # ─────────────────────────────────────────────────────────────────────────
 # Fixtures
@@ -88,7 +88,7 @@ def migrated_db(tmp_path: Path) -> Path:
 
 
 def test_connection_enables_wal_mode(tmp_path: Path) -> None:
-    db_path = tmp_path / "hardware_hunter.db"
+    db_path = tmp_path / "salvager.db"
     connection = open_connection(db_path)
     try:
         mode = connection.execute("PRAGMA journal_mode").fetchone()[0]
@@ -98,7 +98,7 @@ def test_connection_enables_wal_mode(tmp_path: Path) -> None:
 
 
 def test_connection_sets_synchronous_normal(tmp_path: Path) -> None:
-    db_path = tmp_path / "hardware_hunter.db"
+    db_path = tmp_path / "salvager.db"
     connection = open_connection(db_path)
     try:
         # synchronous=NORMAL maps to integer 1
@@ -109,7 +109,7 @@ def test_connection_sets_synchronous_normal(tmp_path: Path) -> None:
 
 
 def test_db_path_under_returns_canonical_path(tmp_path: Path) -> None:
-    assert db_path_under(tmp_path) == tmp_path / "hardware_hunter.db"
+    assert db_path_under(tmp_path) == tmp_path / "salvager.db"
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -125,7 +125,7 @@ def test_migration_runner_lists_available_migrations() -> None:
 
 
 def test_migration_runner_starts_at_version_zero(tmp_path: Path) -> None:
-    connection = open_connection(tmp_path / "hardware_hunter.db")
+    connection = open_connection(tmp_path / "salvager.db")
     try:
         assert MigrationRunner().current_version(connection) == 0
     finally:
@@ -133,7 +133,7 @@ def test_migration_runner_starts_at_version_zero(tmp_path: Path) -> None:
 
 
 def test_migration_runner_applies_pending_migrations(tmp_path: Path) -> None:
-    connection = open_connection(tmp_path / "hardware_hunter.db")
+    connection = open_connection(tmp_path / "salvager.db")
     try:
         version = MigrationRunner().run(connection)
         assert version == 2
@@ -143,7 +143,7 @@ def test_migration_runner_applies_pending_migrations(tmp_path: Path) -> None:
 
 
 def test_migration_runner_is_idempotent(tmp_path: Path) -> None:
-    connection = open_connection(tmp_path / "hardware_hunter.db")
+    connection = open_connection(tmp_path / "salvager.db")
     try:
         runner = MigrationRunner()
         first = runner.run(connection)
@@ -192,7 +192,7 @@ def test_migration_runner_creates_audit_indexes(migrated_db: Path) -> None:
 def test_migration_runner_detects_schema_drift(tmp_path: Path) -> None:
     """If the DB is ahead of the binary, raise instead of silently
     re-using a future schema."""
-    db_path = tmp_path / "hardware_hunter.db"
+    db_path = tmp_path / "salvager.db"
     connection = open_connection(db_path)
     try:
         MigrationRunner().run(connection)

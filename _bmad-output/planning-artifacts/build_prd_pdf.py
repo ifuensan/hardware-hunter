@@ -59,7 +59,7 @@ CSS = r"""
   size: A4;
   margin: 18mm 16mm 20mm 16mm;
   @bottom-center {
-    content: "hardware-hunter PRD · " counter(page) " / " counter(pages);
+    content: "salvager PRD · " counter(page) " / " counter(pages);
     font: 9pt 'Inter', 'Helvetica Neue', sans-serif;
     color: #888;
   }
@@ -214,7 +214,7 @@ li strong:first-child { color: #0a0a0a; }
 
 COVER_HTML = """
 <section class="cover">
-  <h1>hardware-hunter</h1>
+  <h1>salvager</h1>
   <div class="subtitle">Product Requirements Document — v1</div>
   <div class="meta">
     <p><strong>Author:</strong> {author}<br>
@@ -224,7 +224,7 @@ COVER_HTML = """
     <strong>Complexity:</strong> high<br>
     <strong>Release mode:</strong> {release_mode}<br>
     <strong>License:</strong> MIT<br>
-    <strong>Repository:</strong> github.com/ifuensan/hardware-hunter</p>
+    <strong>Repository:</strong> github.com/ifuensan/salvager</p>
   </div>
   <div class="scope-banner">
     <strong>(c3) scope contract — do not relitigate.</strong>
@@ -271,7 +271,7 @@ def main() -> int:
     full_html = (
         "<!DOCTYPE html><html lang=\"en\"><head>"
         "<meta charset=\"utf-8\">"
-        "<title>hardware-hunter PRD</title>"
+        "<title>salvager PRD</title>"
         f"<style>{CSS}</style>"
         "</head><body>"
         f"{cover}"

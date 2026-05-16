@@ -9,8 +9,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from hardware_hunter.adapters.sqlite_store import MigrationRunner, open_connection
-from hardware_hunter.adapters.sqlite_store.migrations import db_path_under
+from salvager.adapters.sqlite_store import MigrationRunner, open_connection
+from salvager.adapters.sqlite_store.migrations import db_path_under
 
 _PHASE2_TABLES = ("tap_events", "transactions", "phase2_smoke_tests", "phase2_state")
 

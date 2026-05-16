@@ -12,16 +12,16 @@ import httpx
 import pytest
 from pydantic import SecretStr
 
-from hardware_hunter.adapters.ebay_api.oauth import (
+from salvager.adapters.ebay_api.oauth import (
     DEFAULT_SCOPE,
     build_consent_url,
     exchange_code_for_tokens,
 )
-from hardware_hunter.domain.errors import EbayOAuthExchangeFailed
+from salvager.domain.errors import EbayOAuthExchangeFailed
 
 _APP_ID = SecretStr("APP-1234")
 _CERT_ID = SecretStr("CERT-5678")
-_RU_NAME = "ifuensan-hardware-hunter-RUNAME"
+_RU_NAME = "ifuensan-salvager-RUNAME"
 
 
 # ─────────────────────────────────────────────────────────────────────────

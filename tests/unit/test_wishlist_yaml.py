@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from hardware_hunter.config.wishlist_yaml import (
+from salvager.config.wishlist_yaml import (
     WishlistParseError,
     WishlistScopeError,
     WishlistValidationError,
@@ -195,7 +195,7 @@ entries:
 def test_save_synthesized_wishlist_serializes_from_scratch(tmp_path: Path) -> None:
     """A Wishlist constructed in Python (not via load_wishlist) has no
     preserved doc; save_wishlist falls back to a fresh serialize."""
-    from hardware_hunter.domain.wishlist import Wishlist, WishlistEntry
+    from salvager.domain.wishlist import Wishlist, WishlistEntry
 
     wishlist = Wishlist(
         entries=[

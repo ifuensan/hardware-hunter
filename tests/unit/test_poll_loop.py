@@ -17,24 +17,24 @@ from uuid import UUID
 
 import pytest
 
-from hardware_hunter.domain.alert import AlertSnapshot, InlineButton, RenderedAlert
-from hardware_hunter.domain.audit import CallbackAudit, TapEventAudit, TransactionAudit
-from hardware_hunter.domain.errors import (
+from salvager.domain.alert import AlertSnapshot, InlineButton, RenderedAlert
+from salvager.domain.audit import CallbackAudit, TapEventAudit, TransactionAudit
+from salvager.domain.errors import (
     LlmEvaluationError,
     LlmRateLimited,
     TelegramDeliveryFailed,
 )
-from hardware_hunter.domain.evaluation import ListingEvaluation
-from hardware_hunter.domain.listing import Listing, SearchQuery
-from hardware_hunter.domain.wishlist import Wishlist, WishlistEntry
-from hardware_hunter.interfaces.listing_evaluator import ListingEvaluator
-from hardware_hunter.interfaces.page_fetcher import PageFetcher
-from hardware_hunter.interfaces.store import EntryKey, Store
-from hardware_hunter.interfaces.telegram_surface import (
+from salvager.domain.evaluation import ListingEvaluation
+from salvager.domain.listing import Listing, SearchQuery
+from salvager.domain.wishlist import Wishlist, WishlistEntry
+from salvager.interfaces.listing_evaluator import ListingEvaluator
+from salvager.interfaces.page_fetcher import PageFetcher
+from salvager.interfaces.store import EntryKey, Store
+from salvager.interfaces.telegram_surface import (
     CallbackHandler,
     TelegramSurface,
 )
-from hardware_hunter.orchestration.poll_loop import (
+from salvager.orchestration.poll_loop import (
     PollCycleSummary,
     run_poll_cycle,
 )
@@ -665,8 +665,8 @@ def test_summary_initializes_with_marketplace_only() -> None:
 # ─────────────────────────────────────────────────────────────────────────
 
 
-from hardware_hunter.domain.phase2_audit import Phase2StateSnapshot  # noqa: E402
-from hardware_hunter.orchestration.phase2_preflight import Phase2Preflight  # noqa: E402
+from salvager.domain.phase2_audit import Phase2StateSnapshot  # noqa: E402
+from salvager.orchestration.phase2_preflight import Phase2Preflight  # noqa: E402
 
 
 class _StubStateReader:
@@ -810,7 +810,7 @@ def test_poll_loop_does_not_import_adapters() -> None:
     source_path = (
         Path(__file__).resolve().parents[2]
         / "src"
-        / "hardware_hunter"
+        / "salvager"
         / "orchestration"
         / "poll_loop.py"
     )
@@ -819,10 +819,10 @@ def test_poll_loop_does_not_import_adapters() -> None:
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
-                if alias.name.startswith("hardware_hunter.adapters"):
+                if alias.name.startswith("salvager.adapters"):
                     offenders.append(f"import {alias.name}")
         elif isinstance(node, ast.ImportFrom):
             module = node.module or ""
-            if module.startswith("hardware_hunter.adapters"):
+            if module.startswith("salvager.adapters"):
                 offenders.append(f"from {module} import ...")
     assert not offenders, "poll_loop imported an adapter:\n  " + "\n  ".join(offenders)

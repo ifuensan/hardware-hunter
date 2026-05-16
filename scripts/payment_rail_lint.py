@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Payment-Rail Enforcement Lint — FR25 / NFR-S5 launch-blocker.
 
-Walks ``src/hardware_hunter/adapters/tinyfish_browser/`` and fails the
+Walks ``src/salvager/adapters/tinyfish_browser/`` and fails the
 build if any file *name* or file *content* references a payment rail
 other than Wallapop Pay / eBay.es checkout. The agent must have no
 codepath — not even a dormant one — to use Bizum, transferencia
@@ -30,7 +30,7 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_LINT_ROOT = REPO_ROOT / "src" / "hardware_hunter" / "adapters" / "tinyfish_browser"
+DEFAULT_LINT_ROOT = REPO_ROOT / "src" / "salvager" / "adapters" / "tinyfish_browser"
 
 #: Payment rails the agent must never reach. Configurable — extend here.
 DENY_TERMS: tuple[str, ...] = (

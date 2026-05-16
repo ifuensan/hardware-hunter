@@ -8,9 +8,9 @@
   Estado actual: Fase 2 desactivada por seguridad
   
   Próximo paso:
-  1\. `hardware-hunter audit show --last 5`
-  2\. `hardware-hunter logs --last 100`
-  3\. `hardware-hunter phase2 enable <entry>`
+  1\. `salvager audit show --last 5`
+  2\. `salvager logs --last 100`
+  3\. `salvager phase2 enable <entry>`
   '''
 # ---
 # name: test_operational_alert_matches_snapshot[circuit_open]
@@ -22,9 +22,9 @@
   Estado actual: Fase 2 desactivada globalmente
   
   Próximo paso:
-  1\. `hardware-hunter audit show --last 5`
+  1\. `salvager audit show --last 5`
   2\. revisa la causa y parchea si es un bug
-  3\. `hardware-hunter phase2 enable <entry>`
+  3\. `salvager phase2 enable <entry>`
   '''
 # ---
 # name: test_operational_alert_matches_snapshot[daemon_started]
@@ -57,8 +57,8 @@
   Estado actual: alertas de eBay en pausa \(Wallapop no afectado\)
   
   Próximo paso:
-  1\. `hardware-hunter login ebay --ru-name <tu-runame>`
-  2\. `docker-compose restart hardware-hunter`
+  1\. `salvager login ebay --ru-name <tu-runame>`
+  2\. `docker-compose restart salvager`
   '''
 # ---
 # name: test_operational_alert_matches_snapshot[entry_snoozed]
@@ -104,9 +104,9 @@
   Estado actual: Fase 2 desactivada globalmente
   
   Próximo paso:
-  1\. `hardware-hunter audit show --last 5`
+  1\. `salvager audit show --last 5`
   2\. revisa el motivo y parchea si es un bug
-  3\. `hardware-hunter phase2 enable <entry>`
+  3\. `salvager phase2 enable <entry>`
   '''
 # ---
 # name: test_operational_alert_matches_snapshot[phase2_re_enabled]
@@ -124,7 +124,7 @@
   Estado: la compra puede haberse completado, pero no se capturó el recibo
   
   Próximo paso:
-  1\. `hardware-hunter audit show --last 5`
+  1\. `salvager audit show --last 5`
   2\. revisa el marketplace manualmente para confirmar la transacción
   '''
 # ---
@@ -136,8 +136,8 @@
   Estado actual: el ciclo continuará en el siguiente tick
   
   Próximo paso:
-  1\. `hardware-hunter audit show --last 5`
-  2\. `hardware-hunter logs --last 50`
+  1\. `salvager audit show --last 5`
+  2\. `salvager logs --last 50`
   '''
 # ---
 # name: test_operational_alert_matches_snapshot[smoke_test_failed]
@@ -149,9 +149,9 @@
   Estado actual: Fase 2 desactivada globalmente
   
   Próximo paso:
-  1\. `hardware-hunter phase2 smoke-test`
-  2\. `hardware-hunter audit show --type phase2_smoke_test --last 3`
-  3\. parchea el parser y reactiva con `hardware-hunter phase2 enable <entry>`
+  1\. `salvager phase2 smoke-test`
+  2\. `salvager audit show --type phase2_smoke_test --last 3`
+  3\. parchea el parser y reactiva con `salvager phase2 enable <entry>`
   '''
 # ---
 # name: test_operational_alert_matches_snapshot[smoke_test_recovered]
@@ -192,9 +192,9 @@
   Estado actual: alertas de Wallapop en pausa \(eBay no afectado\)
   
   Próximo paso:
-  1\. `hardware-hunter audit show --last 5`
+  1\. `salvager audit show --last 5`
   2\. revisa la conexión o parchea el adaptador si persiste
-  3\. `docker-compose restart hardware-hunter`
+  3\. `docker-compose restart salvager`
   '''
 # ---
 # name: test_operational_alert_matches_snapshot[wallapop_session_expired]
@@ -204,7 +204,7 @@
   Adapter: wallapop\_api \(devuelve 401\)
   Fallback: wallapop\_tinyfish activo \(sin alertas perdidas\)
   
-  Próximo paso: `hardware-hunter login wallapop` cuando puedas
+  Próximo paso: `salvager login wallapop` cuando puedas
   '''
 # ---
 # name: test_operational_alert_matches_snapshot[wallapop_session_renewed]

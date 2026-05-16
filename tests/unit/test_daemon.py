@@ -13,8 +13,8 @@ from typing import Any
 
 import pytest
 
-from hardware_hunter.interfaces.scheduler import Scheduler, SchedulerTask
-from hardware_hunter.orchestration.daemon import (
+from salvager.interfaces.scheduler import Scheduler, SchedulerTask
+from salvager.orchestration.daemon import (
     DEFAULT_EBAY_CADENCE_MINUTES,
     DEFAULT_WALLAPOP_CADENCE_MINUTES,
     Daemon,

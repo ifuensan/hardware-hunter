@@ -1,4 +1,4 @@
-# hardware-hunter — Roadmap
+# salvager — Roadmap
 
 This document names what's planned, what's deferred post-launch, what's permanently out of scope by design, and the documented wind-down triggers for the project.
 
@@ -45,9 +45,9 @@ The release-gate audit (Story 5.17) was performed against the v0.2.0 candidate a
 
 ## Post-launch (deferred)
 
-**Multi-marketplace expansion.** Additional Spanish marketplaces (Milanuncios, Vibbo) or international (eBay.com, Adevinta network sites). Architecture is marketplace-agnostic; adding a marketplace = a new adapter in `src/hardware_hunter/adapters/<name>/` plus a fixture in `tests/fixtures/`. No commitments on timeline; depends on whether Wallapop + eBay.es cover the wishlist usage adequately. The (c3) scope contract caps v1 at the two named marketplaces deliberately.
+**Multi-marketplace expansion.** Additional Spanish marketplaces (Milanuncios, Vibbo) or international (eBay.com, Adevinta network sites). Architecture is marketplace-agnostic; adding a marketplace = a new adapter in `src/salvager/adapters/<name>/` plus a fixture in `tests/fixtures/`. No commitments on timeline; depends on whether Wallapop + eBay.es cover the wishlist usage adequately. The (c3) scope contract caps v1 at the two named marketplaces deliberately.
 
-**PyPI publication.** Currently the only distribution channel is the GHCR Docker image. A PyPI publication (`pip install hardware-hunter`) is post-launch nice-to-have; depends on demand from forkers running the agent outside Docker (e.g., directly on a homelab host without containers).
+**PyPI publication.** Currently the only distribution channel is the GHCR Docker image. A PyPI publication (`pip install salvager`) is post-launch nice-to-have; depends on demand from forkers running the agent outside Docker (e.g., directly on a homelab host without containers).
 
 **`config.yaml > telegram.locale = en-US` and other locales.** The Telegram surface is Spanish-only at v1 per UX-DR27. Adding English (or other) Telegram strings post-launch requires the locale flag wired through `domain/alert.py` renderers and a parallel string table. Tracked as OQ.
 
@@ -63,16 +63,16 @@ The release-gate audit (Story 5.17) was performed against the v0.2.0 candidate a
 
 ## Future-research repo (separate)
 
-**`hardware-hunter-research`** is the documented home for arbitrage-flavored experimentation. This separate repo will:
+**`salvager-research`** is the documented home for arbitrage-flavored experimentation. This separate repo will:
 
 - Carry the same MIT license + the same adapter discipline.
 - Have a different name + framing (focused on quantitative resale analysis, not on monitoring + buying).
 - Be a separate code base that the user explicitly forks/installs, not a feature flag on the main repo.
-- Not ship at the same time as `hardware-hunter v1`; it's a research repo with no v1 commitment.
+- Not ship at the same time as `salvager v1`; it's a research repo with no v1 commitment.
 
-The fork separation is a structural choice per the (c3) scope contract. `hardware-hunter` the tool will never carry arbitrage features in mainline; if you need that capability, the future-research repo is the path.
+The fork separation is a structural choice per the (c3) scope contract. `salvager` the tool will never carry arbitrage features in mainline; if you need that capability, the future-research repo is the path.
 
-Planned URL: https://github.com/ifuensan/hardware-hunter-research (stub, not yet created).
+Planned URL: https://github.com/ifuensan/salvager-research (stub, not yet created).
 
 ---
 
@@ -103,12 +103,12 @@ This is a single-maintainer project. Two documented triggers wind it down:
 4. Archive the repository on GitHub.
 5. Encourage forks via the MIT license; the future-research repo path remains open separately.
 
-This is documented up-front. Users running hardware-hunter accept that this is a real possibility for any solo-maintained tool that interacts with a marketplace it does not own.
+This is documented up-front. Users running salvager accept that this is a real possibility for any solo-maintained tool that interacts with a marketplace it does not own.
 
 ---
 
 ## C&D-induced sunset
 
-If hardware-hunter receives a credible legal notice (cease-and-desist or similar) from any party, the project will be wound down via the graceful off-ramp procedure above. The repository will be archived; no anti-C&D circumvention will be attempted (per the legal posture in the PRD's §Legal Disclaimer and in the README).
+If salvager receives a credible legal notice (cease-and-desist or similar) from any party, the project will be wound down via the graceful off-ramp procedure above. The repository will be archived; no anti-C&D circumvention will be attempted (per the legal posture in the PRD's §Legal Disclaimer and in the README).
 
-This is a documented possible end state for any tool that interacts with a marketplace it does not own. Operators running hardware-hunter accept this risk.
+This is a documented possible end state for any tool that interacts with a marketplace it does not own. Operators running salvager accept this risk.

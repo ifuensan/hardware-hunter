@@ -37,7 +37,7 @@ def _json_lines(stdout: str) -> list[dict[str, object]]:
 def test_logger_emits_json_with_standard_fields() -> None:
     result = _run(
         """
-        from hardware_hunter.observability.logging import get_logger
+        from salvager.observability.logging import get_logger
         get_logger("test").info("poll_started")
         """
     )
@@ -53,7 +53,7 @@ def test_logger_emits_json_with_standard_fields() -> None:
 def test_logger_warn_alias_not_warning() -> None:
     result = _run(
         """
-        from hardware_hunter.observability.logging import get_logger
+        from salvager.observability.logging import get_logger
         get_logger("test").warning("slow_response")
         """
     )
@@ -65,7 +65,7 @@ def test_logger_warn_alias_not_warning() -> None:
 def test_logger_includes_extras() -> None:
     result = _run(
         """
-        from hardware_hunter.observability.logging import get_logger
+        from salvager.observability.logging import get_logger
         get_logger("test").info(
             "listing_evaluated",
             extra={
@@ -88,12 +88,12 @@ def test_logger_includes_extras() -> None:
 def test_level_filtering_via_env() -> None:
     result = _run(
         """
-        from hardware_hunter.observability.logging import get_logger
+        from salvager.observability.logging import get_logger
         log = get_logger("test")
         log.debug("hidden_event")
         log.warning("visible_event")
         """,
-        env_extra={"HARDWARE_HUNTER_LOG_LEVEL": "warn"},
+        env_extra={"SALVAGER_LOG_LEVEL": "warn"},
     )
     assert result.returncode == 0, result.stderr
     records = _json_lines(result.stdout)
@@ -104,7 +104,7 @@ def test_level_filtering_via_env() -> None:
 def test_configure_log_level_overrides() -> None:
     result = _run(
         """
-        from hardware_hunter.observability.logging import configure_log_level, get_logger
+        from salvager.observability.logging import configure_log_level, get_logger
         log = get_logger("test")
         log.debug("hidden_before")
         configure_log_level("debug")
@@ -120,7 +120,7 @@ def test_configure_log_level_overrides() -> None:
 def test_unhandled_exception_emits_structured_error_and_exits_nonzero() -> None:
     result = _run(
         """
-        from hardware_hunter.observability.logging import get_logger
+        from salvager.observability.logging import get_logger
         get_logger("test")  # configure root + install excepthook
         raise RuntimeError("boom")
         """
@@ -139,7 +139,7 @@ def test_unhandled_exception_emits_structured_error_and_exits_nonzero() -> None:
 def test_keyboard_interrupt_uses_default_excepthook() -> None:
     result = _run(
         """
-        from hardware_hunter.observability.logging import get_logger
+        from salvager.observability.logging import get_logger
         get_logger("test")
         raise KeyboardInterrupt()
         """
@@ -153,7 +153,7 @@ def test_output_is_single_line_per_record() -> None:
     """Pipe-to-jq compatibility: every emitted record is exactly one line of valid JSON."""
     result = _run(
         """
-        from hardware_hunter.observability.logging import get_logger
+        from salvager.observability.logging import get_logger
         log = get_logger("test")
         log.info("first")
         log.info("second", extra={"entry": "wd_red_plus_4tb"})

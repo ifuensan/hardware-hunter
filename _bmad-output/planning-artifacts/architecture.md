@@ -13,9 +13,9 @@ completedAt: 2026-05-10
 lastStep: 8
 inputDocuments:
   - _bmad-output/planning-artifacts/prd.md
-  - _bmad-output/planning-artifacts/prfaq-hardware-hunter.md
-  - _bmad-output/planning-artifacts/prfaq-hardware-hunter-distillate.md
-  - hardware-hunter-bmad-prompt.md
+  - _bmad-output/planning-artifacts/prfaq-salvager.md
+  - _bmad-output/planning-artifacts/prfaq-salvager-distillate.md
+  - salvager-bmad-prompt.md
 documentCounts:
   prd: 1
   prfaq: 2
@@ -24,7 +24,7 @@ documentCounts:
   research: 0
   projectDocs: 0
 workflowType: architecture
-project_name: hardware-hunter
+project_name: salvager
 user_name: ifuensan
 date: 2026-05-10
 ---
@@ -181,8 +181,8 @@ Five of eight OQs do not require architectural changes; the architecture needs t
 
 ```bash
 # 1. Create the project
-uv init --package hardware-hunter --python 3.12
-cd hardware-hunter
+uv init --package salvager --python 3.12
+cd salvager
 
 # 2. Add runtime dependencies
 uv add typer pydantic 'pydantic-settings' pyyaml httpx
@@ -211,7 +211,7 @@ uv run pytest -q
 The layout encodes the adapter discipline launch blocker:
 
 ```text
-hardware-hunter/
+salvager/
 ├── pyproject.toml                  # uv-managed; pins runtime + dev deps
 ├── uv.lock                         # committed
 ├── Dockerfile                      # python:3.12-slim base
@@ -224,9 +224,9 @@ hardware-hunter/
 ├── ROADMAP.md                      # multi-marketplace, arbitrage-as-separate-repo, C&D-induced sunset
 ├── LICENSE                         # MIT
 │
-├── src/hardware_hunter/
+├── src/salvager/
 │   ├── __init__.py
-│   ├── __main__.py                 # `python -m hardware_hunter` entry
+│   ├── __main__.py                 # `python -m salvager` entry
 │   │
 │   ├── cli/                        # typer subcommands (FR39–FR48)
 │   │   ├── __init__.py
@@ -339,12 +339,12 @@ hardware-hunter/
 
 **Development Experience.**
 
-- `uv run hardware-hunter <subcommand>` runs the CLI without installs.
+- `uv run salvager <subcommand>` runs the CLI without installs.
 - `uv run pytest -q` for tests; `uv run ruff check .` and `uv run ty .` for quality gates.
 - `uv sync` is the contributor-onboarding command; no separate virtualenv setup.
-- `docker-compose up -d` for the daemon mode; `docker-compose run hardware-hunter <subcommand>` available but the supported operator path is host-installed `hardware-hunter` calling into the running container.
+- `docker-compose up -d` for the daemon mode; `docker-compose run salvager <subcommand>` available but the supported operator path is host-installed `salvager` calling into the running container.
 
-**Note.** Project initialization using `uv init --package hardware-hunter --python 3.12` plus the dependency-add commands above should be the **first implementation story** in Phase 1. The directory layout above is itself part of that story, since the adapter discipline boundary cannot be added retroactively without rework.
+**Note.** Project initialization using `uv init --package salvager --python 3.12` plus the dependency-add commands above should be the **first implementation story** in Phase 1. The directory layout above is itself part of that story, since the adapter discipline boundary cannot be added retroactively without rework.
 
 ## Core Architectural Decisions
 
@@ -370,7 +370,7 @@ This section is the authoritative decision register. Each decision links to its 
 
 **Deferred decisions (post-MVP):**
 
-- PyPI publication of the `hardware-hunter` package (post-launch nice-to-have; container image is the v1 distribution channel)
+- PyPI publication of the `salvager` package (post-launch nice-to-have; container image is the v1 distribution channel)
 - agentskills.io publication for Hermes ecosystem visibility (OQ8 from PRD; community-distribution decision tied to v1 outcomes)
 - Grafana / external observability integration (none at v1; logs are docker-compose-captured)
 - LLM provider switch automation — provider is config-driven (`config.yaml > llm.provider`) but no auto-switch on rate-limit; out of scope for v1
@@ -381,12 +381,12 @@ This section is the authoritative decision register. Each decision links to its 
 | Decision | Choice | Rationale | Driving FRs/NFRs |
 |---|---|---|---|
 | **Persistence engine** | SQLite (file-based) | Local-only data plane mandate (NFR-PR3, NFR-S7); single-user; no remote sync to manage | NFR-PR1–PR5, NFR-S7, FR36 |
-| **DB layout** | Single `hardware_hunter.db` file with multiple logical tables | Single backup target; no cross-DB joins; WAL mode allows daemon-write + CLI-read concurrency | FR4, FR10, FR36, NFR-R5 |
+| **DB layout** | Single `salvager.db` file with multiple logical tables | Single backup target; no cross-DB joins; WAL mode allows daemon-write + CLI-read concurrency | FR4, FR10, FR36, NFR-R5 |
 | **WAL mode** | Enabled at first connect (`PRAGMA journal_mode=WAL`) | Concurrent CLI reads while daemon writes; consistent state across crash/restart (NFR-R5) | NFR-R5 |
 | **Tables (initial schema)** | `wishlist_runtime_state`, `seen_listings`, `alert_snapshots`, `tap_events`, `transactions`, `phase2_smoke_tests`, `_meta` | One table per concern; foreign keys via `(manufacturer, model, ref)` entry key (FR4) | FR4, FR10, FR36, FR33 |
 | **Append-only enforcement** | Application layer; `Store` interface exposes only `record_*` writers for `alert_snapshots`/`tap_events`/`transactions`; no `update_*`/`delete_*` methods exist on these tables | NFR-S4 cannot be enforced at SQLite layer alone; must be by interface design | NFR-S4 |
-| **Migrations** | Hand-rolled, `_meta.schema_version` row + numbered `.sql` files in `src/hardware_hunter/migrations/`, applied at daemon startup; CLI `validate-config` flags drift | Alembic overkill for ~7 tables; keeps deps small (NFR-M5); single-user means no rolling-deploy concern | NFR-M5 |
-| **Cache strategy (LLM evals)** | Hermes Agent's built-in SQLite memory + FTS5 hosts the per-URL evaluation cache; not in `hardware_hunter.db` | Reuses existing Hermes infrastructure; FTS5 on the prompt+response is useful for `explain` debugging; keeps stack-swap clean (replace Hermes → replace cache) | FR16, NFR-C3 |
+| **Migrations** | Hand-rolled, `_meta.schema_version` row + numbered `.sql` files in `src/salvager/migrations/`, applied at daemon startup; CLI `validate-config` flags drift | Alembic overkill for ~7 tables; keeps deps small (NFR-M5); single-user means no rolling-deploy concern | NFR-M5 |
+| **Cache strategy (LLM evals)** | Hermes Agent's built-in SQLite memory + FTS5 hosts the per-URL evaluation cache; not in `salvager.db` | Reuses existing Hermes infrastructure; FTS5 on the prompt+response is useful for `explain` debugging; keeps stack-swap clean (replace Hermes → replace cache) | FR16, NFR-C3 |
 | **TTL on cache** | 24 h default; shorter (1 h) for low-confidence results; configurable via `config.yaml > llm.cache_ttl` | Balances freshness vs cost; NFR-C3 hit-rate target ≥ 60% | FR16, NFR-C3 |
 | **File-based state** | Cookie file (Wallapop), OAuth token file (eBay), `wishlist.yaml`, `config.yaml`, `.env` — all live in `data_dir` / `config_dir` mounted into the container | Mode 0600 enforced at startup (NFR-S2); user backs up via existing homelab backup story | NFR-S2, FR41–42 |
 
@@ -427,7 +427,7 @@ No third-party API surface. Internal communication patterns:
 **N/A by design.** No browser-facing UI, no mobile app. The user surface is:
 
 - **Telegram bot** — listing alerts (with inline buttons), operational alerts (plain text). Format is fixed for v1 per FR22.
-- **CLI** — `hardware-hunter <subcommand>`. Plain text + ANSI colors when stdout is a TTY; `--format json` for scripting.
+- **CLI** — `salvager <subcommand>`. Plain text + ANSI colors when stdout is a TTY; `--format json` for scripting.
 
 No frontend decisions. No state management library, no routing strategy, no bundle optimization.
 
@@ -438,12 +438,12 @@ No frontend decisions. No state management library, no routing strategy, no bund
 | **Hosting (primary)** | Owned HPE DL160 Gen10, Valencia colo | PRD; €0/month operational cost | NFR-C1 |
 | **Hosting (fallback)** | Small VPS (~€3–5/month), provider-agnostic | Documented for OSS forkers and as walk-away resilience | NFR-C1, FR54 |
 | **Packaging** | Single `Dockerfile` (base `python:3.12-slim`) building a single-service `docker-compose.yml` that mounts `./data` (SQLite, audit log, cookies) and `./config` (wishlist.yaml, config.yaml, .env) | FR51; minimal-deployment story | FR51, NFR-P5 |
-| **Image distribution** | **GitHub Container Registry (`ghcr.io/ifuensan/hardware-hunter`)**, semver-tagged (`v0.1.0`, `v0.2.0`, …, `v1.0.0`). PyPI publication deferred post-launch. | Free for public repos; native auth via GitHub; matches the (c3) single-deployment-shape posture | NFR-M4, FR51 |
+| **Image distribution** | **GitHub Container Registry (`ghcr.io/ifuensan/salvager`)**, semver-tagged (`v0.1.0`, `v0.2.0`, …, `v1.0.0`). PyPI publication deferred post-launch. | Free for public repos; native auth via GitHub; matches the (c3) single-deployment-shape posture | NFR-M4, FR51 |
 | **CI/CD** | GitHub Actions on every PR + tag. Gates: `ruff check`, `ty` (with `mypy` fallback), `pytest --cov` with coverage thresholds (≥ 90% on Phase 2 critical path), `python scripts/adapter_discipline_lint.py`, daemon smoke test (synthetic SKU end-to-end with all adapters mocked). On tag push: build + push GHCR image. | Free tier sufficient for solo project; integrates with personal GitHub | NFR-M1, NFR-M2 |
-| **Adapter-discipline lint** | **Custom AST-based script** at `scripts/adapter_discipline_lint.py`. Walks every `.py` file; for files outside `src/hardware_hunter/adapters/**`, fails the build on any `import` or `from … import` of a configured deny-list (`hermes_agent`, `tinyfish_*`, `google.genai`, `openai`, `anthropic`, `telegram`, `httpx` for marketplace endpoints, Wallapop/eBay SDK names). Zero external dep; ~50 lines. | Lock the launch-blocker NFR with code we own; no third-party tool drift | NFR-M1 |
+| **Adapter-discipline lint** | **Custom AST-based script** at `scripts/adapter_discipline_lint.py`. Walks every `.py` file; for files outside `src/salvager/adapters/**`, fails the build on any `import` or `from … import` of a configured deny-list (`hermes_agent`, `tinyfish_*`, `google.genai`, `openai`, `anthropic`, `telegram`, `httpx` for marketplace endpoints, Wallapop/eBay SDK names). Zero external dep; ~50 lines. | Lock the launch-blocker NFR with code we own; no third-party tool drift | NFR-M1 |
 | **Restart policy** | `docker-compose.yml: restart: on-failure` with default backoff; `stop_grace_period: 30s` to match FR50 SIGTERM drain budget | NFR-R5 enforcement | NFR-R5, FR50 |
 | **Backups** | **Out of project scope.** README documents that `data_dir/` (SQLite stores, cookies, OAuth tokens) and `config_dir/` (wishlist.yaml, config.yaml, .env) are the user's responsibility to back up alongside their existing homelab backup story. | (c3) personal-use; no opinion-imposing on the user's existing infrastructure | (c3), FR54 |
-| **Monitoring** | None external at v1. `health` CLI command + structured JSON logs are the operator's window. Optional: a cron-driven external script can shell `hardware-hunter health --format json` and Telegram-ping if anything goes red. | NFR-O5 (no remote logging); NFR-O2 (health command) | NFR-O2, NFR-O5 |
+| **Monitoring** | None external at v1. `health` CLI command + structured JSON logs are the operator's window. Optional: a cron-driven external script can shell `salvager health --format json` and Telegram-ping if anything goes red. | NFR-O5 (no remote logging); NFR-O2 (health command) | NFR-O2, NFR-O5 |
 | **Secret management** | `.env` with mode 0600 in the user's `config_dir/`. No secrets manager (Vault, SOPS, etc.) at v1. | (c3) single-user; secrets manager is overkill | NFR-S1 |
 | **Versioning policy** | Semver. `0.x` until first Phase 2 purchase by ifuensan. `1.0.0` released after: (a) Phase 1 stable for 4–8 weeks, AND (b) at least one successful Phase 2 purchase has been completed end-to-end. | NFR-M4; matches the customer-FAQ Phase 2 trust window | NFR-M4 |
 
@@ -514,7 +514,7 @@ This section locks 11 pattern categories where independent contributors (human o
 **Logging `event` taxonomy:**
 
 - Format: `<subsystem>.<verb>` (e.g., `poll.start`, `poll.complete`, `fetch.success`, `fetch.fallback`, `evaluate.cache_hit`, `evaluate.llm_call`, `alert.sent`, `alert.delivery_failed`, `phase2.buy_started`, `phase2.reconcile_passed`, `phase2.reconcile_tripped`, `phase2.smoke_passed`, `phase2.smoke_drift`, `phase2.auto_disabled`, `phase2.purchase_completed`, `phase2.circuit_opened`, `auth.session_expired`, `daemon.startup`, `daemon.shutdown`).
-- The complete enumerated set lives in `src/hardware_hunter/observability/events.py` as a `StrEnum`. Adding a new event requires adding it to the enum first; no free-form `event=` strings in code.
+- The complete enumerated set lives in `src/salvager/observability/events.py` as a `StrEnum`. Adding a new event requires adding it to the enum first; no free-form `event=` strings in code.
 - Subsystems: `poll`, `fetch`, `evaluate`, `alert`, `phase2`, `auth`, `daemon`, `audit`, `health`, `cli`.
 
 ### Structure Patterns
@@ -522,11 +522,11 @@ This section locks 11 pattern categories where independent contributors (human o
 **Project organization:** locked in step 3. Repeating only the load-bearing rules:
 
 - Tests live in `tests/` as a sibling of `src/`. Never co-located `*_test.py` next to source modules.
-- Test files mirror source structure: `src/hardware_hunter/orchestration/buy_orchestrator.py` ↔ `tests/unit/orchestration/test_buy_orchestrator.py`. Use `conftest.py` per directory for shared fixtures.
+- Test files mirror source structure: `src/salvager/orchestration/buy_orchestrator.py` ↔ `tests/unit/orchestration/test_buy_orchestrator.py`. Use `conftest.py` per directory for shared fixtures.
 - Recorded marketplace fixtures live in `tests/fixtures/<marketplace>/<scenario>.json` (or `.html` for Wallapop HTML responses). One fixture file per scenario; never inlined into test code.
-- Domain code (`src/hardware_hunter/domain/`) imports only stdlib + pydantic. **Imports are checked by `scripts/adapter_discipline_lint.py`.**
-- Adapter code (`src/hardware_hunter/adapters/<package>/`) is the **only** location that imports marketplace SDKs / Hermes / TinyFish / google-genai / python-telegram-bot. Same lint enforces this.
-- Orchestration code (`src/hardware_hunter/orchestration/`) imports `interfaces/` only — never adapters directly.
+- Domain code (`src/salvager/domain/`) imports only stdlib + pydantic. **Imports are checked by `scripts/adapter_discipline_lint.py`.**
+- Adapter code (`src/salvager/adapters/<package>/`) is the **only** location that imports marketplace SDKs / Hermes / TinyFish / google-genai / python-telegram-bot. Same lint enforces this.
+- Orchestration code (`src/salvager/orchestration/`) imports `interfaces/` only — never adapters directly.
 
 **Module-level layout (within a single .py file):**
 
@@ -726,32 +726,32 @@ This section locks 11 pattern categories where independent contributors (human o
 **Good — adapter-disciplined module:**
 
 ```python
-# src/hardware_hunter/orchestration/poll_loop.py
+# src/salvager/orchestration/poll_loop.py
 from __future__ import annotations
 
 import asyncio
 import datetime as dt
 
-from hardware_hunter.domain.alert import AlertSnapshot, render_listing_alert
-from hardware_hunter.domain.errors import AdapterError
-from hardware_hunter.interfaces import (
+from salvager.domain.alert import AlertSnapshot, render_listing_alert
+from salvager.domain.errors import AdapterError
+from salvager.interfaces import (
     ListingEvaluator,
     PageFetcher,
     Scheduler,
     Store,
     TelegramSurface,
 )
-from hardware_hunter.observability.events import EventName
-from hardware_hunter.observability.logging import log
+from salvager.observability.events import EventName
+from salvager.observability.logging import log
 
-# Note: no imports from hardware_hunter.adapters here — passes adapter discipline lint.
+# Note: no imports from salvager.adapters here — passes adapter discipline lint.
 ```
 
 **Anti-pattern — adapter discipline violation:**
 
 ```python
-# src/hardware_hunter/orchestration/poll_loop.py
-from hardware_hunter.adapters.wallapop_api import WallapopAPIClient   # ❌ direct adapter import
+# src/salvager/orchestration/poll_loop.py
+from salvager.adapters.wallapop_api import WallapopAPIClient   # ❌ direct adapter import
 import google.generativeai as genai                                    # ❌ external SDK in business logic
 ```
 
@@ -794,7 +794,7 @@ except Exception:
 ### Complete Project Directory Structure (authoritative)
 
 ```text
-hardware-hunter/
+salvager/
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml                                    # PR + push: ruff, ty/mypy, pytest+cov, adapter-discipline lint, daemon smoke test
@@ -802,7 +802,7 @@ hardware-hunter/
 ├── .gitignore                                        # /.env, /wishlist.yaml, /config.yaml, /data/, /.venv/, .ruff_cache/, .pytest_cache/, .ty_cache/, __pycache__/
 ├── pyproject.toml                                    # uv-managed; deps + ruff + ty + pytest + coverage thresholds
 ├── uv.lock                                           # committed
-├── Dockerfile                                        # python:3.12-slim base; multi-stage; entrypoint = `hardware-hunter`
+├── Dockerfile                                        # python:3.12-slim base; multi-stage; entrypoint = `salvager`
 ├── docker-compose.yml                                # single service; mounts ./data and ./config; restart: on-failure; stop_grace_period: 30s
 ├── .env.example                                      # tracked
 ├── wishlist.example.yaml                             # tracked; example HDD + RAM entries
@@ -812,9 +812,9 @@ hardware-hunter/
 ├── ROADMAP.md                                        # multi-marketplace, arbitrage-as-separate-repo, C&D-induced sunset (FR53)
 ├── LICENSE                                           # MIT (FR54)
 │
-├── src/hardware_hunter/
+├── src/salvager/
 │   ├── __init__.py
-│   ├── __main__.py                                   # `python -m hardware_hunter` entry; calls cli.app:main
+│   ├── __main__.py                                   # `python -m salvager` entry; calls cli.app:main
 │   │
 │   ├── cli/                                          # FR39–FR48
 │   │   ├── __init__.py
@@ -1174,14 +1174,14 @@ hardware-hunter/
 
 ```yaml
 services:
-  hardware-hunter:
-    image: ghcr.io/ifuensan/hardware-hunter:${HARDWARE_HUNTER_VERSION:-latest}
+  salvager:
+    image: ghcr.io/ifuensan/salvager:${SALVAGER_VERSION:-latest}
     volumes:
       - ./config:/config:ro
       - ./data:/data
     environment:
-      HARDWARE_HUNTER_CONFIG_DIR: /config
-      HARDWARE_HUNTER_DATA_DIR: /data
+      SALVAGER_CONFIG_DIR: /config
+      SALVAGER_DATA_DIR: /data
     restart: on-failure
     stop_grace_period: 30s
 ```
@@ -1207,8 +1207,8 @@ services:
 
 **Development server structure:**
 
-- `uv run hardware-hunter <subcommand>` for CLI work — no install needed.
-- `uv run hardware-hunter daemon` to run the agent locally (uses local `./config` and `./data` directories, NOT the docker mounts).
+- `uv run salvager <subcommand>` for CLI work — no install needed.
+- `uv run salvager daemon` to run the agent locally (uses local `./config` and `./data` directories, NOT the docker mounts).
 - `uv run pytest -q` for tests.
 - Live-coding loop: edit a file under `src/`, re-run targeted tests via `uv run pytest tests/unit/<area>/`.
 
@@ -1231,13 +1231,13 @@ services:
 
 All files listed above EXCEPT:
 
-- `src/hardware_hunter/orchestration/buy_orchestrator.py`
-- `src/hardware_hunter/orchestration/reconciler.py`
-- `src/hardware_hunter/orchestration/circuit_breaker.py`
-- `src/hardware_hunter/orchestration/smoke_test.py`
-- `src/hardware_hunter/adapters/tinyfish_browser/`
-- `src/hardware_hunter/adapters/sqlite_store/audit_writer.py` (write side; tap_events + transactions tables)
-- `src/hardware_hunter/cli/phase2_cmd.py` (the `enable/disable/status/smoke-test/reconcile` subcommands)
+- `src/salvager/orchestration/buy_orchestrator.py`
+- `src/salvager/orchestration/reconciler.py`
+- `src/salvager/orchestration/circuit_breaker.py`
+- `src/salvager/orchestration/smoke_test.py`
+- `src/salvager/adapters/tinyfish_browser/`
+- `src/salvager/adapters/sqlite_store/audit_writer.py` (write side; tap_events + transactions tables)
+- `src/salvager/cli/phase2_cmd.py` (the `enable/disable/status/smoke-test/reconcile` subcommands)
 
 These are present at v0.x as **stubs that raise `Phase2GuardrailTripped("Phase 2 not yet enabled in this build")`** so the `phase2 status` subcommand returns sensibly without code paths half-existing. Stubs are removed and full implementations land at the v0.x → v1.0 boundary (Phase 1 stabilization gate).
 
@@ -1412,8 +1412,8 @@ The PRD itself is unusually detailed (54 FRs, 30+ NFRs, 8 OQs with defaults, nam
 **First Implementation Priority:**
 
 ```bash
-uv init --package hardware-hunter --python 3.12
-cd hardware-hunter
+uv init --package salvager --python 3.12
+cd salvager
 uv add typer pydantic pydantic-settings pyyaml ruamel.yaml httpx hermes-agent python-telegram-bot google-genai
 uv add --dev pytest pytest-cov pytest-asyncio syrupy ruff ty
 uv lock

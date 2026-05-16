@@ -2,4 +2,4 @@
 Receipt: `WP-2026-0001`
 Listing: WD\_Red\+Plus \*4TB\* \(ref\!\)
 Tiempo total: 42 s
-`hardware-hunter audit show --id 7` para el registro completo de eventos\.
+`salvager audit show --id 7` para el registro completo de eventos\.

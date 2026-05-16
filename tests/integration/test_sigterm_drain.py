@@ -21,8 +21,8 @@ import json
 import time
 from typing import Any
 
-from hardware_hunter.adapters.asyncio_scheduler.scheduler import AsyncioScheduler
-from hardware_hunter.orchestration.daemon import Daemon
+from salvager.adapters.asyncio_scheduler.scheduler import AsyncioScheduler
+from salvager.orchestration.daemon import Daemon
 
 _FR50_BUDGET_S = 30.0
 

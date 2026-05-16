@@ -22,15 +22,15 @@ from uuid import UUID
 import pytest
 from syrupy.assertion import SnapshotAssertion
 
-from hardware_hunter.domain.alert import (
+from salvager.domain.alert import (
     REASSURANCE_LINE,
     SCREENSHOT_MISSING_REASSURANCE,
     escape_markdown_v2,
     render_phase2_buy_failure,
     render_phase2_buy_success,
 )
-from hardware_hunter.domain.errors import BuyFailureReason
-from hardware_hunter.domain.phase2_audit import TransactionRecord
+from salvager.domain.errors import BuyFailureReason
+from salvager.domain.phase2_audit import TransactionRecord
 
 _FIXED_ALERT_ID = UUID("12345678-1234-1234-1234-123456789abc")
 _FIXED_TS = datetime(2026, 5, 15, 12, 0, 0, tzinfo=UTC)

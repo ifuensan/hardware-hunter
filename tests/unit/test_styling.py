@@ -9,7 +9,7 @@ import pytest
 from rich.console import Console
 from syrupy.assertion import SnapshotAssertion
 
-from hardware_hunter.observability.styling import (
+from salvager.observability.styling import (
     THEME,
     ColumnSpec,
     render_prose,
@@ -91,7 +91,7 @@ def test_progress_and_status_not_imported() -> None:
     import ast
     import inspect
 
-    from hardware_hunter.observability import styling
+    from salvager.observability import styling
 
     tree = ast.parse(inspect.getsource(styling))
     forbidden_modules = {"rich.progress", "rich.status"}

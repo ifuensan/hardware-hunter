@@ -36,13 +36,13 @@ from tinyfish import (
     SDKError,
 )
 
-from hardware_hunter.adapters.tinyfish_browser import (
+from salvager.adapters.tinyfish_browser import (
     EbayCheckoutFlow,
     WallapopPayFlow,
 )
-from hardware_hunter.domain.errors import BuyFailureReason
-from hardware_hunter.domain.listing import Listing
-from hardware_hunter.interfaces.browser_session import (
+from salvager.domain.errors import BuyFailureReason
+from salvager.domain.listing import Listing
+from salvager.interfaces.browser_session import (
     BuyFailure,
     BuySuccess,
 )
@@ -151,7 +151,7 @@ class _RaisingRealClient:
 @pytest.fixture(autouse=True)
 def _block_real_client(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
-        "hardware_hunter.adapters.tinyfish_browser._runtime.AsyncTinyFish",
+        "salvager.adapters.tinyfish_browser._runtime.AsyncTinyFish",
         _RaisingRealClient,
     )
 

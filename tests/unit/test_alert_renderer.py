@@ -8,7 +8,7 @@ from uuid import UUID
 
 import pytest
 
-from hardware_hunter.domain.alert import (
+from salvager.domain.alert import (
     BUTTON_LABELS,
     CALLBACK_DATA_FORMAT,
     SEVERITY_TOKENS,
@@ -16,8 +16,8 @@ from hardware_hunter.domain.alert import (
     escape_markdown_v2,
     render_phase1_listing_alert,
 )
-from hardware_hunter.domain.evaluation import ListingEvaluation
-from hardware_hunter.domain.listing import Listing
+from salvager.domain.evaluation import ListingEvaluation
+from salvager.domain.listing import Listing
 
 # A stable UUID + datetime so snapshot tests are deterministic.
 FIXED_ALERT_ID = UUID("12345678-1234-1234-1234-123456789abc")

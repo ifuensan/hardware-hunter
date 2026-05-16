@@ -7,5 +7,5 @@ Causa: Reconciliación de precios falló
 La compra NO se ha ejecutado\.
 
 Próximo paso:
-1\. `hardware-hunter audit show --last 1`
-2\. Revisa el parser HTML antes de reactivar Fase 2 con `hardware-hunter phase2 enable <entry>`
+1\. `salvager audit show --last 1`
+2\. Revisa el parser HTML antes de reactivar Fase 2 con `salvager phase2 enable <entry>`

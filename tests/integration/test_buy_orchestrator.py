@@ -28,38 +28,38 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from hardware_hunter.adapters.sqlite_store import (
+from salvager.adapters.sqlite_store import (
     MigrationRunner,
     Phase2AuditWriter,
     open_connection,
 )
-from hardware_hunter.adapters.sqlite_store.migrations import db_path_under
-from hardware_hunter.domain.alert import (
+from salvager.adapters.sqlite_store.migrations import db_path_under
+from salvager.domain.alert import (
     AlertSnapshot,
     CallbackEvent,
     EventName,
     RenderedAlert,
 )
-from hardware_hunter.domain.errors import BuyFailureReason
-from hardware_hunter.domain.evaluation import ListingEvaluation
-from hardware_hunter.domain.listing import Listing
-from hardware_hunter.domain.phase2_audit import Phase2StateSnapshot
-from hardware_hunter.domain.wishlist import (
+from salvager.domain.errors import BuyFailureReason
+from salvager.domain.evaluation import ListingEvaluation
+from salvager.domain.listing import Listing
+from salvager.domain.phase2_audit import Phase2StateSnapshot
+from salvager.domain.wishlist import (
     Phase2Settings,
     WishlistEntry,
 )
-from hardware_hunter.interfaces.browser_session import BuyFailure, BuySuccess
-from hardware_hunter.interfaces.telegram_surface import TelegramSurface
-from hardware_hunter.orchestration.buy_orchestrator import (
+from salvager.interfaces.browser_session import BuyFailure, BuySuccess
+from salvager.interfaces.telegram_surface import TelegramSurface
+from salvager.orchestration.buy_orchestrator import (
     RECEIPT_MISMATCH_REASON,
     BuyOrchestrator,
     BuyOutcomeAborted,
     BuyOutcomeFailure,
     BuyOutcomeSuccess,
 )
-from hardware_hunter.orchestration.circuit_breaker import CircuitBreaker
-from hardware_hunter.orchestration.phase2_preflight import Phase2Preflight
-from hardware_hunter.orchestration.reconciler import Reconciler
+from salvager.orchestration.circuit_breaker import CircuitBreaker
+from salvager.orchestration.phase2_preflight import Phase2Preflight
+from salvager.orchestration.reconciler import Reconciler
 
 # ─────────────────────────────────────────────────────────────────────────
 # Fixtures + data builders

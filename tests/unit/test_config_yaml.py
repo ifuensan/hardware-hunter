@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from hardware_hunter.config.config_yaml import (
+from salvager.config.config_yaml import (
     ConfigModel,
     ConfigParseError,
     ConfigValidationError,

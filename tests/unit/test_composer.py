@@ -21,9 +21,9 @@ from typing import Any
 import pytest
 from pydantic import SecretStr
 
-from hardware_hunter.config.env import EnvSettings, reset_env_cache
-from hardware_hunter.orchestration import composer as composer_module
-from hardware_hunter.orchestration.composer import (
+from salvager.config.env import EnvSettings, reset_env_cache
+from salvager.orchestration import composer as composer_module
+from salvager.orchestration.composer import (
     EBAY_OAUTH_TOKENS_RELPATH,
     WALLAPOP_COOKIES_RELPATH,
     NoMarketplacesEnabledError,

@@ -41,4 +41,4 @@ COPY pyproject.toml ./
 VOLUME ["/app/data", "/app/config"]
 
 # Entrypoint resolves to the uv-installed console script.
-ENTRYPOINT ["hardware-hunter"]
+ENTRYPOINT ["salvager"]

@@ -12,8 +12,8 @@ from typing import Any
 
 import pytest
 
-from hardware_hunter.adapters.wallapop_browser import login as login_mod
-from hardware_hunter.adapters.wallapop_browser.login import (
+from salvager.adapters.wallapop_browser import login as login_mod
+from salvager.adapters.wallapop_browser.login import (
     BrowserLoginTimeout,
     _has_session_cookie,
     _wait_for_session_cookie,

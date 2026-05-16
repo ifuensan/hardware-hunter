@@ -16,8 +16,8 @@ import asyncio
 
 import pytest
 
-from hardware_hunter.adapters.asyncio_scheduler import AsyncioScheduler
-from hardware_hunter.interfaces.scheduler import SchedulerTask
+from salvager.adapters.asyncio_scheduler import AsyncioScheduler
+from salvager.interfaces.scheduler import SchedulerTask
 
 # 100 µs per "cadence minute" — fast cycles, deterministic ordering.
 _FAST_UNIT_S = 0.0001
@@ -332,7 +332,7 @@ def test_asyncio_scheduler_does_not_import_hermes_or_subprocess() -> None:
     source = (
         Path(__file__).resolve().parents[2]
         / "src"
-        / "hardware_hunter"
+        / "salvager"
         / "adapters"
         / "asyncio_scheduler"
         / "scheduler.py"

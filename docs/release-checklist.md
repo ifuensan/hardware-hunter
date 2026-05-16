@@ -24,9 +24,9 @@ Any **critical** anomaly blocks the v1.0 tag.
 - The bot configured against that chat in `config.yaml`.
 - A controlled wishlist with one entry that will reliably produce
   Phase 1 + Phase 2 listing alerts (or fixture replays via
-  `hardware-hunter audit replay <id>` when that lands).
+  `salvager audit replay <id>` when that lands).
 - The 22 operational `EventName` variants are reachable from
-  `hardware-hunter dev emit-alert <event>` (or by replaying recorded
+  `salvager dev emit-alert <event>` (or by replaying recorded
   fixtures from `tests/unit/__snapshots__/`).
 
 ---
@@ -173,12 +173,12 @@ operator's platform; ORCA / NVDA are out of scope for v1.0.
 
 Run each in sequence and listen to the VoiceOver readout end-to-end:
 
-1. `hardware-hunter health` — the table is read row by row, label →
+1. `salvager health` — the table is read row by row, label →
    value, without VoiceOver getting stuck on box-drawing characters.
-2. `hardware-hunter audit show --last 5` — the 5 most recent audit
+2. `salvager audit show --last 5` — the 5 most recent audit
    entries read in chronological order, with each row's fields
    identifiable.
-3. `hardware-hunter phase2 status` — the Phase 2 state table reads
+3. `salvager phase2 status` — the Phase 2 state table reads
    cleanly; the "global disabled" / "per-entry disabled" sections are
    announced as distinct.
 
@@ -203,7 +203,7 @@ For any line-reading anomaly:
 - If the limitation is structural (a Rich behaviour we can't reach
   without an architecture change), document the workaround in
   `docs/accessibility.md` (e.g. "for VoiceOver users, prefer
-  `hardware-hunter ... --json | jq` for tabular output").
+  `salvager ... --json | jq` for tabular output").
 
 ---
 

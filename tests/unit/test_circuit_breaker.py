@@ -25,21 +25,21 @@ from typing import Any
 
 import pytest
 
-from hardware_hunter.adapters.sqlite_store import (
+from salvager.adapters.sqlite_store import (
     MigrationRunner,
     Phase2AuditWriter,
     open_connection,
 )
-from hardware_hunter.adapters.sqlite_store.migrations import db_path_under
-from hardware_hunter.adapters.sqlite_store.phase2_state_reader import (
+from salvager.adapters.sqlite_store.migrations import db_path_under
+from salvager.adapters.sqlite_store.phase2_state_reader import (
     SqlitePhase2StateReader,
 )
-from hardware_hunter.domain.alert import EventName
-from hardware_hunter.orchestration.circuit_breaker import (
+from salvager.domain.alert import EventName
+from salvager.orchestration.circuit_breaker import (
     CIRCUIT_OPEN_REASON,
     CircuitBreaker,
 )
-from hardware_hunter.orchestration.degradation_reporter import Reporter
+from salvager.orchestration.degradation_reporter import Reporter
 
 _THRESHOLD = 3
 

@@ -13,18 +13,18 @@ from pathlib import Path
 
 import pytest
 
-from hardware_hunter.adapters.llm_cache_sqlite import (
+from salvager.adapters.llm_cache_sqlite import (
     CachingListingEvaluator,
     SqliteLlmEvalCache,
 )
-from hardware_hunter.adapters.llm_cache_sqlite.cache import (
+from salvager.adapters.llm_cache_sqlite.cache import (
     DEFAULT_TTL_HOURS,
     DEFAULT_TTL_HOURS_LOW_CONFIDENCE,
 )
-from hardware_hunter.domain.evaluation import ListingEvaluation
-from hardware_hunter.domain.listing import Listing
-from hardware_hunter.domain.wishlist import WishlistEntry
-from hardware_hunter.interfaces.listing_evaluator import ListingEvaluator
+from salvager.domain.evaluation import ListingEvaluation
+from salvager.domain.listing import Listing
+from salvager.domain.wishlist import WishlistEntry
+from salvager.interfaces.listing_evaluator import ListingEvaluator
 
 # ─────────────────────────────────────────────────────────────────────────
 # Fixtures
@@ -475,7 +475,7 @@ async def test_decorator_uses_real_prompt_builder_by_default(
 
 
 def test_prompt_version_is_exported_from_domain_prompts() -> None:
-    from hardware_hunter.domain.prompts import PROMPT_VERSION
+    from salvager.domain.prompts import PROMPT_VERSION
 
     assert isinstance(PROMPT_VERSION, str)
     assert PROMPT_VERSION  # non-empty

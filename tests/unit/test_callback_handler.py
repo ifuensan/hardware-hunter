@@ -17,23 +17,23 @@ from io import StringIO
 from typing import Any
 from uuid import UUID, uuid4
 
-from hardware_hunter.domain.alert import (
+from salvager.domain.alert import (
     AlertSnapshot,
     CallbackEvent,
     InlineButton,
     RenderedAlert,
 )
-from hardware_hunter.domain.audit import (
+from salvager.domain.audit import (
     CallbackAudit,
     TapEventAudit,
     TransactionAudit,
 )
-from hardware_hunter.domain.evaluation import ListingEvaluation
-from hardware_hunter.domain.listing import Listing
-from hardware_hunter.interfaces.store import EntryKey, Store
-from hardware_hunter.interfaces.telegram_surface import TelegramSurface
-from hardware_hunter.observability import logging as hh_logging
-from hardware_hunter.orchestration.callback_handler import (
+from salvager.domain.evaluation import ListingEvaluation
+from salvager.domain.listing import Listing
+from salvager.interfaces.store import EntryKey, Store
+from salvager.interfaces.telegram_surface import TelegramSurface
+from salvager.observability import logging as hh_logging
+from salvager.orchestration.callback_handler import (
     ACK_LABELS,
     DEFAULT_SNOOZE_HOURS,
     HANDLED_VERBS,
@@ -568,7 +568,7 @@ def test_callback_handler_imports_stay_within_orchestration_allowlist() -> None:
     source_path = (
         Path(__file__).resolve().parents[2]
         / "src"
-        / "hardware_hunter"
+        / "salvager"
         / "orchestration"
         / "callback_handler.py"
     )
@@ -590,7 +590,7 @@ def test_callback_handler_imports_stay_within_orchestration_allowlist() -> None:
         # third-party we treat as pure-tier
         "pydantic",
         # project pure tiers
-        "hardware_hunter",
+        "salvager",
     }
     bad: list[str] = []
     for node in ast.walk(tree):
@@ -604,7 +604,7 @@ def test_callback_handler_imports_stay_within_orchestration_allowlist() -> None:
             top = module.split(".")[0]
             if top not in allowed_first_segments:
                 bad.append(f"from {module} import ...")
-            if module.startswith("hardware_hunter.adapters"):
+            if module.startswith("salvager.adapters"):
                 bad.append(f"orchestration must not import adapters: from {module} import ...")
     assert not bad, "orchestration import discipline violated:\n  " + "\n  ".join(bad)
 
@@ -619,11 +619,11 @@ _SUBPROCESS_BOOTSTRAP = (
     "from datetime import UTC, datetime, timedelta\n"
     "from decimal import Decimal\n"
     "from uuid import UUID\n"
-    "from hardware_hunter.domain.alert import CallbackEvent\n"
-    "from hardware_hunter.domain.listing import Listing\n"
-    "from hardware_hunter.domain.evaluation import ListingEvaluation\n"
-    "from hardware_hunter.domain.alert import AlertSnapshot\n"
-    "from hardware_hunter.orchestration.callback_handler import CallbackDispatcher\n"
+    "from salvager.domain.alert import CallbackEvent\n"
+    "from salvager.domain.listing import Listing\n"
+    "from salvager.domain.evaluation import ListingEvaluation\n"
+    "from salvager.domain.alert import AlertSnapshot\n"
+    "from salvager.orchestration.callback_handler import CallbackDispatcher\n"
 )
 
 
@@ -648,8 +648,8 @@ def _run_subprocess_logging_handle_unknown_verb() -> str:
     Literal blocks ad-hoc verbs at validation; we use ``model_construct``
     to bypass — the same shape a misbehaving adapter could feed us."""
     snippet = (
-        "from hardware_hunter.interfaces.store import Store\n"
-        "from hardware_hunter.interfaces.telegram_surface import TelegramSurface\n"
+        "from salvager.interfaces.store import Store\n"
+        "from salvager.interfaces.telegram_surface import TelegramSurface\n"
         "class _S(Store):\n"
         "    async def is_seen(self, *a, **kw): return False\n"
         "    async def record_seen(self, *a, **kw): pass\n"
@@ -685,8 +685,8 @@ def _run_subprocess_logging_handle_buy() -> str:
     orchestrator is wired — the dispatcher still emits the log and
     the badge, which is all this test cares about."""
     snippet = (
-        "from hardware_hunter.interfaces.store import Store\n"
-        "from hardware_hunter.interfaces.telegram_surface import TelegramSurface\n"
+        "from salvager.interfaces.store import Store\n"
+        "from salvager.interfaces.telegram_surface import TelegramSurface\n"
         "class _S(Store):\n"
         "    async def is_seen(self, *a, **kw): return False\n"
         "    async def record_seen(self, *a, **kw): pass\n"
@@ -719,8 +719,8 @@ def _run_subprocess_logging_handle_buy() -> str:
 def _run_subprocess_logging_handle_snooze() -> str:
     alert_id = uuid4()
     snippet = (
-        "from hardware_hunter.interfaces.store import Store\n"
-        "from hardware_hunter.interfaces.telegram_surface import TelegramSurface\n"
+        "from salvager.interfaces.store import Store\n"
+        "from salvager.interfaces.telegram_surface import TelegramSurface\n"
         f"ALERT_ID = UUID('{alert_id}')\n"
         "SNAP = AlertSnapshot(\n"
         "    alert_id=ALERT_ID,\n"

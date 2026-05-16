@@ -19,8 +19,8 @@ from typing import Any
 
 import pytest
 
-from hardware_hunter.domain.alert import EventName, Severity
-from hardware_hunter.domain.errors import (
+from salvager.domain.alert import EventName, Severity
+from salvager.domain.errors import (
     TinyFishAuthFailed,
     TinyFishRateLimited,
     TinyFishUnavailable,
@@ -28,9 +28,9 @@ from hardware_hunter.domain.errors import (
     WallapopSchemaDrift,
     WallapopSessionExpired,
 )
-from hardware_hunter.domain.listing import Listing, SearchQuery
-from hardware_hunter.interfaces.page_fetcher import PageFetcher
-from hardware_hunter.orchestration.wallapop_fallback import (
+from salvager.domain.listing import Listing, SearchQuery
+from salvager.interfaces.page_fetcher import PageFetcher
+from salvager.orchestration.wallapop_fallback import (
     SOURCE_API,
     WallapopFallbackFetcher,
     WallapopHealth,
@@ -538,7 +538,7 @@ def test_wallapop_fallback_imports_stay_within_orchestration_allowlist() -> None
     source_path = (
         Path(__file__).resolve().parents[2]
         / "src"
-        / "hardware_hunter"
+        / "salvager"
         / "orchestration"
         / "wallapop_fallback.py"
     )
@@ -547,11 +547,11 @@ def test_wallapop_fallback_imports_stay_within_orchestration_allowlist() -> None
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
-                if alias.name.startswith("hardware_hunter.adapters"):
+                if alias.name.startswith("salvager.adapters"):
                     offenders.append(f"import {alias.name}")
         elif isinstance(node, ast.ImportFrom):
             module = node.module or ""
-            if module.startswith("hardware_hunter.adapters"):
+            if module.startswith("salvager.adapters"):
                 offenders.append(f"from {module} import ...")
     assert not offenders, "orchestration.wallapop_fallback imported an adapter:\n  " + "\n  ".join(
         offenders

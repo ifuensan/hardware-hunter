@@ -37,7 +37,7 @@ When you hit a real-world parser surprise:
 3. Drop the capture into `active/` as `<descriptive-name>.<ext>`.
 4. Add a sibling `<descriptive-name>.expected.json` with the verified
    price and the parser kind.
-5. Run `hardware-hunter phase2 smoke-test` locally to confirm the
+5. Run `salvager phase2 smoke-test` locally to confirm the
    fixture parses; commit the pair.
 
 Every CI run now exercises that case.

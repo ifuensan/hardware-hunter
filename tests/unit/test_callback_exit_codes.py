@@ -9,7 +9,7 @@ FR48 locks the CLI exit-code set at ``{0, 1, 2, 3, 4, 5}``:
   - 4 → authentication error
   - 5 → unrecoverable runtime error (Phase 2 fail-closed, etc.)
 
-This test AST-walks ``src/hardware_hunter/cli/`` and refuses any
+This test AST-walks ``src/salvager/cli/`` and refuses any
 literal ``typer.Exit(code=N)`` or ``return N`` (inside a callable
 named ``run`` — the convention for subcommand entrypoints) with
 ``N`` outside that set. The walker is intentionally conservative:
@@ -26,11 +26,11 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from hardware_hunter.cli.app import app
+from salvager.cli.app import app
 
 VALID_EXIT_CODES: frozenset[int] = frozenset({0, 1, 2, 3, 4, 5})
 
-_CLI_ROOT = Path(__file__).resolve().parents[2] / "src" / "hardware_hunter" / "cli"
+_CLI_ROOT = Path(__file__).resolve().parents[2] / "src" / "salvager" / "cli"
 
 
 def _cli_python_files() -> list[Path]:

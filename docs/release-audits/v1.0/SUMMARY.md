@@ -155,9 +155,9 @@ readout end-to-end.
 
 | Command | Reads in logical order? | Box-drawing interference? | Notes |
 |---|:-:|:-:|---|
-| `hardware-hunter health`              | ✗ (see below) | ✓ — but not reached: VO silent | Visual output correct; JSON workaround verified |
-| `hardware-hunter audit show --last 5` | ✗ (see below) | n/a — single-line text       | Visual output correct; JSON workaround verified |
-| `hardware-hunter phase2 status`       | ✗ (see below) | ✓ — but not reached: VO silent | Visual output correct; JSON workaround verified |
+| `salvager health`              | ✗ (see below) | ✓ — but not reached: VO silent | Visual output correct; JSON workaround verified |
+| `salvager audit show --last 5` | ✗ (see below) | n/a — single-line text       | Visual output correct; JSON workaround verified |
+| `salvager phase2 status`       | ✗ (see below) | ✓ — but not reached: VO silent | Visual output correct; JSON workaround verified |
 
 **Verdict: PASS with documented limitation** (not BLOCKED). Per UX-DR23
 escape clause: "either patch the renderer or document the limitation
@@ -172,7 +172,7 @@ branch.
   (`Cmd+F5` + `VO+A`) emits only whitespace / prompt sounds when asked
   to read the output. Root cause is a known limitation of Apple
   Terminal's accessibility hook with Unicode box-drawing characters +
-  ANSI colour codes; not introduced by hardware-hunter. **Workaround**:
+  ANSI colour codes; not introduced by salvager. **Workaround**:
   every audited command supports `--format json`, which produces
   plain-text single-line JSON that VoiceOver reads cleanly. The
   workaround is documented in

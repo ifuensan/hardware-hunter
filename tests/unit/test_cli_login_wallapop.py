@@ -1,4 +1,4 @@
-"""Tests for ``hardware-hunter login wallapop`` — Story 2.9.
+"""Tests for ``salvager login wallapop`` — Story 2.9.
 
 The browser-login adapter is mocked at the module boundary (the
 ``capture`` parameter of :func:`run`). The Netscape serializer +
@@ -11,12 +11,12 @@ from pathlib import Path
 
 import pytest
 
-from hardware_hunter.adapters.wallapop_api.cookies import load_cookies
-from hardware_hunter.adapters.wallapop_browser import (
+from salvager.adapters.wallapop_api.cookies import load_cookies
+from salvager.adapters.wallapop_browser import (
     BrowserLoginTimeout,
     BrowserNotInstalled,
 )
-from hardware_hunter.cli.commands.login_wallapop import _serialize_to_netscape, run
+from salvager.cli.commands.login_wallapop import _serialize_to_netscape, run
 
 
 def _ok_cookies() -> list[dict[str, object]]:

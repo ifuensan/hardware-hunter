@@ -17,8 +17,8 @@ from __future__ import annotations
 
 import pytest
 
-from hardware_hunter.adapters.sqlite_store import SqliteStore
-from hardware_hunter.interfaces.store import Store
+from salvager.adapters.sqlite_store import SqliteStore
+from salvager.interfaces.store import Store
 
 # Forbidden ``<prefix>_*<keyword>*`` combinations on a Store-shaped surface.
 _FORBIDDEN_PREFIXES = ("update_", "delete_")

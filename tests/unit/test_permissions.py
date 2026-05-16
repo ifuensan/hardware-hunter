@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from hardware_hunter.config.permissions import (
+from salvager.config.permissions import (
     EXPECTED_MODE,
     CredentialMissingError,
     CredentialPermissionsError,
@@ -168,7 +168,7 @@ def test_missing_env_hint_points_at_init(
     with pytest.raises(SystemExit):
         verify_or_exit([missing])
     err = capsys.readouterr().err
-    assert "hardware-hunter init" in err
+    assert "salvager init" in err
 
 
 def test_missing_oauth_hint_points_at_login_ebay(

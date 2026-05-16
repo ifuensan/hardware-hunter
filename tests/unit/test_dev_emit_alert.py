@@ -1,4 +1,4 @@
-"""Tests for ``hardware-hunter dev emit-alert`` — Story 5.17.
+"""Tests for ``salvager dev emit-alert`` — Story 5.17.
 
 Three layers:
 
@@ -18,13 +18,13 @@ from __future__ import annotations
 import pytest
 from typer.testing import CliRunner
 
-from hardware_hunter.cli.app import app
-from hardware_hunter.cli.dev_alert_fixtures import (
+from salvager.cli.app import app
+from salvager.cli.dev_alert_fixtures import (
     VARIANT_REGISTRY,
     build_rendered_variant,
 )
-from hardware_hunter.domain.alert import EventName
-from hardware_hunter.domain.errors import BuyFailureReason
+from salvager.domain.alert import EventName
+from salvager.domain.errors import BuyFailureReason
 
 _RUNNER = CliRunner()
 

@@ -4,5 +4,5 @@ Causa: RuntimeError en el ciclo de wallapop
 Estado actual: el ciclo continuará en el siguiente tick
 
 Próximo paso:
-1\. `hardware-hunter audit show --last 5`
-2\. `hardware-hunter logs --last 50`
+1\. `salvager audit show --last 5`
+2\. `salvager logs --last 50`

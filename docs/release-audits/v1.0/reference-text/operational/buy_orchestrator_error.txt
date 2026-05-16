@@ -5,6 +5,6 @@ Alert: 12345678\-1234\-1234\-1234\-123456789abc
 Estado actual: Fase 2 desactivada por seguridad
 
 Próximo paso:
-1\. `hardware-hunter audit show --last 5`
-2\. `hardware-hunter logs --last 100`
-3\. `hardware-hunter phase2 enable <entry>`
+1\. `salvager audit show --last 5`
+2\. `salvager logs --last 100`
+3\. `salvager phase2 enable <entry>`

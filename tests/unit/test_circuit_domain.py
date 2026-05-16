@@ -17,7 +17,7 @@ from __future__ import annotations
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from hardware_hunter.domain.circuit import (
+from salvager.domain.circuit import (
     CircuitDecision,
     compute_next_state,
 )

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from hardware_hunter.domain.alert import EventName
-from hardware_hunter.orchestration.health_state import HealthState
+from salvager.domain.alert import EventName
+from salvager.orchestration.health_state import HealthState
 
 _T0 = datetime(2026, 5, 14, 12, 0, 0, tzinfo=UTC)
 _T1 = datetime(2026, 5, 14, 12, 5, 0, tzinfo=UTC)

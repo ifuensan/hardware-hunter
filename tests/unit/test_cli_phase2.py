@@ -1,4 +1,4 @@
-"""Tests for ``hardware-hunter phase2 enable/disable/status`` — Story 5.12.
+"""Tests for ``salvager phase2 enable/disable/status`` — Story 5.12.
 
 The three ``run_*`` functions are exercised directly. Where TTY semantics
 or ``input()`` matter, the test passes its own ``is_tty`` /``input_fn``
@@ -16,17 +16,17 @@ from pathlib import Path
 
 import pytest
 
-from hardware_hunter.adapters.sqlite_store import (
+from salvager.adapters.sqlite_store import (
     MigrationRunner,
     Phase2AuditWriter,
     open_connection,
 )
-from hardware_hunter.adapters.sqlite_store.migrations import db_path_under
-from hardware_hunter.adapters.sqlite_store.phase2_state_reader import (
+from salvager.adapters.sqlite_store.migrations import db_path_under
+from salvager.adapters.sqlite_store.phase2_state_reader import (
     SqlitePhase2StateReader,
 )
-from hardware_hunter.cli.commands import phase2_cmd
-from hardware_hunter.config.wishlist_yaml import load_wishlist
+from salvager.cli.commands import phase2_cmd
+from salvager.config.wishlist_yaml import load_wishlist
 
 _WISHLIST_YAML = """\
 entries:

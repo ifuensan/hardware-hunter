@@ -14,23 +14,23 @@ import httpx
 import pytest
 from pydantic import SecretStr
 
-from hardware_hunter.adapters.ebay_api import (
+from salvager.adapters.ebay_api import (
     DailyQuotaTracker,
     EbayApiFetcher,
     OAuthTokens,
     OAuthTokenStore,
 )
-from hardware_hunter.adapters.ebay_api.tokens import (
+from salvager.adapters.ebay_api.tokens import (
     OAUTH_TOKEN_FILE_MODE,
     parse_expires_in,
 )
-from hardware_hunter.domain.errors import (
+from salvager.domain.errors import (
     EbayApiError,
     EbayAuthFailed,
     EbayQuotaExceeded,
     EbaySchemaDrift,
 )
-from hardware_hunter.domain.listing import SearchQuery
+from salvager.domain.listing import SearchQuery
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIXTURE_PATH = REPO_ROOT / "tests" / "fixtures" / "ebay_api" / "browse_search_4tb_hdd.json"
@@ -372,7 +372,7 @@ def test_fetcher_module_never_disables_tls_verification() -> None:
     import ast
 
     src = (
-        REPO_ROOT / "src" / "hardware_hunter" / "adapters" / "ebay_api" / "fetcher.py"
+        REPO_ROOT / "src" / "salvager" / "adapters" / "ebay_api" / "fetcher.py"
     ).read_text(encoding="utf-8")
     tree = ast.parse(src)
     for node in ast.walk(tree):

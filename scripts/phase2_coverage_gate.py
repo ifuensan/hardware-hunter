@@ -9,11 +9,11 @@ path is exactly where v1.0 cannot afford coverage drift.
 
 Modules under the gate (Story 5.15 AC):
 
-  - ``hardware_hunter.orchestration.buy_orchestrator``  — Story 5.7
-  - ``hardware_hunter.orchestration.reconciler``        — Story 5.4
-  - ``hardware_hunter.orchestration.circuit_breaker``   — Story 5.5
-  - ``hardware_hunter.orchestration.smoke_test``        — Story 5.6
-  - ``hardware_hunter.adapters.sqlite_store.audit_writer`` — Story 5.1
+  - ``salvager.orchestration.buy_orchestrator``  — Story 5.7
+  - ``salvager.orchestration.reconciler``        — Story 5.4
+  - ``salvager.orchestration.circuit_breaker``   — Story 5.5
+  - ``salvager.orchestration.smoke_test``        — Story 5.6
+  - ``salvager.adapters.sqlite_store.audit_writer`` — Story 5.1
 
 Modules that haven't landed yet (e.g. buy_orchestrator before Story 5.7)
 are reported as ``PENDING`` and do not fail the gate. The gate trips
@@ -39,11 +39,11 @@ DEFAULT_THRESHOLD_PCT: Final[float] = 90.0
 #: Critical-path modules as repo-relative file paths (the form coverage.json
 #: uses as its ``files`` keys). Listed in AC order.
 CRITICAL_MODULES: Final[tuple[str, ...]] = (
-    "src/hardware_hunter/orchestration/buy_orchestrator.py",
-    "src/hardware_hunter/orchestration/reconciler.py",
-    "src/hardware_hunter/orchestration/circuit_breaker.py",
-    "src/hardware_hunter/orchestration/smoke_test.py",
-    "src/hardware_hunter/adapters/sqlite_store/audit_writer.py",
+    "src/salvager/orchestration/buy_orchestrator.py",
+    "src/salvager/orchestration/reconciler.py",
+    "src/salvager/orchestration/circuit_breaker.py",
+    "src/salvager/orchestration/smoke_test.py",
+    "src/salvager/adapters/sqlite_store/audit_writer.py",
 )
 
 

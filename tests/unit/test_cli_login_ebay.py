@@ -1,4 +1,4 @@
-"""Tests for ``hardware-hunter login ebay`` — Story 2.10.
+"""Tests for ``salvager login ebay`` — Story 2.10.
 
 The token exchange is mocked at the module boundary (the ``exchange``
 parameter of :func:`run`). The :class:`OAuthTokenStore` write runs for
@@ -14,13 +14,13 @@ from pathlib import Path
 import pytest
 from pydantic import SecretStr
 
-from hardware_hunter.adapters.ebay_api.tokens import OAuthTokens
-from hardware_hunter.cli.commands.login_ebay import run
-from hardware_hunter.domain.errors import EbayOAuthExchangeFailed
+from salvager.adapters.ebay_api.tokens import OAuthTokens
+from salvager.cli.commands.login_ebay import run
+from salvager.domain.errors import EbayOAuthExchangeFailed
 
 _APP_ID = SecretStr("APP-1234")
 _CERT_ID = SecretStr("CERT-5678")
-_RU_NAME = "ifuensan-hardware-hunter-RUNAME"
+_RU_NAME = "ifuensan-salvager-RUNAME"
 
 
 def _tokens() -> OAuthTokens:
@@ -91,7 +91,7 @@ def test_run_opens_browser_with_consent_url(tmp_path: Path) -> None:
     assert code == 0
     assert len(opened) == 1
     assert opened[0].startswith("https://auth.ebay.com/oauth2/authorize?")
-    assert "ifuensan-hardware-hunter-RUNAME" in opened[0]
+    assert "ifuensan-salvager-RUNAME" in opened[0]
 
 
 def test_run_survives_browser_open_failure(tmp_path: Path) -> None:

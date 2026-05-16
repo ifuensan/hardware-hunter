@@ -1,8 +1,8 @@
-# hardware-hunter
+# salvager
 
-[![CI](https://github.com/ifuensan/hardware-hunter/actions/workflows/ci.yml/badge.svg)](https://github.com/ifuensan/hardware-hunter/actions/workflows/ci.yml)
+[![CI](https://github.com/ifuensan/salvager/actions/workflows/ci.yml/badge.svg)](https://github.com/ifuensan/salvager/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Container](https://img.shields.io/badge/ghcr.io-hardware--hunter-blue)](https://github.com/ifuensan/hardware-hunter/pkgs/container/hardware-hunter)
+[![Container](https://img.shields.io/badge/ghcr.io-hardware--hunter-blue)](https://github.com/ifuensan/salvager/pkgs/container/salvager)
 
 A self-hosted personal agent for monitoring second-hand homelab parts. Watches your configured marketplaces against a YAML wishlist and sends Telegram alerts when matches appear — with optional autonomous purchase via a non-bypassable Telegram tap.
 
@@ -10,7 +10,7 @@ A self-hosted personal agent for monitoring second-hand homelab parts. Watches y
 **Wishlist focus:** HDDs (NAS-grade and enterprise) and DDR4 RAM. Extensible to other part types.
 **Distribution:** single Docker image, single docker-compose service.
 
-> **Status (May 2026): `v0.2.0` — Phase 1 + Phase 2 feature-complete preview.** All Epic 2–5 code has shipped + been audited for rendering invariants ([release-audit summary](docs/release-audits/v1.0/SUMMARY.md)). The daemon polls Wallapop + eBay.es, evaluates listings against the wishlist via Gemini Flash, dispatches Telegram alerts, and the Phase 2 autonomous-purchase loop is wired end-to-end behind the safety stack and the non-bypassable Telegram tap. **Not yet validated in production**: the operator's burn-in window is in progress; v1.0 promotion is gated on at least 2 weeks of continuous live-traffic operation + one completed Phase 2 purchase. Recommended pinned tag: `ghcr.io/ifuensan/hardware-hunter:0.2.0`. See [CHANGELOG.md](CHANGELOG.md) for v0.2.0 release notes and [ROADMAP.md](ROADMAP.md) for the v1.0 path.
+> **Status (May 2026): `v0.2.0` — Phase 1 + Phase 2 feature-complete preview.** All Epic 2–5 code has shipped + been audited for rendering invariants ([release-audit summary](docs/release-audits/v1.0/SUMMARY.md)). The daemon polls Wallapop + eBay.es, evaluates listings against the wishlist via Gemini Flash, dispatches Telegram alerts, and the Phase 2 autonomous-purchase loop is wired end-to-end behind the safety stack and the non-bypassable Telegram tap. **Not yet validated in production**: the operator's burn-in window is in progress; v1.0 promotion is gated on at least 2 weeks of continuous live-traffic operation + one completed Phase 2 purchase. Recommended pinned tag: `ghcr.io/ifuensan/salvager:0.2.0`. See [CHANGELOG.md](CHANGELOG.md) for v0.2.0 release notes and [ROADMAP.md](ROADMAP.md) for the v1.0 path.
 
 ---
 
@@ -26,11 +26,11 @@ A self-hosted personal agent for monitoring second-hand homelab parts. Watches y
 
 Prerequisites: Docker + docker-compose, a Telegram bot, a Google Gemini API key, an eBay developer account, a TinyFish API key (for the Phase 1 Wallapop fallback path and the Phase 2 buy flows), and a Wallapop / eBay.es account dedicated to the agent (see Legal disclaimer below).
 
-The recommended image tag for new deployments is `ghcr.io/ifuensan/hardware-hunter:0.2.0` (pinned). `:latest` follows the newest release; pin to `:0.2.0` for reproducible deploys during the v1.0 burn-in window.
+The recommended image tag for new deployments is `ghcr.io/ifuensan/salvager:0.2.0` (pinned). `:latest` follows the newest release; pin to `:0.2.0` for reproducible deploys during the v1.0 burn-in window.
 
 ```bash
-git clone https://github.com/ifuensan/hardware-hunter
-cd hardware-hunter
+git clone https://github.com/ifuensan/salvager
+cd salvager
 
 # Scaffold your config from the tracked examples.
 mkdir -p config data
@@ -45,13 +45,13 @@ $EDITOR config/.env
 $EDITOR config/wishlist.yaml
 
 # Validate before starting (lands in Epic 2).
-# docker-compose run --rm hardware-hunter validate-wishlist
+# docker-compose run --rm salvager validate-wishlist
 
 # Start the daemon (Phase 1 polling lands across Epics 2-4).
 docker-compose up -d
 
 # First-time Wallapop login — interactive browser cookie capture (Story 2.9).
-# docker-compose exec hardware-hunter hardware-hunter login wallapop
+# docker-compose exec salvager salvager login wallapop
 ```
 
 The commented-out commands above land in subsequent stories. See [ROADMAP.md](ROADMAP.md) for what's implemented today versus planned.
@@ -60,11 +60,11 @@ The commented-out commands above land in subsequent stories. See [ROADMAP.md](RO
 
 ## Legal disclaimer
 
-**Spanish ToS posture.** hardware-hunter operates within the operator's own authenticated marketplace session. The tool does not bypass authentication, scrape behind login walls without consent, or impersonate the marketplace. The terms of service for each marketplace (Wallapop, eBay.es) are click-wrap agreements between the operator and the platform; you are the operator of this tool and the party bound by those terms.
+**Spanish ToS posture.** salvager operates within the operator's own authenticated marketplace session. The tool does not bypass authentication, scrape behind login walls without consent, or impersonate the marketplace. The terms of service for each marketplace (Wallapop, eBay.es) are click-wrap agreements between the operator and the platform; you are the operator of this tool and the party bound by those terms.
 
-**Secondary-account recommendation.** Use a separate marketplace account dedicated to hardware-hunter rather than your primary personal account. If an unforeseen pattern triggers anti-bot or rate-limit measures, you do not lose access to your day-to-day account. The tool's poll cadences (default: every 15 min for Wallapop, every 30 min for eBay.es) are well within human-volume rates, but a dedicated account is sound precaution.
+**Secondary-account recommendation.** Use a separate marketplace account dedicated to salvager rather than your primary personal account. If an unforeseen pattern triggers anti-bot or rate-limit measures, you do not lose access to your day-to-day account. The tool's poll cadences (default: every 15 min for Wallapop, every 30 min for eBay.es) are well within human-volume rates, but a dedicated account is sound precaution.
 
-**Anti-bot honesty.** Wallapop session re-authentication is intentionally manual (`hardware-hunter login wallapop`); there is no codepath that attempts silent re-login. The Phase 2 buy flow drives a real browser session via TinyFish; the agent uses the operator's session, not API token forgery (FR30).
+**Anti-bot honesty.** Wallapop session re-authentication is intentionally manual (`salvager login wallapop`); there is no codepath that attempts silent re-login. The Phase 2 buy flow drives a real browser session via TinyFish; the agent uses the operator's session, not API token forgery (FR30).
 
 The tool is provided AS IS under the MIT license (see [LICENSE](LICENSE)). The operator is solely responsible for compliance with applicable law in their jurisdiction.
 
@@ -75,7 +75,7 @@ The tool is provided AS IS under the MIT license (see [LICENSE](LICENSE)). The o
 Hexagonal / ports-and-adapters:
 
 ```
-src/hardware_hunter/
+src/salvager/
 ├── domain/          ← pure pydantic models, no external SDK imports
 ├── interfaces/      ← ABCs (PageFetcher, ListingEvaluator, Store, …)
 ├── orchestration/   ← composes interfaces; the poll loop + buy flow
