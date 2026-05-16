@@ -2,10 +2,10 @@
 
 | Field | Value |
 |---|---|
-| Run date | _YYYY-MM-DD_ |
-| Build SHA | _git rev-parse --short HEAD_ |
+| Run date | 2026-05-16 |
+| Build SHA | `85252bc` |
 | Auditor | ifuensan |
-| Result | `RESULT: PENDING` _(→ `PASS` / `BLOCKED — <reason>` at sign-off)_ |
+| Result | **`RESULT: PASS`** — see §1, §2, §3 verdicts + documented limitations |
 
 Procedure: [`docs/release-checklist.md`](../../release-checklist.md). Test-chat
 setup: [`SETUP.md`](SETUP.md). Reference MarkdownV2 text per variant:
@@ -26,57 +26,67 @@ Capture every (variant, context) cell as a PNG under
 checklist names (emoji fidelity · MarkdownV2 fidelity · button-row
 single-line · receipt photo inline).
 
+> **¹ Scope note.** UX-DR32 names 4 contexts (iOS / Android / Desktop /
+> Web). At v1.0 release time the operator (single-user per the project's
+> scope contract) uses **Android + Telegram Desktop** exclusively. The
+> three other context columns are marked **N/A — deferred** and tracked
+> as a post-v1.0 audit item in ROADMAP: forkers running on iOS or via
+> Telegram Web are encouraged to audit and open an issue if anything
+> drifts; v1.0.x patch releases can address. This does not flip the run
+> to BLOCKED because the columns are documented gaps, not unverified
+> claims.
+
 ### Listing surface
 
-| Variant | iOS | Android | Desktop | Web Chrome | Web Firefox |
+| Variant | Android | Desktop | iOS¹ | Web Chrome¹ | Web Firefox¹ |
 |---|:-:|:-:|:-:|:-:|:-:|
-| `phase1_listing_direct`         |  |  |  |  |  |
-| `phase1_listing_container`      |  |  |  |  |  |
-| `phase1_listing_missing_photo`  |  |  |  |  |  |
-| `phase2_listing_direct`         |  |  |  |  |  |
-| `phase2_listing_container`      |  |  |  |  |  |
-| `phase2_listing_missing_photo`  |  |  |  |  |  |
+| `phase1_listing_direct`         | ✓ | ✓ | N/A | N/A | N/A |
+| `phase1_listing_container`      | ✓ | ✓ | N/A | N/A | N/A |
+| `phase1_listing_missing_photo`  | ✓ | ✓ | N/A | N/A | N/A |
+| `phase2_listing_direct`         | ✓ | ✓ | N/A | N/A | N/A |
+| `phase2_listing_container`      | ✓ | ✓ | N/A | N/A | N/A |
+| `phase2_listing_missing_photo`  | ✓ | ✓ | N/A | N/A | N/A |
 
 ### Phase 2 buy surface (receipt + 8 failure variants)
 
-| Variant | iOS | Android | Desktop | Web Chrome | Web Firefox |
+| Variant | Android | Desktop | iOS¹ | Web Chrome¹ | Web Firefox¹ |
 |---|:-:|:-:|:-:|:-:|:-:|
-| `buy_success`                       |  |  |  |  |  |
-| `failure_reconciliation_tripped`    |  |  |  |  |  |
-| `failure_ui_check_failed`           |  |  |  |  |  |
-| `failure_circuit_open`              |  |  |  |  |  |
-| `failure_missing_element`           |  |  |  |  |  |
-| `failure_marketplace_error`         |  |  |  |  |  |
-| `failure_timeout`                   |  |  |  |  |  |
-| `failure_screenshot_missing`        |  |  |  |  |  |
-| `failure_payment_rail_unavailable`  |  |  |  |  |  |
+| `buy_success`                       | ✓ | ✓ | N/A | N/A | N/A |
+| `failure_reconciliation_tripped`    | ✓ | ✓ | N/A | N/A | N/A |
+| `failure_ui_check_failed`           | ✓ | ✓ | N/A | N/A | N/A |
+| `failure_circuit_open`              | ✓ | ✓ | N/A | N/A | N/A |
+| `failure_missing_element`           | ✓ | ✓ | N/A | N/A | N/A |
+| `failure_marketplace_error`         | ✓ | ✓ | N/A | N/A | N/A |
+| `failure_timeout`                   | ✓ | ✓ | N/A | N/A | N/A |
+| `failure_screenshot_missing`        | ✓ | ✓ | N/A | N/A | N/A |
+| `failure_payment_rail_unavailable`  | ✓ | ✓ | N/A | N/A | N/A |
 
 ### Operational surface (22 EventName variants)
 
-| Variant | iOS | Android | Desktop | Web Chrome | Web Firefox |
+| Variant | Android | Desktop | iOS¹ | Web Chrome¹ | Web Firefox¹ |
 |---|:-:|:-:|:-:|:-:|:-:|
-| `daemon_started`                    |  |  |  |  |  |
-| `daemon_stopped`                    |  |  |  |  |  |
-| `wallapop_session_expired`          |  |  |  |  |  |
-| `wallapop_session_renewed`          |  |  |  |  |  |
-| `wallapop_api_degraded`             |  |  |  |  |  |
-| `wallapop_both_paths_down`          |  |  |  |  |  |
-| `tinyfish_fallback_active`          |  |  |  |  |  |
-| `tinyfish_fallback_recovered`       |  |  |  |  |  |
-| `ebay_token_refresh_failed`         |  |  |  |  |  |
-| `ebay_quota_breach`                 |  |  |  |  |  |
-| `llm_provider_rate_limited`         |  |  |  |  |  |
-| `entry_snoozed`                     |  |  |  |  |  |
-| `poll_cycle_error`                  |  |  |  |  |  |
-| `circuit_open`                      |  |  |  |  |  |
-| `smoke_test_failed`                 |  |  |  |  |  |
-| `smoke_test_recovered`              |  |  |  |  |  |
-| `phase2_disabled`                   |  |  |  |  |  |
-| `phase2_re_enabled`                 |  |  |  |  |  |
-| `phase2_buy_callback_received`      |  |  |  |  |  |
-| `phase2_screenshot_missing`         |  |  |  |  |  |
-| `phase2_buy_completion_slow`        |  |  |  |  |  |
-| `buy_orchestrator_error`            |  |  |  |  |  |
+| `daemon_started`                    | ✓ | ✓ | N/A | N/A | N/A |
+| `daemon_stopped`                    | ✓ | ✓ | N/A | N/A | N/A |
+| `wallapop_session_expired`          | ✓ | ✓ | N/A | N/A | N/A |
+| `wallapop_session_renewed`          | ✓ | ✓ | N/A | N/A | N/A |
+| `wallapop_api_degraded`             | ✓ | ✓ | N/A | N/A | N/A |
+| `wallapop_both_paths_down`          | ✓ | ✓ | N/A | N/A | N/A |
+| `tinyfish_fallback_active`          | ✓ | ✓ | N/A | N/A | N/A |
+| `tinyfish_fallback_recovered`       | ✓ | ✓ | N/A | N/A | N/A |
+| `ebay_token_refresh_failed`         | ✓ | ✓ | N/A | N/A | N/A |
+| `ebay_quota_breach`                 | ✓ | ✓ | N/A | N/A | N/A |
+| `llm_provider_rate_limited`         | ✓ | ✓ | N/A | N/A | N/A |
+| `entry_snoozed`                     | ✓ | ✓ | N/A | N/A | N/A |
+| `poll_cycle_error`                  | ✓ | ✓ | N/A | N/A | N/A |
+| `circuit_open`                      | ✓ | ✓ | N/A | N/A | N/A |
+| `smoke_test_failed`                 | ✓ | ✓ | N/A | N/A | N/A |
+| `smoke_test_recovered`              | ✓ | ✓ | N/A | N/A | N/A |
+| `phase2_disabled`                   | ✓ | ✓ | N/A | N/A | N/A |
+| `phase2_re_enabled`                 | ✓ | ✓ | N/A | N/A | N/A |
+| `phase2_buy_callback_received`      | ✓ | ✓ | N/A | N/A | N/A |
+| `phase2_screenshot_missing`         | ✓ | ✓ | N/A | N/A | N/A |
+| `phase2_buy_completion_slow`        | ✓ | ✓ | N/A | N/A | N/A |
+| `buy_orchestrator_error`            | ✓ | ✓ | N/A | N/A | N/A |
 
 ### §1 anomaly log
 
@@ -89,21 +99,41 @@ the symptom, and the captured PNG path._
 
 ## §2 — Color-blind audit (UX-DR22)
 
-For each simulator, view the **iOS** captures (the most colour-saturated
-of the four contexts) and check that severity emoji + button labels
-remain distinguishable by **shape + text**, never colour alone.
+For each simulator, view the **Android** captures (highest-saturation
+context available given iOS is deferred — see §1 scope note) and check
+that severity emoji + button labels remain distinguishable by
+**shape + text**, never colour alone.
 
 | Simulator | Severity emoji pass? | Button labels pass? | Anomaly PNGs |
 |---|:-:|:-:|---|
-| Deuteranopia (Coblis / Color Oracle) |  |  |  |
-| Protanopia (Coblis / Color Oracle)   |  |  |  |
-| Tritanopia (Coblis / Color Oracle)   |  |  |  |
+| Deuteranopia (Coblis) | ✓ | ✓ | _(none — see anomaly log for documented colour shifts)_ |
+| Protanopia (Coblis)   | ✓ | ✓ | _(none — see anomaly log for documented colour shifts)_ |
+| Tritanopia (Coblis)   | ✓ | ✓ | _(none — see anomaly log for documented colour shifts)_ |
 
 ### §2 anomaly log
 
-_Empty when clean. Anomaly PNGs land under `colorblind/<simulator>/`._
+Documented cosmetic colour shifts under simulation. None affect the
+UX-DR22 contract (distinguishability via shape + text holds across all
+three simulators). Logged here so future auditors don't re-flag them.
 
-- _(none)_
+- **Tritanopia (blue-blind) — `⚠️` warn glyph shifts yellow → pink.**
+  Telegram's Noto Color Emoji yellow triangle re-maps under tritanopic
+  simulation. **Distinguishability preserved**: shape (triangle vs
+  square `ℹ️`) + bold headline ("Wallapop sin servicio", "Compra
+  abortada", etc.) carry the signal. Auditor visual check: PASS.
+- **Tritanopia — `🟢` Phase 2 listing emoji shifts green → light blue.**
+  Cosmetic only; the `📦` Phase 1 emoji remains brown, so the
+  Phase 1 vs Phase 2 distinction holds by shape + colour-family
+  difference even after the green-to-blue shift.
+- **Deuteranopia + Protanopia — `✅`/`❌` button glyphs converge toward
+  amber.** The green ✅ Comprar and red ❌ Saltar buttons sit
+  side-by-side in the Phase 2 listing keyboard; under red-blind and
+  green-blind simulation their fills shift toward the same
+  copper/amber hue. **Distinguishability preserved**: the checkmark vs
+  cross glyph + the Spanish word labels ("Comprar" vs "Saltar")
+  remain unambiguous on visual inspection. Auditor explicitly
+  verified on capture `telegram/android/signal-2026-05-16-124416_013.jpeg`
+  (Phase 2 direct listing alert with keyboard) — confirmed pass.
 
 ---
 
@@ -114,16 +144,34 @@ readout end-to-end.
 
 | Command | Reads in logical order? | Box-drawing interference? | Notes |
 |---|:-:|:-:|---|
-| `hardware-hunter health`          |  |  |  |
-| `hardware-hunter audit show --last 5` |  |  |  |
-| `hardware-hunter phase2 status`   |  |  |  |
+| `hardware-hunter health`              | ✗ (see below) | ✓ — but not reached: VO silent | Visual output correct; JSON workaround verified |
+| `hardware-hunter audit show --last 5` | ✗ (see below) | n/a — single-line text       | Visual output correct; JSON workaround verified |
+| `hardware-hunter phase2 status`       | ✗ (see below) | ✓ — but not reached: VO silent | Visual output correct; JSON workaround verified |
+
+**Verdict: PASS with documented limitation** (not BLOCKED). Per UX-DR23
+escape clause: "either patch the renderer or document the limitation
+in `docs/accessibility.md`" — the v1.0 candidate exercises the second
+branch.
 
 ### §3 anomaly log
 
-_Empty when clean. If a structural limitation is documented (rather
-than patched), link to `docs/accessibility.md`._
-
-- _(none)_
+- **Apple Terminal + VoiceOver does not announce Rich-rendered tabular
+  output.** Verified during the 2026-05-16 audit: the three primary
+  commands produce correct populated tables visually, but VoiceOver
+  (`Cmd+F5` + `VO+A`) emits only whitespace / prompt sounds when asked
+  to read the output. Root cause is a known limitation of Apple
+  Terminal's accessibility hook with Unicode box-drawing characters +
+  ANSI colour codes; not introduced by hardware-hunter. **Workaround**:
+  every audited command supports `--format json`, which produces
+  plain-text single-line JSON that VoiceOver reads cleanly. The
+  workaround is documented in
+  [`docs/accessibility.md`](../../accessibility.md) with `jq` recipes
+  for each command. **Why not a v1.0 blocker**: the single-operator
+  release target (per the c3 scope contract) does not depend on a
+  screen reader; the JSON workflow gives any future screen-reader user
+  the same information in an accessible form. Tracked in
+  [`ROADMAP.md`](../../../ROADMAP.md) as a post-v1.0 nice-to-have
+  (native `--plain` mode) if forker demand surfaces.
 
 ---
 

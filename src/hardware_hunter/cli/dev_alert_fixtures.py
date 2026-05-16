@@ -61,7 +61,11 @@ def _listing(**overrides: Any) -> Listing:
         "description": "Como nuevo, en caja.",
         "price_eur": Decimal("55.00"),
         "location": "Madrid",
-        "photo_urls": ["https://cdn/photo.jpg"],
+        # Placeholder image hosted by placehold.co (free, no auth, no
+        # rate limits for occasional use) — Telegram fetches it during
+        # send_photo. The fake `https://cdn/photo.jpg` we use in unit
+        # tests is rejected by the real API ("Wrong http url specified").
+        "photo_urls": ["https://placehold.co/600x400/png?text=Listing+photo"],
         "fetched_at": _FIXED_TS,
     }
     base.update(overrides)
@@ -161,7 +165,12 @@ def _buy_success() -> RenderedAlert:
             price_paid_eur=Decimal("55.00"),
             payment_method="wallapop_pay",
             receipt_id="WP-2026-0001",
-            screenshot_path="/app/data/screenshots/WP-2026-0001.png",
+            # The buy_success renderer accepts any non-empty path; in
+            # production this is the captured receipt screenshot on
+            # local disk. For audit purposes we route Telegram at a
+            # public placeholder so send_photo succeeds without
+            # changing the renderer's contract.
+            screenshot_path="https://placehold.co/600x400/png?text=Receipt+WP-2026-0001",
             total_seconds=42,
             committed_at=_FIXED_TS,
         ),
