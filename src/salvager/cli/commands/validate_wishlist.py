@@ -32,9 +32,7 @@ from salvager.domain.wishlist import Wishlist
 from salvager.observability.styling import render_prose
 
 # Locked (c3) hint pair — Story 2.2 AC. Don't reword without PRD amendment.
-SCOPE_ERROR_HINT_1 = (
-    "salvager does not support arbitrage scoring per the (c3) scope contract."
-)
+SCOPE_ERROR_HINT_1 = "salvager does not support arbitrage scoring per the (c3) scope contract."
 SCOPE_ERROR_HINT_2 = (
     "See ROADMAP.md for the future-research repo path: "
     "github.com/ifuensan/salvager-research (stub)."

@@ -622,9 +622,7 @@ def _body_wallapop_session_expired(_ctx: Mapping[str, Any]) -> list[str]:
         _prose("Adapter: wallapop_api (devuelve 401)"),
         _prose("Fallback: wallapop_tinyfish activo (sin alertas perdidas)"),
         "",
-        _prose("Próximo paso: ")
-        + _cmd("salvager login wallapop")
-        + _prose(" cuando puedas"),
+        _prose("Próximo paso: ") + _cmd("salvager login wallapop") + _prose(" cuando puedas"),
     ]
 
 
@@ -715,8 +713,7 @@ def _body_smoke_test_failed(ctx: Mapping[str, Any]) -> list[str]:
         _prose("Próximo paso:"),
         _prose("1. ") + _cmd("salvager phase2 smoke-test"),
         _prose("2. ") + _cmd("salvager audit show --type phase2_smoke_test --last 3"),
-        _prose("3. parchea el parser y reactiva con ")
-        + _cmd("salvager phase2 enable <entry>"),
+        _prose("3. parchea el parser y reactiva con ") + _cmd("salvager phase2 enable <entry>"),
     ]
 
 

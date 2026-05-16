@@ -371,9 +371,9 @@ async def test_missing_required_field_raises_schema_drift(tmp_path: Path) -> Non
 def test_fetcher_module_never_disables_tls_verification() -> None:
     import ast
 
-    src = (
-        REPO_ROOT / "src" / "salvager" / "adapters" / "ebay_api" / "fetcher.py"
-    ).read_text(encoding="utf-8")
+    src = (REPO_ROOT / "src" / "salvager" / "adapters" / "ebay_api" / "fetcher.py").read_text(
+        encoding="utf-8"
+    )
     tree = ast.parse(src)
     for node in ast.walk(tree):
         if isinstance(node, ast.Call):

@@ -808,11 +808,7 @@ def test_poll_loop_does_not_import_adapters() -> None:
     from pathlib import Path
 
     source_path = (
-        Path(__file__).resolve().parents[2]
-        / "src"
-        / "salvager"
-        / "orchestration"
-        / "poll_loop.py"
+        Path(__file__).resolve().parents[2] / "src" / "salvager" / "orchestration" / "poll_loop.py"
     )
     tree = ast.parse(source_path.read_text(encoding="utf-8"))
     offenders: list[str] = []
