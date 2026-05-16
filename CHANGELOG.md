@@ -12,10 +12,29 @@ Nothing on the wire today. Post-v1 work is described in
 
 ---
 
-## [0.2.1] — _pending publish_
+## [0.2.2] — _pending publish_
+
+Re-cut of v0.2.1 with `pyproject.toml` actually bumped to match the
+tag. The v0.2.1 GHCR image (`ghcr.io/ifuensan/salvager:0.2.1`)
+shipped correctly tagged at the registry level but its embedded
+`importlib.metadata` version still reported `0.2.0`, so
+`salvager version` lied about which release the operator was
+running. v0.2.1 stays published (the binary works); v0.2.2 is the
+self-consistent re-cut. Operators on v0.2.1 should upgrade to
+v0.2.2; there is no functional difference.
+
+**Fixed**
+
+- `pyproject.toml` version now matches the git/GHCR tag, so
+  `salvager version` reports the actual release number instead of
+  `0.2.0`.
+
+## [0.2.1] — 2026-05-16
 
 Operational patch on top of v0.2.0. No functional changes to the
-poll loop, evaluator, alert renderer, or Phase 2 buy path.
+poll loop, evaluator, alert renderer, or Phase 2 buy path. **Known
+issue**: the embedded version string still reads `0.2.0` because
+`pyproject.toml` was not bumped before tagging — fixed in v0.2.2.
 
 **Fixed**
 
@@ -214,8 +233,9 @@ polling yet. Published to GHCR as `ghcr.io/ifuensan/salvager:0.1.0`.
 
 ---
 
-[Unreleased]: https://github.com/ifuensan/salvager/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/ifuensan/salvager/compare/v0.2.2...HEAD
 [1.0.0]: https://github.com/ifuensan/salvager/releases/tag/v1.0.0
+[0.2.2]: https://github.com/ifuensan/salvager/releases/tag/v0.2.2
 [0.2.1]: https://github.com/ifuensan/salvager/releases/tag/v0.2.1
 [0.2.0]: https://github.com/ifuensan/salvager/releases/tag/v0.2.0
 [0.1.0]: https://github.com/ifuensan/salvager/releases/tag/v0.1.0
