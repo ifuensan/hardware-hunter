@@ -562,26 +562,74 @@ def cmd_login_ebay(
 @phase2_app.command("enable")
 def cmd_phase2_enable(
     entry: Annotated[str, typer.Argument(help="Entry key from wishlist.")],
+    wishlist_path: Annotated[
+        Path,
+        typer.Option("--wishlist-path", "-w", help="Path to wishlist.yaml."),
+    ] = _DEFAULT_WISHLIST_PATH,
+    data_dir: Annotated[
+        Path,
+        typer.Option("--data-dir", "-d", help="Daemon state dir (default: /app/data)."),
+    ] = _DEFAULT_DATA_DIR,
 ) -> None:
-    """Enable Phase 2 for an entry (Epic 5)."""
-    _ = entry
-    _placeholder()
+    """Enable Phase 2 for an entry — Story 5.12 (FR45 / AR12)."""
+    from hardware_hunter.cli.commands import phase2_cmd
+
+    exit_code = phase2_cmd.run_enable(query=entry, wishlist_path=wishlist_path, data_dir=data_dir)
+    if exit_code != 0:
+        raise typer.Exit(code=exit_code)
 
 
 @phase2_app.command("disable")
 def cmd_phase2_disable(
     entry: Annotated[str | None, typer.Argument(help="Entry key, or omit with --all.")] = None,
     all_entries: Annotated[bool, typer.Option("--all", help="Disable Phase 2 globally.")] = False,
+    wishlist_path: Annotated[
+        Path,
+        typer.Option("--wishlist-path", "-w", help="Path to wishlist.yaml."),
+    ] = _DEFAULT_WISHLIST_PATH,
+    data_dir: Annotated[
+        Path,
+        typer.Option("--data-dir", "-d", help="Daemon state dir (default: /app/data)."),
+    ] = _DEFAULT_DATA_DIR,
 ) -> None:
-    """Disable Phase 2 (Epic 5)."""
-    _ = (entry, all_entries)
-    _placeholder()
+    """Disable Phase 2 — per entry or globally (Story 5.12 / UX-DR23)."""
+    from hardware_hunter.cli.commands import phase2_cmd
+
+    exit_code = phase2_cmd.run_disable(
+        query=entry,
+        all_entries=all_entries,
+        wishlist_path=wishlist_path,
+        data_dir=data_dir,
+    )
+    if exit_code != 0:
+        raise typer.Exit(code=exit_code)
 
 
 @phase2_app.command("status")
-def cmd_phase2_status() -> None:
-    """Show Phase 2 enable scope (Epic 5)."""
-    _placeholder()
+def cmd_phase2_status(
+    wishlist_path: Annotated[
+        Path,
+        typer.Option("--wishlist-path", "-w", help="Path to wishlist.yaml."),
+    ] = _DEFAULT_WISHLIST_PATH,
+    data_dir: Annotated[
+        Path,
+        typer.Option("--data-dir", "-d", help="Daemon state dir (default: /app/data)."),
+    ] = _DEFAULT_DATA_DIR,
+    output_format: Annotated[
+        str,
+        typer.Option("--format", "-f", help="Output format: human | json."),
+    ] = "human",
+) -> None:
+    """Print Phase 2 enablement table + global state (Story 5.12)."""
+    from hardware_hunter.cli.commands import phase2_cmd
+
+    exit_code = phase2_cmd.run_status(
+        wishlist_path=wishlist_path,
+        data_dir=data_dir,
+        output_format=output_format,
+    )
+    if exit_code != 0:
+        raise typer.Exit(code=exit_code)
 
 
 @audit_app.command("show")

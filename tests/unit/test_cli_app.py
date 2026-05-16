@@ -140,9 +140,6 @@ def test_bare_invocation_without_env_exits_missing_creds() -> None:
     [
         ["logs"],
         ["smoke-test"],
-        ["phase2", "enable", "wd_red_plus_4tb"],
-        ["phase2", "disable", "wd_red_plus_4tb"],
-        ["phase2", "status"],
         ["wishlist", "list"],
     ],
 )
