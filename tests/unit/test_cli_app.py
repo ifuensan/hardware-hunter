@@ -139,7 +139,6 @@ def test_bare_invocation_without_env_exits_missing_creds() -> None:
     "argv",
     [
         ["logs"],
-        ["smoke-test"],
         ["wishlist", "list"],
     ],
 )

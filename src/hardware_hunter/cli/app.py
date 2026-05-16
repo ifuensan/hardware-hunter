@@ -484,12 +484,6 @@ def cmd_logs() -> None:
     _placeholder()
 
 
-@app.command("smoke-test")
-def cmd_smoke_test() -> None:
-    """Manually run the Phase 2 synthetic smoke test (Epic 5)."""
-    _placeholder()
-
-
 @login_app.command("wallapop")
 def cmd_login_wallapop(
     data_dir: Annotated[
@@ -600,6 +594,76 @@ def cmd_phase2_disable(
         all_entries=all_entries,
         wishlist_path=wishlist_path,
         data_dir=data_dir,
+    )
+    if exit_code != 0:
+        raise typer.Exit(code=exit_code)
+
+
+_DEFAULT_FIXTURES_DIR = Path("tests/fixtures/price_parsers/active")
+
+
+@phase2_app.command("smoke-test")
+def cmd_phase2_smoke_test(
+    env_path: Annotated[
+        Path,
+        typer.Option("--env-path", "-e", help="Path to .env."),
+    ] = _DEFAULT_ENV_PATH,
+    config_path: Annotated[
+        Path,
+        typer.Option("--config-path", "-c", help="Path to config.yaml."),
+    ] = _DEFAULT_CONFIG_PATH,
+    data_dir: Annotated[
+        Path,
+        typer.Option("--data-dir", "-d", help="Daemon state dir (default: /app/data)."),
+    ] = _DEFAULT_DATA_DIR,
+    fixtures_dir: Annotated[
+        Path,
+        typer.Option(
+            "--fixtures-dir",
+            help="Directory of price-parser fixtures.",
+        ),
+    ] = _DEFAULT_FIXTURES_DIR,
+) -> None:
+    """Manually run the Phase 2 synthetic smoke test (Story 5.13)."""
+    from hardware_hunter.cli.commands import phase2_cmd
+
+    exit_code = phase2_cmd.run_smoke_test(
+        env_path=env_path,
+        config_path=config_path,
+        data_dir=data_dir,
+        fixtures_dir=fixtures_dir,
+    )
+    if exit_code != 0:
+        raise typer.Exit(code=exit_code)
+
+
+@phase2_app.command("reconcile")
+def cmd_phase2_reconcile(
+    receipt_id: Annotated[
+        str,
+        typer.Argument(help="Receipt ID (or numeric audit_id) of a past transaction."),
+    ],
+    config_path: Annotated[
+        Path,
+        typer.Option("--config-path", "-c", help="Path to config.yaml."),
+    ] = _DEFAULT_CONFIG_PATH,
+    data_dir: Annotated[
+        Path,
+        typer.Option("--data-dir", "-d", help="Daemon state dir (default: /app/data)."),
+    ] = _DEFAULT_DATA_DIR,
+    output_format: Annotated[
+        str,
+        typer.Option("--format", "-f", help="Output format: human | json."),
+    ] = "human",
+) -> None:
+    """Re-run reconciliation on a past receipt (Story 5.13)."""
+    from hardware_hunter.cli.commands import phase2_cmd
+
+    exit_code = phase2_cmd.run_reconcile(
+        receipt_or_audit_id=receipt_id,
+        config_path=config_path,
+        data_dir=data_dir,
+        output_format=output_format,
     )
     if exit_code != 0:
         raise typer.Exit(code=exit_code)

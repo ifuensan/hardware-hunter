@@ -26,7 +26,9 @@ import asyncio
 import json
 import sqlite3
 import sys
-from collections.abc import Callable
+import time
+from collections.abc import Callable, Mapping
+from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
@@ -35,8 +37,20 @@ from hardware_hunter.adapters.sqlite_store.migrations import db_path_under
 from hardware_hunter.adapters.sqlite_store.phase2_state_reader import (
     SqlitePhase2StateReader,
 )
+from hardware_hunter.config.config_yaml import load_config
+from hardware_hunter.config.env import load_env_or_exit
 from hardware_hunter.config.wishlist_yaml import load_wishlist, save_wishlist
-from hardware_hunter.domain.phase2_audit import Phase2StateSnapshot
+from hardware_hunter.domain.alert import AlertSnapshot
+from hardware_hunter.domain.evaluation import ListingEvaluation
+from hardware_hunter.domain.listing import Listing
+from hardware_hunter.domain.phase2_audit import (
+    Phase2StateSnapshot,
+    TransactionRecord,
+)
+from hardware_hunter.domain.reconciliation import (
+    ReconciliationResult,
+    compute_tolerance,
+)
 from hardware_hunter.domain.wishlist import Phase2Settings, Wishlist, WishlistEntry
 from hardware_hunter.observability.logging import get_logger
 from hardware_hunter.observability.styling import (
@@ -44,6 +58,20 @@ from hardware_hunter.observability.styling import (
     print_table,
     render_prose,
     render_table,
+)
+from hardware_hunter.orchestration.degradation_reporter import Reporter
+from hardware_hunter.orchestration.phase2_parsers import (
+    default_price_parser_registry,
+)
+from hardware_hunter.orchestration.smoke_test import (
+    FixtureOutcome,
+    PriceParser,
+    SmokeTestFixture,
+    SmokeTestSummary,
+    discover_fixtures,
+)
+from hardware_hunter.orchestration.smoke_test import (
+    run_smoke_test as run_smoke_test_orchestrator,
 )
 
 _USAGE_EXIT = 2
@@ -476,4 +504,315 @@ def _format_es(value: Decimal) -> str:
     return f"{sign}{grouped},{decimal_part} €"
 
 
-__all__ = ["run_disable", "run_enable", "run_status"]
+__all__ = [
+    "run_disable",
+    "run_enable",
+    "run_reconcile",
+    "run_smoke_test",
+    "run_status",
+]
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# `phase2 smoke-test` — Story 5.13 manual trigger for Story 5.6 run
+# ─────────────────────────────────────────────────────────────────────────
+
+
+def run_smoke_test(
+    *,
+    env_path: Path,
+    config_path: Path,
+    data_dir: Path,
+    fixtures_dir: Path,
+    width: int = 100,
+    reporter_factory: Callable[[], Reporter] | None = None,
+    parsers: Mapping[str, PriceParser] | None = None,
+) -> int:
+    """Re-run the daily smoke test on demand.
+
+    On any fixture failure the orchestrator auto-disables Phase 2 globally
+    (per Story 5.6) and we exit 5 — the Phase 2 guardrail code per FR48.
+    ``reporter_factory`` + ``parsers`` are injection seams: tests pass
+    fakes, production picks up the defaults wired below.
+    """
+    config = load_config(config_path)
+
+    try:
+        fixtures = discover_fixtures(fixtures_dir)
+    except FileNotFoundError as exc:
+        render_prose(
+            f"smoke-test fixtures not found: {exc}",
+            style="error",
+            hint=f"check --fixtures-dir (default: {fixtures_dir})",
+        )
+        return _USAGE_EXIT
+
+    if reporter_factory is None:
+        env = load_env_or_exit(env_path)
+        reporter = _build_default_reporter(env, config)
+    else:
+        reporter = reporter_factory()
+
+    parser_registry = parsers if parsers is not None else default_price_parser_registry()
+
+    started = time.monotonic()
+    summary = asyncio.run(
+        _run_smoke_test_async(
+            fixtures=fixtures,
+            parsers=parser_registry,
+            data_dir=data_dir,
+            reporter=reporter,
+            tolerance_eur=config.phase2.reconciliation_tolerance_eur,
+            tolerance_pct=config.phase2.reconciliation_tolerance_pct,
+        )
+    )
+    elapsed = time.monotonic() - started
+
+    _render_smoke_test_summary(summary, elapsed, width=width)
+    return 5 if summary.any_failed else 0
+
+
+async def _run_smoke_test_async(
+    *,
+    fixtures: list[SmokeTestFixture],
+    parsers: Mapping[str, PriceParser],
+    data_dir: Path,
+    reporter: Reporter,
+    tolerance_eur: Decimal,
+    tolerance_pct: Decimal,
+) -> SmokeTestSummary:
+    writer = Phase2AuditWriter(db_path_under(data_dir))
+    reader = SqlitePhase2StateReader(db_path_under(data_dir))
+    try:
+        return await run_smoke_test_orchestrator(
+            fixtures=fixtures,
+            parsers=parsers,
+            audit_writer=writer,
+            state_reader=reader,
+            reporter=reporter,
+            tolerance_eur=tolerance_eur,
+            tolerance_pct=tolerance_pct,
+        )
+    finally:
+        await writer.close()
+        await reader.close()
+
+
+def _build_default_reporter(env: object, config: object) -> Reporter:
+    from hardware_hunter.adapters.telegram_bot.surface import TelegramBotSurface
+    from hardware_hunter.orchestration.degradation_reporter import (
+        DegradationReporter,
+    )
+    from hardware_hunter.orchestration.health_state import HealthState
+
+    telegram = TelegramBotSurface(
+        bot_token=env.TELEGRAM_BOT_TOKEN,  # type: ignore[attr-defined]
+        recipient_chat_id=env.TELEGRAM_CHAT_ID,  # type: ignore[attr-defined]
+    )
+    return DegradationReporter(
+        telegram_surface=telegram,
+        health_state=HealthState(),
+        dedup_window_seconds=config.observability.degradation_dedup_window_seconds,  # type: ignore[attr-defined]
+    )
+
+
+def _render_smoke_test_summary(summary: SmokeTestSummary, elapsed_s: float, *, width: int) -> None:
+    rows: list[dict[str, object]] = []
+    for outcome in summary.outcomes:
+        rows.append(_smoke_test_row(outcome))
+
+    columns: list[ColumnSpec] = [
+        {"key": "Fixture"},
+        {"key": "Parsed Price", "align": "right"},
+        {"key": "Expected Price", "align": "right"},
+        {"key": "Delta", "align": "right"},
+        {"key": "Result"},
+    ]
+    print_table(render_table(rows, columns, width=width), width=width)
+    overall = "fail" if summary.any_failed else "pass"
+    render_prose(
+        f"Overall: {overall} · Smoke test completed in {elapsed_s:.1f}s",
+        style="info",
+    )
+
+
+def _smoke_test_row(outcome: FixtureOutcome) -> dict[str, object]:
+    parsed = (
+        _format_es(outcome.parsed_price_eur)
+        if outcome.parsed_price_eur is not None
+        else (outcome.parser_error_class or "—")
+    )
+    delta = _format_es(outcome.result.delta_eur) if outcome.result is not None else "—"
+    return {
+        "Fixture": outcome.fixture.name,
+        "Parsed Price": parsed,
+        "Expected Price": _format_es(outcome.fixture.expected_price_eur),
+        "Delta": delta,
+        "Result": "PASS" if outcome.passed else "FAIL",
+    }
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# `phase2 reconcile <receipt-id>` — Story 5.13 read-only re-verification
+# ─────────────────────────────────────────────────────────────────────────
+
+
+def run_reconcile(
+    *,
+    receipt_or_audit_id: str,
+    config_path: Path,
+    data_dir: Path,
+    output_format: str = "human",
+) -> int:
+    """Re-run receipt-vs-alert reconciliation on a past transaction.
+
+    Read-only by contract — the AC explicitly forbids mutating state
+    from this command (no auto-disable). Exit 0 if reconciled, 5 if a
+    mismatch is detected, 1 if the receipt id wasn't found.
+    """
+    if output_format not in ("human", "json"):
+        render_prose(
+            f"unknown --format value: {output_format!r}",
+            style="error",
+            hint="use --format human or --format json",
+        )
+        return _USAGE_EXIT
+
+    config = load_config(config_path)
+    db_path = db_path_under(data_dir)
+    if not db_path.exists():
+        render_prose(
+            f"audit DB not found at {db_path}",
+            style="error",
+            hint="the daemon hasn't recorded any transactions yet",
+        )
+        return _USER_CANCELLED_EXIT
+
+    transaction_row, alert_row = _lookup_reconcile_rows(db_path, receipt_or_audit_id)
+    if transaction_row is None or alert_row is None:
+        render_prose(
+            f"receipt id {receipt_or_audit_id!r} not found in audit log",
+            style="error",
+        )
+        return _USER_CANCELLED_EXIT
+
+    listing = Listing.model_validate_json(str(alert_row["listing_json"]))
+    evaluation = ListingEvaluation.model_validate_json(str(alert_row["evaluation_json"]))
+    snapshot = AlertSnapshot(
+        alert_id=str(alert_row["alert_id"]),  # type: ignore[arg-type]
+        entry_key=(
+            str(alert_row["entry_manufacturer"]),
+            str(alert_row["entry_model"]),
+            str(alert_row["entry_ref"]),
+        ),
+        entry_display_name=str(alert_row["entry_display_name"]),
+        listing=listing,
+        evaluation=evaluation,
+        phase=str(alert_row["phase"]),  # type: ignore[arg-type]
+        phase2_max_price_eur=(
+            Decimal(str(alert_row["phase2_max_price_eur"]))
+            if alert_row["phase2_max_price_eur"] is not None
+            else None
+        ),
+        rendered_at=_iso_to_dt(str(alert_row["rendered_at"])),
+    )
+    transaction = TransactionRecord(
+        alert_id=str(transaction_row["alert_id"]),  # type: ignore[arg-type]
+        price_paid_eur=Decimal(str(transaction_row["price_paid_eur"])),
+        payment_method=str(transaction_row["payment_method"]),  # type: ignore[arg-type]
+        receipt_id=str(transaction_row["receipt_id"]),
+        screenshot_path=str(transaction_row["screenshot_path"]),
+        total_seconds=int(transaction_row["total_seconds"]),
+        committed_at=_iso_to_dt(str(transaction_row["committed_at"])),
+    )
+
+    result = compute_tolerance(
+        snapshot.listing.price_eur,
+        transaction.price_paid_eur,
+        tolerance_eur=config.phase2.reconciliation_tolerance_eur,
+        tolerance_pct=config.phase2.reconciliation_tolerance_pct,
+    )
+
+    if output_format == "json":
+        payload = {
+            "receipt_id": transaction.receipt_id,
+            "alert_id": str(snapshot.alert_id),
+            "alert_price_eur": str(snapshot.listing.price_eur),
+            "receipt_price_eur": str(transaction.price_paid_eur),
+            "passed": result.passed,
+            "delta_eur": str(result.delta_eur),
+            "delta_pct": str(result.delta_pct),
+            "tolerance_used": result.tolerance_used,
+            "tolerance_value_eur": str(result.tolerance_value),
+        }
+        print(json.dumps(payload, indent=2))
+    else:
+        _render_reconcile_human(snapshot, transaction, result)
+
+    return 0 if result.passed else 5
+
+
+def _lookup_reconcile_rows(
+    db_path: Path, identifier: str
+) -> tuple[sqlite3.Row | None, sqlite3.Row | None]:
+    """Find a transaction by receipt_id (fall back to audit_id if numeric)
+    and its matching alert_snapshots row."""
+    connection = open_connection(db_path)
+    try:
+        transaction_row = connection.execute(
+            "SELECT * FROM transactions WHERE receipt_id = ?", (identifier,)
+        ).fetchone()
+        if transaction_row is None and identifier.isdigit():
+            transaction_row = connection.execute(
+                "SELECT * FROM transactions WHERE audit_id = ?", (int(identifier),)
+            ).fetchone()
+        if transaction_row is None:
+            return None, None
+        alert_row = connection.execute(
+            "SELECT * FROM alert_snapshots WHERE alert_id = ?",
+            (str(transaction_row["alert_id"]),),
+        ).fetchone()
+        return transaction_row, alert_row
+    except sqlite3.Error:
+        return None, None
+    finally:
+        connection.close()
+
+
+def _render_reconcile_human(
+    snapshot: AlertSnapshot,
+    transaction: TransactionRecord,
+    result: ReconciliationResult,
+) -> None:
+    if result.passed:
+        render_prose(
+            f"Reconciliation PASSED for receipt {transaction.receipt_id}",
+            style="success",
+        )
+    else:
+        render_prose(
+            f"Reconciliation FAILED for receipt {transaction.receipt_id}",
+            style="error",
+        )
+    rows: list[dict[str, object]] = [
+        {"Field": "Alert price", "Value": _format_es(snapshot.listing.price_eur)},
+        {"Field": "Receipt price", "Value": _format_es(transaction.price_paid_eur)},
+        {"Field": "Delta", "Value": _format_es(result.delta_eur)},
+        {
+            "Field": "Tolerance used",
+            "Value": f"{result.tolerance_used} ({_format_es(result.tolerance_value)})",
+        },
+    ]
+    print_table(
+        render_table(
+            rows,
+            [{"key": "Field"}, {"key": "Value", "align": "right"}],
+            width=60,
+        ),
+        width=60,
+    )
+
+
+def _iso_to_dt(value: str) -> datetime:
+    """Decode an ISO 8601 stamp, accepting the daemon's trailing ``Z``."""
+    return datetime.fromisoformat(value.replace("Z", "+00:00"))
