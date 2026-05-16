@@ -90,3 +90,13 @@ Open a GitHub issue with:
 - Whether you've reproduced it.
 
 Security issues: please email ivanfs@b4os.dev rather than opening a public issue.
+
+---
+
+## Releases
+
+The pre-v1.0 release-gate procedure (Telegram client variance,
+color-blind audit, VoiceOver pass on Terminal) lives in
+[docs/release-checklist.md](docs/release-checklist.md). It is run by
+the maintainer against a v1.0 candidate build before the `v1.0.0` tag.
+Audit artefacts land in `docs/release-audits/v1.0/`.
