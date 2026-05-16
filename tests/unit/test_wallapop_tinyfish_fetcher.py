@@ -398,18 +398,29 @@ async def test_fetch_raises_not_implemented_at_v0() -> None:
 # ─────────────────────────────────────────────────────────────────────────
 
 
-def test_only_wallapop_tinyfish_adapter_imports_tinyfish() -> None:
+def test_only_tinyfish_adapters_import_tinyfish() -> None:
     """The adapter-discipline lint script enforces this at the package
     level; this test re-asserts it at the unit-test layer too so the
-    invariant breaks here even before CI runs the lint."""
+    invariant breaks here even before CI runs the lint.
+
+    Two adapter packages legitimately depend on the TinyFish SDK:
+
+      - ``adapters/wallapop_tinyfish/`` — Wallapop search fallback (3.5)
+      - ``adapters/tinyfish_browser/`` — Phase 2 buy flows (5.3)
+
+    Every other source file must be tinyfish-free.
+    """
     import ast
     from pathlib import Path
 
     src_root = Path(__file__).resolve().parents[2] / "src" / "hardware_hunter"
-    own_pkg = src_root / "adapters" / "wallapop_tinyfish"
+    allowed_pkgs = (
+        src_root / "adapters" / "wallapop_tinyfish",
+        src_root / "adapters" / "tinyfish_browser",
+    )
     offenders: list[str] = []
     for path in sorted(src_root.rglob("*.py")):
-        if own_pkg in path.parents:
+        if any(pkg in path.parents for pkg in allowed_pkgs):
             continue
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
