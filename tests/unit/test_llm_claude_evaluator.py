@@ -141,6 +141,25 @@ async def test_evaluator_extracts_json_from_markdown_fences() -> None:
     assert evaluation.confidence == "high"
 
 
+@pytest.mark.asyncio
+async def test_evaluator_extracts_json_ignoring_trailing_brace_prose() -> None:
+    """Regression: the old greedy ``\\{.*\\}`` regex would span from
+    the first ``{`` to the last ``}`` and capture trailing aside text
+    with literal braces, producing invalid JSON. The structural
+    extractor (json.JSONDecoder.raw_decode) returns just the first
+    parseable object."""
+    trailing = (
+        _valid_response()
+        + "\n\nPS: aside text mentioning {literal:braces} after the JSON."
+    )
+    evaluator = ClaudeHaikuEvaluator(
+        SecretStr("test-key"),
+        call=_make_callable(trailing),
+    )
+    evaluation = await evaluator.evaluate(_listing(), _entry())
+    assert evaluation.confidence == "high"
+
+
 # ─────────────────────────────────────────────────────────────────────────
 # Budget short-circuit
 # ─────────────────────────────────────────────────────────────────────────

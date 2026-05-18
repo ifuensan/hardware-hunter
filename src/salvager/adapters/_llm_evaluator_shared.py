@@ -13,7 +13,7 @@ local.
 
 from __future__ import annotations
 
-import re
+import json
 from datetime import UTC, datetime
 
 from salvager.domain.evaluation import ListingEvaluation
@@ -70,19 +70,33 @@ def budget_short_circuit_evaluation(
 # JSON extraction
 # ─────────────────────────────────────────────────────────────────────────
 
-_JSON_OBJECT_RE = re.compile(r"\{.*\}", re.DOTALL)
-
 
 def extract_json_object(raw: str) -> str:
-    """Return the outermost ``{...}`` substring of ``raw``.
+    """Return the first complete JSON object substring of ``raw``.
 
     Robust to LLMs that wrap JSON in markdown code fences or pad it
-    with explanatory prose. Raises ``ValueError`` when no object is
-    present — adapters wrap that as :class:`LlmEvaluationError`.
+    with explanatory prose, and — unlike a greedy ``\\{.*\\}`` regex —
+    also robust to extra brace-containing text *after* the JSON object
+    (e.g. the model appending a "PS:" with literal braces). Uses
+    :class:`json.JSONDecoder.raw_decode` to find the first ``{`` that
+    starts a parseable object and returns exactly those bytes.
+
+    Raises ``ValueError`` when no parseable object is present —
+    adapters wrap that as :class:`LlmEvaluationError`.
     """
     if not raw or not raw.strip():
         raise ValueError("empty LLM response")
-    match = _JSON_OBJECT_RE.search(raw)
-    if match is None:
-        raise ValueError("no JSON object found in response")
-    return match.group(0)
+
+    decoder = json.JSONDecoder()
+    idx = raw.find("{")
+    while idx != -1:
+        try:
+            obj, consumed = decoder.raw_decode(raw[idx:])
+        except json.JSONDecodeError:
+            idx = raw.find("{", idx + 1)
+            continue
+        if isinstance(obj, dict):
+            return raw[idx : idx + consumed]
+        idx = raw.find("{", idx + 1)
+
+    raise ValueError("no JSON object found in response")
