@@ -28,12 +28,17 @@ provider-specific rate-limit errors into :class:`LlmRateLimited`.
 
 from __future__ import annotations
 
-import re
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 
 from pydantic import SecretStr, ValidationError
 
+from salvager.adapters._llm_evaluator_shared import (
+    MAX_ONE_LINE_TAKE,
+    budget_short_circuit_evaluation,
+    exceeds_all_ceilings,
+    extract_json_object,
+)
 from salvager.adapters.llm_gemini.schema import GeminiEvalResponse
 from salvager.domain.errors import LlmEvaluationError, LlmRateLimited
 from salvager.domain.evaluation import ListingEvaluation
@@ -47,7 +52,6 @@ from salvager.observability.logging import get_logger
 GeminiCallable = Callable[[str], Awaitable[str]]
 
 _DEFAULT_MODEL = "gemini-2.0-flash"
-_ONE_LINE_TAKE_MAX = 120
 
 
 class GeminiFlashEvaluator(ListingEvaluator):
@@ -73,14 +77,14 @@ class GeminiFlashEvaluator(ListingEvaluator):
     ) -> ListingEvaluation:
         # Pre-flight budget guard — no LLM call when the listing's price
         # exceeds every configured ceiling.
-        if _exceeds_all_ceilings(listing, entry):
-            return _budget_short_circuit(listing, entry)
+        if exceeds_all_ceilings(listing, entry):
+            return budget_short_circuit_evaluation(listing, entry)
 
         prompt = build_evaluation_prompt(listing, entry)
         raw = await self._call(prompt)
 
         try:
-            json_blob = _extract_json_object(raw)
+            json_blob = extract_json_object(raw)
             parsed = GeminiEvalResponse.model_validate_json(json_blob)
         except (ValidationError, ValueError) as exc:
             self._log.error(
@@ -93,9 +97,9 @@ class GeminiFlashEvaluator(ListingEvaluator):
             )
             raise LlmEvaluationError(f"malformed Gemini response: {raw[:200]}") from exc
 
-        if len(parsed.one_line_take) > _ONE_LINE_TAKE_MAX:
+        if len(parsed.one_line_take) > MAX_ONE_LINE_TAKE:
             raise LlmEvaluationError(
-                f"one_line_take too long ({len(parsed.one_line_take)} > {_ONE_LINE_TAKE_MAX} chars)"
+                f"one_line_take too long ({len(parsed.one_line_take)} > {MAX_ONE_LINE_TAKE} chars)"
             )
 
         return ListingEvaluation(
@@ -109,61 +113,6 @@ class GeminiFlashEvaluator(ListingEvaluator):
             evaluated_at=datetime.now(UTC),
             cache_hit=False,
         )
-
-
-# ─────────────────────────────────────────────────────────────────────────
-# Budget short-circuit
-# ─────────────────────────────────────────────────────────────────────────
-
-
-def _exceeds_all_ceilings(listing: Listing, entry: WishlistEntry) -> bool:
-    """True iff the listing price is strictly above every configured ceiling.
-
-    A None ceiling means "container detection disabled for that variant"
-    (FR5) — we treat it as not-a-bound, so a None ceiling alone never
-    triggers the short-circuit.
-    """
-    price = listing.price_eur
-    ceilings = [c for c in (entry.max_price_solo, entry.max_price_in_device) if c is not None]
-    if not ceilings:
-        return False
-    return all(price > ceiling for ceiling in ceilings)
-
-
-def _budget_short_circuit(listing: Listing, entry: WishlistEntry) -> ListingEvaluation:
-    return ListingEvaluation(
-        listing_id=listing.listing_id,
-        entry_key=entry.entry_key,
-        confidence="low",
-        one_line_take=(f"EUR {listing.price_eur} — price exceeds wishlist max."),
-        is_container=False,
-        wrapper_text=None,
-        extracted_text=None,
-        evaluated_at=datetime.now(UTC),
-        cache_hit=False,
-    )
-
-
-# ─────────────────────────────────────────────────────────────────────────
-# JSON extraction
-# ─────────────────────────────────────────────────────────────────────────
-
-_JSON_OBJECT_RE = re.compile(r"\{.*\}", re.DOTALL)
-
-
-def _extract_json_object(raw: str) -> str:
-    """Return the outermost ``{...}`` substring of ``raw``.
-
-    Robust to LLMs that wrap JSON in markdown code fences or pad it
-    with explanatory prose. Raises ``ValueError`` when no object is
-    present — the caller wraps that as :class:`LlmEvaluationError`.
-    """
-    if not raw or not raw.strip():
-        raise ValueError("empty LLM response")
-    match = _JSON_OBJECT_RE.search(raw)
-    if match is None:
-        raise ValueError("no JSON object found in response")
-    return match.group(0)
 
 
 # ─────────────────────────────────────────────────────────────────────────

@@ -259,7 +259,7 @@ async def _search_one(
                 result.one_line_take = evaluation.one_line_take
             except LlmRateLimited:
                 outcome.rate_limited = True
-                outcome.notes.append("gemini: rate limited — evaluation skipped for some results")
+                outcome.notes.append("llm: rate limited — evaluation skipped for some results")
         outcome.results.append(result)
 
 

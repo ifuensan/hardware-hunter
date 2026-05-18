@@ -218,6 +218,10 @@ def build_inner_evaluator(env: EnvSettings, config: ConfigModel) -> ListingEvalu
     """
     provider = config.llm.provider
     if provider == "gemini-flash":
+        if env.GEMINI_API_KEY is None:
+            raise ValueError(
+                "llm.provider=gemini-flash selected but GEMINI_API_KEY is not set in .env"
+            )
         return GeminiFlashEvaluator(api_key=env.GEMINI_API_KEY)
     if provider == "claude-haiku":
         if env.ANTHROPIC_API_KEY is None:
