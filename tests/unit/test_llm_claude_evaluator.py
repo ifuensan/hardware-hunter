@@ -148,10 +148,7 @@ async def test_evaluator_extracts_json_ignoring_trailing_brace_prose() -> None:
     with literal braces, producing invalid JSON. The structural
     extractor (json.JSONDecoder.raw_decode) returns just the first
     parseable object."""
-    trailing = (
-        _valid_response()
-        + "\n\nPS: aside text mentioning {literal:braces} after the JSON."
-    )
+    trailing = _valid_response() + "\n\nPS: aside text mentioning {literal:braces} after the JSON."
     evaluator = ClaudeHaikuEvaluator(
         SecretStr("test-key"),
         call=_make_callable(trailing),
