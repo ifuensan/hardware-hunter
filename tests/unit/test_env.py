@@ -71,6 +71,7 @@ def test_valid_env_loads_all_required_fields(env_file: Path) -> None:
     assert settings.TELEGRAM_CHAT_ID == 12345
     assert isinstance(settings.TELEGRAM_BOT_TOKEN, SecretStr)
     assert settings.TELEGRAM_BOT_TOKEN.get_secret_value() == "secret-bot-token"
+    assert settings.GEMINI_API_KEY is not None
     assert settings.GEMINI_API_KEY.get_secret_value() == "secret-gemini"
 
 
